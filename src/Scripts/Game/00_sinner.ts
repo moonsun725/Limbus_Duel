@@ -1,0 +1,223 @@
+import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'json'};
+// skill.ts 상속
+import type { Skill } from './01_skill.js'; 
+
+export interface Resist1
+{
+    Slash: number; // 참격 저항
+    Penetrate: number; // 관통 저항
+    Blunt: number; // 타격 저항
+}
+
+export interface Resist2
+{
+    red: number; // 분노 저할
+    orange: number; // 색욕 저항
+    yellow: number; // 나태 저항
+    green: number; // 탐식 저항
+    blue: number; // 우울 저항
+    indigo: number; // 오만 저항
+    violet: number; // 질투 저항
+}
+
+type SinnerBattleState = 'NORMAL' | 'STARTCOMBAT' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' |'STAGGERED' | 'PANIC' | 'ERODE' |'DEAD'; // 당장은 이대로만
+export class Character
+{
+    public name: string; // 인격 이름
+    public id: number; // 인격 ID
+
+    public Skills: Skill[]; // 스킬 목록
+
+    public lv: number; // 레벨
+
+    public hp: number; // 체력
+    public sp: number = 0; // 정신력
+    public maxSp: number = 45;
+    public minSp: number = -45;
+    public maxHp: number; // 최대체력
+    public hpRate: number; // 체력 레벨당 계수
+    public defLv: number; // 방렙
+    public State: SinnerBattleState = 'NORMAL';
+
+    public parrycnt: number = 0;
+    private minusSP: 1 | -1 | 0 = 1;
+    
+
+    public ResistP : Resist1 =
+    {
+        Slash: 1.0,
+        Penetrate: 1.0,
+        Blunt: 1.0
+    }; // 물리 저항
+
+    public ResistS : Resist2 = 
+    {
+        red: 1.0,
+        orange: 1.0,
+        yellow: 1.0,    
+        green: 1.0,
+        blue: 1.0,
+        indigo: 1.0,
+        violet: 1.0
+    }; // 속성 저항
+
+    public minSpeed: number; // 최소 속도
+    public maxSpeed: number; // 최대 속도
+    public currentSpeed: number; // 현재 속도
+
+    public stg1?: number; // 흐트러짐 게이지 1
+    Stg1checker: boolean = false; // 흐트러짐 된 이후면 켜짐
+
+    public stg2?: number; // 흐트러짐 게이지 2
+    Stg2checker: boolean = false;
+
+    public stg3?: number; // 흐트러짐 게이지 3
+    Stg3checker: boolean = false;
+
+    // public Bpassive: Passive; // 전투 패시브
+    // public Spassive: Passive; // 비전투 패시브
+
+    constructor( name: string, id: number, lv: number, hp : number, maxHp: number, hpRate: number, defLv: number, minSpeed: number, maxSpeed: number, stg1: number, stg2: number, stg3: number, Rslash?: number, Rpenetrate?: number, RBlunt?: number, Rred?: number, Rorange?: number, Ryellow?: number, Rgreen?: number, Rblue?: number, Rindigo?: number, Rviolet?: number)
+    {
+        this.name = name;
+        this.id = id;
+
+        this.Skills = [];
+        // this.EGO_Skills = [];
+
+        this.lv = lv;
+        this.maxHp = maxHp;
+        this.hp = hp;
+        this.hpRate = hpRate;
+        this.defLv = defLv;
+        
+        // 물리 내성
+        this.ResistP.Slash = Rslash || 1.0;
+        this.ResistP.Penetrate = Rpenetrate || 1.0;
+        this.ResistP.Blunt = RBlunt || 1.0; 
+
+        // 죄악 내성(당장은 에고가 없으니 기본값 처리만)
+        this.ResistS.red = Rred || 1.0;
+        this.ResistS.orange = Rorange || 1.0;
+        this.ResistS.yellow = Ryellow || 1.0;
+        this.ResistS.green = Rgreen || 1.0;
+        this.ResistS.blue = Rblue || 1.0;
+        this.ResistS.indigo = Rindigo || 1.0;
+        this.ResistS.violet = Rviolet || 1.0;   
+
+        this.minSpeed = minSpeed;
+        this.maxSpeed = maxSpeed;   
+        this.currentSpeed = minSpeed;
+
+        this.stg1 = this.maxHp*stg1;
+        this.stg2 = this.maxHp*stg2;
+        this.stg3 = this.maxHp*stg3;
+    }
+
+    Show() : void // js/ts에서는 클래스 내부에 함수 정의할 때 function 뺀다
+    {
+        console.log("이름:", this.name, "ID:", this.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.defLv);
+        console.log("참격내성:", this.ResistP.Slash, "관통내성:", this.ResistP.Penetrate, "타격내성:", this.ResistP.Blunt);
+        console.log("속도:", this.minSpeed + "~" + this.maxSpeed);
+        console.log("흐트러짐 게이지:", this.stg1 + "/" + this.stg2 + "/" + this.stg3);
+        
+    }
+
+    takeDamage(damage: number): void
+    {
+        this.hp -= damage;
+        if(this.stg1)
+        { 
+            if (this.hp <= this.stg1 && !this.Stg1checker)
+            {
+                this.State = 'STAGGERED';
+                this.ResistP = {Slash:2.0, Penetrate:2.0, Blunt:2.0};
+            }
+        }
+        if(this.stg2)
+        { 
+            if (this.hp <= this.stg2 && !this.Stg2checker)
+            {
+                this.State = 'STAGGERED';
+                this.ResistP = {Slash:2.0, Penetrate:2.0, Blunt:2.0};
+            }
+        }
+        if(this.stg3)
+        { 
+            if (this.hp <= this.stg3 && !this.Stg3checker)
+            {
+                this.State = 'STAGGERED';
+                this.ResistP = {Slash:2.0, Penetrate:2.0, Blunt:2.0};
+            }
+        }
+        
+        
+        if (this.hp <= 0) 
+        {
+            this.hp = 0
+            this.State = 'DEAD';
+        };
+    }
+
+    loseHP(damage: number)
+    {
+        this.hp -= damage;
+        if (this.hp <= 0) 
+        {
+            this.hp = 0
+            this.State = 'DEAD';
+        };
+    }
+
+    statusCheck() : void { // 상태에 따라 만들기
+        switch(this.State)
+        {
+            case 'STAGGERED':
+                this.ResistP = {Slash: 2.0, Penetrate: 2.0, Blunt: 2.0};
+                break;
+            case 'CLASHWIN':
+                this.sp += (10 + (this.parrycnt*2));
+        }
+    }
+
+    addSkill(skill:Skill) : void {
+        this.Skills.push(skill);
+        console.log(`[Sinner]/[addSkill]: ${skill}을 스킬 목록에 추가`);
+    }
+
+    useSkill(skill:Skill) : void {
+        
+    }
+}
+
+export class AtkData
+{
+
+}
+
+export function createSinnerFromData(id: number): Character 
+{
+    // 데이터에서 해당 수감자 정보 찾기
+    const sinnerData = data.Identities.find(sinner => sinner.id === id);
+    if (!sinnerData) {
+        throw new Error(`수감자 ID ${id}에 해당하는 데이터를 찾을 수 없습니다.`);
+    }
+    return new Character(
+        sinnerData.name,
+        sinnerData.id,
+        sinnerData.lv,
+        sinnerData.hp,
+        sinnerData.hp, // 초기 체력은 최대 체력과 동일하게
+        sinnerData.hpRate,
+        sinnerData.Def,
+        sinnerData.Rslash,
+        sinnerData.Rpenetrate,
+        sinnerData.RBlunt,
+        sinnerData.minSpeed,
+        sinnerData.maxSpeed,
+        sinnerData.stg1,
+        sinnerData.stg2,
+        sinnerData.stg3
+    );
+}
+

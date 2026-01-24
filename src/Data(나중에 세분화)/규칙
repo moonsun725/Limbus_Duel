@@ -1,0 +1,66 @@
+{
+      "id": 1010103,
+      "level": 31,
+      "name": "연격",
+      "desc": "",
+      "keywords": [
+        "Sinking"
+      ],
+      "BasePower": 6,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Slash",
+          "SinAffinity": "yellow",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 2 부여"
+            }
+          ],
+          "effectK": [
+            { 
+              "event" : "OnHit",
+              "KeywordBuf": "Sinking",
+              "power": 2,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "Type": "Slash",
+          "SinAffinity": "yellow",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 1 부여"
+            }
+          ],
+          "effectK": [
+            {
+              "event" : "OnHit",
+              "KeywordBuf": "Sinking",
+              "power": 2,
+              "count": 0
+            }
+          ]
+        },
+        {
+          "Type": "Slash",
+          "SinAffinity": "yellow",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 대상의 정신력이 0미만이면 다음 턴에 취약 1 부여"
+            }
+          ],
+          "effectB": {
+            "event" : "OnHit",
+            "target": "opponent",
+            "BattleUnitBuf": "Vulnerable",
+            "amount": 1
+          }
+        }
+      ]
+}

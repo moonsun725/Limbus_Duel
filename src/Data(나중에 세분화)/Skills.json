@@ -1,0 +1,164 @@
+{
+  "dataList": [
+    {
+      "id": 1010101,
+      "level": 11,
+      "name": "쳐내기",
+      "desc": "",
+      "category" : "attack",
+      "skilltype" : "blue",
+      "keywords": [
+        "Sinking"
+      ],
+      "BasePower": 4,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Slash",
+          "SinAffinity": "blue",
+          "CoinPower": 7,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 2 부여"
+            }
+          ],
+          "effectK": [
+            {
+              "event": "OnSucceedAttack",
+              "target": "opponent",
+              "KeywordBuf": "Sinking",
+              "stack": 2,
+              "count": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1010102,
+      "level": 21,
+      "name": "밀어 찌르기",
+      "desc": "",
+      "category": "attack",
+      "skilltype": "violet",
+      "keywords": [
+        "Sinking"
+      ],
+      "BasePower": 4,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Penetrate",
+          "SinAffinity": "violet",
+          "CoinPower": 4
+        },
+        {
+          "Type": "Penetrate",
+          "SinAffinity": "violet",
+          "CoinPower": 4,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 2 부여. 침잠 횟수 1 증가"
+            }
+          ],
+          "effectK": [
+            {
+              "event": "OnSucceedAttack",
+              "KeywordBuf": "Sinking",
+              "stack": 2,
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1010103,
+      "level": 31,
+      "name": "연격",
+      "desc": "",
+      "keywords": [
+        "Sinking"
+      ],
+      "BasePower": 6,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Slash",
+          "SinAffinity": "yellow",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 2 부여"
+            }
+          ],
+          "effectK": [
+            {
+              "event": "OnSucceedAttack",
+              "target": "opponent",
+              "KeywordBuf": "Sinking",
+              "stack": 2,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "Type": "Slash",
+          "SinAffinity": "yellow",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 1 부여"
+            }
+          ],
+          "effectK": [
+            {
+              "event": "OnSucceedAttack",
+              "target": "opponent",
+              "KeywordBuf": "Sinking",
+              "stack": 2,
+              "count": 0
+            }
+          ]
+        },
+        {
+          "Type": "Slash",
+          "SinAffinity": "yellow",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 대상의 정신력이 0미만이면 다음 턴에 취약 1 부여"
+            }
+          ],
+          "effectB": [
+            {
+              "event": "OnSucceedAttack",
+              "target": "opponent",
+              "BattleUnitBuf": "Vulnerable",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1010104,
+      "level": 10,
+      "name": "가드",
+      "desc": "",
+      "category": "defence",
+      "skilltype": "blue",
+      "BasePower": 7,
+      "coinlist": [
+        {
+          "Type" : "Guard",
+          "CoinPower": 3,
+          "SinAffinity": "blue"
+        }
+      ]
+    }
+  ]
+}
