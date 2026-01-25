@@ -1,4 +1,4 @@
-function SelecPhase() {
+function SelectPhase() {
     RoundStart();
     while // 
 }
