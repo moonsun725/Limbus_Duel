@@ -116,7 +116,7 @@ export class Character
 
     Show() : void // js/ts에서는 클래스 내부에 함수 정의할 때 function 뺀다
     {
-        console.log("이름:", this.name, "ID:", this.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.defLv);
+        console.log("이름:", this.name, "ID:", this.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.defLv, "정신력:", this.sp);
         console.log("참격내성:", this.ResistP.Slash, "관통내성:", this.ResistP.Penetrate, "타격내성:", this.ResistP.Blunt);
         console.log("속도:", this.minSpeed + "~" + this.maxSpeed);
         console.log("흐트러짐 게이지:", this.stg1 + "/" + this.stg2 + "/" + this.stg3);

@@ -24,10 +24,6 @@ faust.ShowHp();
 
 
 
-
-
-
-
 // 시부레 1대1 기본로직은 끝이다 시벌거
 export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : void {
     let sk1cpy = [...sk1.coinlist]; // 얕복이라 sk1cpy.xxx 수정하면 sk1이 바뀌어버린다
@@ -47,12 +43,12 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
         console.log(`[Clash]: 스킬명: ${sk2.name}`);
         let resP2 = CoinToss(sk2cpy, ch2.sp) + sk2.BasePower;
         console.log(`[Clash]: 스킬위력: ${resP2}`);
-        
-        if(resP1 > resP2) sk1cpy.shift();
-        else if (resP2 > resP1) sk2cpy.shift(); // 아 시발 존나 맘에안들어
+
+        if(resP1 > resP2) sk2cpy.shift();
+        else if (resP2 > resP1) sk1cpy.shift(); // 아 시발 존나 맘에안들어
         // 동률이면 다시 굴릴거니까 ㅇㅇ
     }
-    while(sk1cpy.length === 0 || sk2cpy.length === 0)
+    while(sk1cpy.length !== 0 && sk2cpy.length !== 0)
 
     if (sk1cpy.length > sk2cpy.length)
     {
@@ -74,8 +70,9 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
 
 export function Attack(attacker: Character, target: Character, atkSkill: Skill, coinList: Coin[]) // 아니 씨부레 이러면 코인 부서진거 반영을 못하잖아 아 결국엔 따로 받아오냐
 {
+    console.log(`[Attack]: 공격자: ${attacker.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
     let Power = atkSkill.BasePower;
-    
+
     coinList.forEach(element => {
     if(100*Math.random() < (attacker.sp+50) )
     {  
