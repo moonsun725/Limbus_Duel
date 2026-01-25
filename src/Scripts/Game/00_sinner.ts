@@ -123,6 +123,11 @@ export class Character
         
     }
 
+    ShowHp() : void
+    {
+        console.log("이름:", this.name, "체력:", this.hp + "/" + this.maxHp);
+    }
+
     takeDamage(damage: number): void
     {
         this.hp -= damage;
@@ -182,7 +187,7 @@ export class Character
 
     addSkill(skill:Skill) : void {
         this.Skills.push(skill);
-        console.log(`[Sinner]/[addSkill]: ${skill}을 스킬 목록에 추가`);
+        console.log(`[Sinner]/[addSkill]: ${skill.name}을 스킬 목록에 추가`);
     }
 
     useSkill(skill:Skill) : void {

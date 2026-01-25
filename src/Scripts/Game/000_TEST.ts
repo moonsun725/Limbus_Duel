@@ -8,8 +8,19 @@ const yisang : Character = createSinnerFromData(10101);
 const faust : Character = createSinnerFromData(10201);
 
 yisang.addSkill(SkillData.dataList[0]!);
+faust.addSkill(SkillData.dataList[1]!);
 
+yisang.sp = 45;
 
+yisang.Show();
+faust.Show();
+
+yisang.ShowHp();
+faust.ShowHp();
+Clash(yisang, faust, yisang.Skills[0]!, faust.Skills[0]!)
+
+yisang.ShowHp();
+faust.ShowHp();
 
 
 
@@ -29,8 +40,14 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
 
     do
     {
+        console.log(`[Clash]: 스킬명: ${sk1.name}`);
         let resP1 = CoinToss(sk1cpy, ch1.sp) + sk1.BasePower;
+        console.log(`[Clash]: 스킬위력: ${resP1}`);
+        
+        console.log(`[Clash]: 스킬명: ${sk2.name}`);
         let resP2 = CoinToss(sk2cpy, ch2.sp) + sk2.BasePower;
+        console.log(`[Clash]: 스킬위력: ${resP2}`);
+        
         if(resP1 > resP2) sk1cpy.shift();
         else if (resP2 > resP1) sk2cpy.shift(); // 아 시발 존나 맘에안들어
         // 동률이면 다시 굴릴거니까 ㅇㅇ

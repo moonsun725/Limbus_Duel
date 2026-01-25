@@ -66,6 +66,7 @@
           "effectK": [
             {
               "event": "OnSucceedAttack",
+              "target": "opponent",
               "KeywordBuf": "Sinking",
               "stack": 2,
               "count": 1
@@ -79,6 +80,8 @@
       "level": 31,
       "name": "연격",
       "desc": "",
+      "category": "attack",
+      "skilltype": "yellow",
       "keywords": [
         "Sinking"
       ],

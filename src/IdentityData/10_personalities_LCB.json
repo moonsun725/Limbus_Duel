@@ -2,7 +2,7 @@
     "Identities":[
         {
             "Snumber": 1, 
-            "name": "LCB 수감자", 
+            "name": "LCB 수감자 이상", 
             "id": 10101, 
             "lv": 50, 
             "hp": 72, 
@@ -20,7 +20,7 @@
         
         {
             "Snumber": 2, 
-            "name": "LCB 수감자",
+            "name": "LCB 수감자 파우스트",
             "id": 10201,
             "lv": 50, 
             "hp": 84, 
