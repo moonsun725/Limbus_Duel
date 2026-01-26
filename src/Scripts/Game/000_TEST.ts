@@ -65,24 +65,6 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
         coinlist = sk2cpy;
     }
     console.log(`[합 결과]: ${winner.name} 승리, ${target.name} 패배`);
-    Attack(winner, target, winnerskill, coinlist);
-}
-
-export function Attack(attacker: Character, target: Character, atkSkill: Skill, coinList: Coin[]) // 아니 씨부레 이러면 코인 부서진거 반영을 못하잖아 아 결국엔 따로 받아오냐
-{
-        console.log(`[Attack]: 공격자: ${attacker.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
-        let Power = atkSkill.BasePower;
-
-        coinList.forEach(element => {
-        if(100*Math.random() < (attacker.sp+50) )
-        {  
-            console.log(`[Attack]: 앞면: + ${element.CoinPower}`);
-            Power += element.CoinPower; 
-            console.log(`[Attack]: 위력: ${Power}`);
-            
-            let damage = Power*target.ResistP[element.Type]!; // 당장은 위력과 내성만 따집니다
-            target.takeDamage(Math.floor(damage)); 
-        }
-    });
+    winner.Attack(target, winnerskill, coinlist);
 }
 

@@ -1,6 +1,7 @@
 import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'json'};
 // skill.ts 상속
 import type { Skill } from './01_skill.js'; 
+import { type Coin } from './02_coin.js';
 
 export interface Resist1 { [key: string]: number }
 
@@ -39,15 +40,10 @@ export class Character
     
 
     public ResistP : Resist1 =
-
     {
-
         "Slash": 1.0,
-
         "Penetrate": 1.0,
-
         "Blunt": 1.0
-
     };
 
     public ResistS : Resist2 = 
@@ -120,6 +116,24 @@ export class Character
         console.log("이름:", this.name, "체력:", this.hp + "/" + this.maxHp);
     }
 
+    Attack(target: Character, atkSkill: Skill, coinList: Coin[]) // 아니 씨부레 이러면 코인 부서진거 반영을 못하잖아 아 결국엔 따로 받아오냐
+    {
+            console.log(`[Attack]: 공격자: ${this.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
+            let Power = atkSkill.BasePower;
+            console.log(`[Attack]: 기본위력: ${Power}`)
+            coinList.forEach(element => {
+            if(100*Math.random() < (this.sp+50) )
+            {  
+                console.log(`[Attack]: 앞면: + ${element.CoinPower}`);
+                Power += element.CoinPower; 
+                console.log(`[Attack]: 위력: ${Power}`);
+                
+                let damage = Power*target.ResistP[element.Type]!; // 당장은 위력과 내성만 따집니다
+                target.takeDamage(Math.floor(damage)); 
+            }
+        });
+    }
+
     takeDamage(damage: number): void
     {
         this.hp -= damage;
@@ -128,7 +142,7 @@ export class Character
             if (this.hp <= this.stg1 && !this.Stg1checker)
             {
                 this.State = 'STAGGERED';
-                this.ResistP = {Slash:2.0, Penetrate:2.0, Blunt:2.0};
+                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
             }
         }
         if(this.stg2)
@@ -136,7 +150,7 @@ export class Character
             if (this.hp <= this.stg2 && !this.Stg2checker)
             {
                 this.State = 'STAGGERED';
-                this.ResistP = {Slash:2.0, Penetrate:2.0, Blunt:2.0};
+                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
             }
         }
         if(this.stg3)
@@ -144,7 +158,7 @@ export class Character
             if (this.hp <= this.stg3 && !this.Stg3checker)
             {
                 this.State = 'STAGGERED';
-                this.ResistP = {Slash:2.0, Penetrate:2.0, Blunt:2.0};
+                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
             }
         }
         
@@ -179,10 +193,11 @@ export class Character
         switch(this.State)
         {
             case 'STAGGERED':
-                this.ResistP = {Slash: 2.0, Penetrate: 2.0, Blunt: 2.0};
+                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
                 break;
             case 'CLASHWIN':
                 this.sp += (10 + (this.parrycnt*2));
+                
         }
     }
 
@@ -191,9 +206,17 @@ export class Character
         console.log(`[Sinner]/[addSkill]: ${skill.name}을 스킬 목록에 추가`);
     }
 
-    useSkill(skill:Skill) : void {
-        
+    ResetCondition(): void {
+        // (1) 체력, 정신력 초기화
+        this.hp = this.maxHp;
+        this.sp = 0;
+                
+        // (2) 상태 돌리기
+        this.State = "NORMAL";
+
     }
+
+
 }
 
 export function createSinnerFromData(id: number): Character 
