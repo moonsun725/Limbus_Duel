@@ -22,11 +22,11 @@ export function CoinToss(coinlist:Coin[], sp:number, coinmultiplier?:number, gam
   coinlist.forEach(element => {
     if(100*Math.random() < (sp+50) )
     {  
-      console.log(`앞면: ${element.CoinPower}`);
+      console.log(`[CoinToss]: 앞면: + ${element.CoinPower}`);
       finalpower += element.CoinPower; 
     }
     else
-      console.log(`뒷면: ${0}`);
+      console.log(`[CoinToss]: 뒷면: + 0`);
   });
 
   return finalpower;

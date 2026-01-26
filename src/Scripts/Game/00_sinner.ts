@@ -2,12 +2,7 @@ import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'jso
 // skill.ts 상속
 import type { Skill } from './01_skill.js'; 
 
-export interface Resist1
-{
-    Slash: number; // 참격 저항
-    Penetrate: number; // 관통 저항
-    Blunt: number; // 타격 저항
-}
+export interface Resist1 { [key: string]: number }
 
 export interface Resist2
 {
@@ -44,11 +39,16 @@ export class Character
     
 
     public ResistP : Resist1 =
+
     {
-        Slash: 1.0,
-        Penetrate: 1.0,
-        Blunt: 1.0
-    }; // 물리 저항
+
+        "Slash": 1.0,
+
+        "Penetrate": 1.0,
+
+        "Blunt": 1.0
+
+    };
 
     public ResistS : Resist2 = 
     {
@@ -77,7 +77,7 @@ export class Character
     // public Bpassive: Passive; // 전투 패시브
     // public Spassive: Passive; // 비전투 패시브
 
-    constructor( name: string, id: number, lv: number, hp : number, maxHp: number, hpRate: number, defLv: number, minSpeed: number, maxSpeed: number, stg1: number, stg2: number, stg3: number, Rslash?: number, Rpenetrate?: number, RBlunt?: number, Rred?: number, Rorange?: number, Ryellow?: number, Rgreen?: number, Rblue?: number, Rindigo?: number, Rviolet?: number)
+    constructor( name: string, id: number, lv: number,  maxHp: number, hpRate: number, defLv: number, RSlash: number, RPenetrate: number, RBlunt: number, minSpeed: number, maxSpeed: number, stg1: number, stg2?: number, stg3?: number, Rred?: number, Rorange?: number, Ryellow?: number, Rgreen?: number, Rblue?: number, Rindigo?: number, Rviolet?: number)
     {
         this.name = name;
         this.id = id;
@@ -86,41 +86,33 @@ export class Character
         // this.EGO_Skills = [];
 
         this.lv = lv;
-        this.maxHp = maxHp;
-        this.hp = hp;
+        this.maxHp = maxHp + Math.floor(lv*hpRate);
+        this.hp = maxHp + Math.floor(lv*hpRate);
         this.hpRate = hpRate;
         this.defLv = defLv;
         
         // 물리 내성
-        this.ResistP.Slash = Rslash || 1.0;
-        this.ResistP.Penetrate = Rpenetrate || 1.0;
-        this.ResistP.Blunt = RBlunt || 1.0; 
-
-        // 죄악 내성(당장은 에고가 없으니 기본값 처리만)
-        this.ResistS.red = Rred || 1.0;
-        this.ResistS.orange = Rorange || 1.0;
-        this.ResistS.yellow = Ryellow || 1.0;
-        this.ResistS.green = Rgreen || 1.0;
-        this.ResistS.blue = Rblue || 1.0;
-        this.ResistS.indigo = Rindigo || 1.0;
-        this.ResistS.violet = Rviolet || 1.0;   
+        this.ResistP.Slash = RSlash;
+        this.ResistP.Penetrate = RPenetrate;
+        this.ResistP.Blunt = RBlunt; 
 
         this.minSpeed = minSpeed;
         this.maxSpeed = maxSpeed;   
         this.currentSpeed = minSpeed;
 
         this.stg1 = this.maxHp*stg1;
-        this.stg2 = this.maxHp*stg2;
-        this.stg3 = this.maxHp*stg3;
+        if(stg2)
+            this.stg2 = this.maxHp*stg2; // 아 이건 좀 싶은데
+        if (stg3)
+            this.stg3 = this.maxHp*stg3;
     }
 
     Show() : void // js/ts에서는 클래스 내부에 함수 정의할 때 function 뺀다
     {
         console.log("이름:", this.name, "ID:", this.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.defLv, "정신력:", this.sp);
+        console.log("속도:", this.minSpeed , "~" , this.maxSpeed);
+        console.log("흐트러짐 게이지:", this.stg1 , "/" , this.stg2 , "/", this.stg3);
         console.log("참격내성:", this.ResistP.Slash, "관통내성:", this.ResistP.Penetrate, "타격내성:", this.ResistP.Blunt);
-        console.log("속도:", this.minSpeed + "~" + this.maxSpeed);
-        console.log("흐트러짐 게이지:", this.stg1 + "/" + this.stg2 + "/" + this.stg3);
-        
     }
 
     ShowHp() : void
@@ -195,11 +187,6 @@ export class Character
     }
 }
 
-export class AtkData
-{
-
-}
-
 export function createSinnerFromData(id: number): Character 
 {
     // 데이터에서 해당 수감자 정보 찾기
@@ -211,13 +198,14 @@ export function createSinnerFromData(id: number): Character
         sinnerData.name,
         sinnerData.id,
         sinnerData.lv,
-        sinnerData.hp,
         sinnerData.hp, // 초기 체력은 최대 체력과 동일하게
         sinnerData.hpRate,
         sinnerData.Def,
-        sinnerData.Rslash,
-        sinnerData.Rpenetrate,
+        
+        sinnerData.RSlash,
+        sinnerData.RPenetrate,
         sinnerData.RBlunt,
+
         sinnerData.minSpeed,
         sinnerData.maxSpeed,
         sinnerData.stg1,
