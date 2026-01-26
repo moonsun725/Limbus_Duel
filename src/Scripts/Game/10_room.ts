@@ -1,6 +1,6 @@
 // room.ts
 import { Server } from 'socket.io';
-import { Player } from '../Game/Player.js';
+import { Player } from './Player.js';
 import { Pokemon, createPokemon,} from './pokemon.js';
 import type { Move } from './pokemon.js';
 import { ResolveStatusEffects } from '../BattleSystem/StatusSystem.js';
