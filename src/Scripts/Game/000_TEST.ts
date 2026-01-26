@@ -80,8 +80,8 @@ export function Attack(attacker: Character, target: Character, atkSkill: Skill, 
             Power += element.CoinPower; 
             console.log(`[Attack]: 위력: ${Power}`);
             
-            let damage = Power*target.ResistP[element.Type]!;
-            target.takeDamage(damage); // 당장은 위력만큼 피해 입도록 하자.
+            let damage = Power*target.ResistP[element.Type]!; // 당장은 위력과 내성만 따집니다
+            target.takeDamage(Math.floor(damage)); 
         }
     });
 }

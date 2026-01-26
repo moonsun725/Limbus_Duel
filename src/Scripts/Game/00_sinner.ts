@@ -100,11 +100,11 @@ export class Character
         this.maxSpeed = maxSpeed;   
         this.currentSpeed = minSpeed;
 
-        this.stg1 = this.maxHp*stg1;
+        this.stg1 = Math.floor(this.maxHp*stg1);
         if(stg2)
-            this.stg2 = this.maxHp*stg2; // 아 이건 좀 싶은데
+            this.stg2 = Math.floor(this.maxHp*stg2); // 아 이건 좀 싶은데
         if (stg3)
-            this.stg3 = this.maxHp*stg3;
+            this.stg3 = Math.floor(this.maxHp*stg3);
     }
 
     Show() : void // js/ts에서는 클래스 내부에 함수 정의할 때 function 뺀다
@@ -164,6 +164,15 @@ export class Character
             this.hp = 0
             this.State = 'DEAD';
         };
+    }
+
+    recoverSp(spAmount: number) : void
+    {
+        if (this.sp + spAmount > 45)
+            spAmount = 45 - this.sp;
+        else if (this.sp + spAmount < -45)
+            spAmount = -45 - this.sp;
+        this.sp += spAmount;
     }
 
     statusCheck() : void { // 상태에 따라 만들기
