@@ -1,20 +1,16 @@
 import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'json'};
+import data_S from '../../Data_WIP/Skills.json' with {type: 'json'};
 // skill.ts 상속
 import type { Skill } from './01_skill.js'; 
 import { type Coin } from './02_coin.js';
+import type { Slot } from '../BattleSystem/slot.js';
+
+// "키는 DamageType 중 하나여야 하고, 값은 number다"
 
 export interface Resist1 { [key: string]: number }
 
-export interface Resist2
-{
-    red: number; // 분노 저할
-    orange: number; // 색욕 저항
-    yellow: number; // 나태 저항
-    green: number; // 탐식 저항
-    blue: number; // 우울 저항
-    indigo: number; // 오만 저항
-    violet: number; // 질투 저항
-}
+export interface Resist2 { [key: string]: number }
+
 
 type SinnerBattleState = 'NORMAL' | 'STARTCOMBAT' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' |'STAGGERED' | 'PANIC' | 'ERODE' |'DEAD'; // 당장은 이대로만
 export class Character
@@ -23,6 +19,7 @@ export class Character
     public id: number; // 인격 ID
 
     public Skills: Skill[]; // 스킬 목록
+    public Cycle: Slot[];
 
     public lv: number; // 레벨
 
@@ -48,14 +45,14 @@ export class Character
 
     public ResistS : Resist2 = 
     {
-        red: 1.0,
-        orange: 1.0,
-        yellow: 1.0,    
-        green: 1.0,
-        blue: 1.0,
-        indigo: 1.0,
-        violet: 1.0
-    }; // 속성 저항
+        "red": 1.0,
+        "orange": 1.0,
+        "yellow": 1.0,    
+        "green": 1.0,
+        "blue": 1.0,
+        "indigo": 1.0,
+        "violet": 1.0
+    }; 
 
     public minSpeed: number; // 최소 속도
     public maxSpeed: number; // 최대 속도
@@ -79,6 +76,8 @@ export class Character
         this.id = id;
 
         this.Skills = [];
+        this.addSkillByID();
+        this.Cycle = [];
         // this.EGO_Skills = [];
 
         this.lv = lv;
@@ -116,6 +115,14 @@ export class Character
         console.log("이름:", this.name, "체력:", this.hp + "/" + this.maxHp);
     }
 
+    ShowSkillList() : void
+    {
+        for (var i = 0; i < 4; i++)
+        {
+            console.log("스킬목록", i, this.Skills[i]?.name);
+        }
+    }
+
     Attack(target: Character, atkSkill: Skill, coinList: Coin[]) // 아니 씨부레 이러면 코인 부서진거 반영을 못하잖아 아 결국엔 따로 받아오냐
     {
             console.log(`[Attack]: 공격자: ${this.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
@@ -128,7 +135,7 @@ export class Character
                 Power += element.CoinPower; 
                 console.log(`[Attack]: 위력: ${Power}`);
                 
-                let damage = Power*target.ResistP[element.Type]!; // 당장은 위력과 내성만 따집니다
+                let damage = Power*(target.ResistP[element.Type]!+target.ResistS[element.Color]!); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
                 target.takeDamage(Math.floor(damage)); 
             }
         });
@@ -204,6 +211,16 @@ export class Character
     addSkill(skill:Skill) : void {
         this.Skills.push(skill);
         console.log(`[Sinner]/[addSkill]: ${skill.name}을 스킬 목록에 추가`);
+    }
+
+    addSkillByID()
+    {
+        const mySkills = data_S.dataList.filter(skill => {
+        // 스킬 ID가 내 ID 범주 안에 있는지 확인
+        return Math.floor(skill.id / 100) === this.id;
+        });
+
+        this.Skills.push(...mySkills);
     }
 
     ResetCondition(): void {

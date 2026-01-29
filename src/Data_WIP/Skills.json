@@ -16,7 +16,7 @@
       "coinlist": [
         {
           "Type": "Slash",
-          "SinAffinity": "blue",
+          "Color": "blue",
           "CoinPower": 7,
           "coindescs": [
             {
@@ -51,12 +51,12 @@
       "coinlist": [
         {
           "Type": "Penetrate",
-          "SinAffinity": "violet",
+          "Color": "violet",
           "CoinPower": 4
         },
         {
           "Type": "Penetrate",
-          "SinAffinity": "violet",
+          "Color": "violet",
           "CoinPower": 4,
           "coindescs": [
             {
@@ -91,7 +91,7 @@
       "coinlist": [
         {
           "Type": "Slash",
-          "SinAffinity": "yellow",
+          "Color": "yellow",
           "CoinPower": 2,
           "coindescs": [
             {
@@ -110,7 +110,7 @@
         },
         {
           "Type": "Slash",
-          "SinAffinity": "yellow",
+          "Color": "yellow",
           "CoinPower": 2,
           "coindescs": [
             {
@@ -129,7 +129,7 @@
         },
         {
           "Type": "Slash",
-          "SinAffinity": "yellow",
+          "Color": "yellow",
           "CoinPower": 2,
           "coindescs": [
             {
@@ -159,7 +159,7 @@
         {
           "Type" : "Guard",
           "CoinPower": 3,
-          "SinAffinity": "blue"
+          "Color": "blue"
         }
       ]
     }

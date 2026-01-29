@@ -99,13 +99,13 @@ export class GameRoom {
         if (!this.p1) {
             const newParty = [createSinnerFromData(10101), createSinnerFromData(10201), createSinnerFromData(10301), createSinnerFromData(10401), createSinnerFromData(10501), createSinnerFromData(10601), createSinnerFromData(10701), createSinnerFromData(10801), createSinnerFromData(10901), createSinnerFromData(11001), createSinnerFromData(11101), createSinnerFromData(11201)];
             this.p1 = new Player(socketId, newParty)
-            this.p1.activeSinner = this.p1.party[0]!; // 림버스는 그래도 newParty 서순 그대로 들고가면 될듯...
+            this.p1.activeSinner = this.p1.party[this.p1.getCount()]!; // 림버스는 그래도 newParty 서순 그대로 들고가면 될듯...
             this.players[socketId] = 'p1';
             return 'p1';
         } else if (!this.p2) {
             const newParty2  = [createSinnerFromData(10101), createSinnerFromData(10201), createSinnerFromData(10301), createSinnerFromData(10401), createSinnerFromData(10501), createSinnerFromData(10601), createSinnerFromData(10701), createSinnerFromData(10801), createSinnerFromData(10901), createSinnerFromData(11001), createSinnerFromData(11101), createSinnerFromData(11201)];
             this.p2 = new Player(socketId, newParty2)
-            this.p2.activeSinner = this.p2.party[0]!; // 
+            this.p2.activeSinner = this.p2.party[this.p2.getCount()]!; // 야 시발 근데 나중에 6대6까진 만들거잖아 active하나만 만든다고 될게 아닌데??????
             this.players[socketId] = 'p2';
             return 'p2';
         }
@@ -185,19 +185,9 @@ export class GameRoom {
 
     private handleFaint(target: Player, io: Server) {
         if (target.hasRemainingPokemon()) {
-            // 1. 상태 변경
-            console.log(`[room.ts]/[endTurn]: State (${this.gameState} -> FORCE_SWITCH)`);
-            this.gameState = 'FORCE_SWITCH';
-            
-            // 2. ★ [중요] 누가 죽었는지 기억해야 함!
-            this.faintPlayerId = target.id; 
-
-            // 3. 요청 전송
-            io.to(target.id).emit('force_switch_request');
-            io.to(this.roomId).emit('chat message', `[시스템] ${target.id}님이 다음 포켓몬을 고르고 있습니다.`);
-            console.log(`[Battle] State changed to FORCE_SWITCH. Waiting for ${target.id}`);
-
-            this.broadcastState(io); // >< 포켓몬이 기절했는데 UI 갱신 처리가 안 되어있었다...
+            // 근데 림버스는 다음타자 그대로 나오기 때문에 인덱스 늘려서 보내기만 하면 됨
+            target.switchCharacter(target.getCount()+1);
+            this.broadcastState(io);
 
         } else {
             // 전멸 -> 게임 종료 및 리셋
@@ -246,6 +236,14 @@ export class GameRoom {
         if (!this.p1 || !this.p2) return;
 
         // 상태이상 데미지
+        /*  
+            bufList.OnRoundEnd()
+            keyWordBufList.OnRoundEnd()
+            Foreach() 
+            {
+                p1.active.Passive.OnRoundEnd();
+            }
+        */
         // (오타 주의: p2여야 함) -> ResolveStatusEffects(this.p2.activeSinner);
 
         // 행동 초기화

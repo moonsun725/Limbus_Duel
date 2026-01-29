@@ -8,21 +8,23 @@ const yisang : Character = createSinnerFromData(10101);
 const faust : Character = createSinnerFromData(10201);
 
 yisang.addSkill(SkillData.dataList[0]!);
-faust.addSkill(SkillData.dataList[1]!);
+//faust.addSkill(SkillData.dataList[1]!);
 
 yisang.sp = 45;
 
 yisang.Show();
-faust.Show();
+//faust.Show();
 
 yisang.ShowHp();
-faust.ShowHp();
-Clash(yisang, faust, yisang.Skills[0]!, faust.Skills[0]!)
+//faust.ShowHp();
+//Clash(yisang, faust, yisang.Skills[0]!, faust.Skills[0]!)
+yisang.ShowSkillList();
 
-yisang.ShowHp();
-faust.ShowHp();
+//yisang.ShowHp();
+//faust.ShowHp();
 
-
+// 실행 명령어
+// npx tsx src/Scripts/Game/000_TEST.ts
 
 // 시부레 1대1 기본로직은 끝이다 시벌거
 export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : void {
