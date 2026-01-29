@@ -12,7 +12,7 @@ export interface Resist1 { [key: string]: number }
 export interface Resist2 { [key: string]: number }
 
 
-type SinnerBattleState = 'NORMAL' | 'STARTCOMBAT' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' |'STAGGERED' | 'PANIC' | 'ERODE' |'DEAD'; // 당장은 이대로만
+type SinnerBattleState = 'NORMAL' | 'STARTCOMBAT' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' |'STAGGERED' | 'STAGGERED+' | 'STAGGERED++' | 'PANIC' | 'ERODE' |'DEAD'; // 당장은 이대로만
 export class Character
 {
     public name: string; // 인격 이름
@@ -138,6 +138,13 @@ export class Character
                 let damage = Power*(target.ResistP[element.Type]!+target.ResistS[element.Color]!); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
                 target.takeDamage(Math.floor(damage)); 
             }
+            else
+            {
+                console.log(`[Attack]: 뒷면: + 0`);
+                console.log(`[Attack]: 위력: ${Power}`);
+                let damage = Power*(target.ResistP[element.Type]!+target.ResistS[element.Color]!); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
+                target.takeDamage(Math.floor(damage)); 
+            }
         });
     }
 
@@ -149,32 +156,56 @@ export class Character
             if (this.hp <= this.stg1 && !this.Stg1checker)
             {
                 this.State = 'STAGGERED';
-                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
+                console.log(`[takeDamage]: 흐트러짐!`);
+                this.Stg1checker = true;
             }
         }
         if(this.stg2)
         { 
             if (this.hp <= this.stg2 && !this.Stg2checker)
             {
-                this.State = 'STAGGERED';
-                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
+                switch(this.State)
+                {
+                    case 'STAGGERED':
+                        this.State = 'STAGGERED+';
+                        console.log(`[takeDamage]: 흐트러짐+!!`);
+                        break;
+                    default:
+                        this.State = 'STAGGERED';
+                        console.log(`[takeDamage]: 흐트러짐!`);
+                        break;
+                }
+                this.Stg2checker = true;
             }
         }
         if(this.stg3)
         { 
             if (this.hp <= this.stg3 && !this.Stg3checker)
             {
-                this.State = 'STAGGERED';
-                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
+                switch(this.State)
+                {
+                    case 'STAGGERED+':
+                        this.State = 'STAGGERED++';
+                        console.log(`[takeDamage]: 흐트러짐++!!!`);
+                        break;
+                    case 'STAGGERED':
+                        this.State = 'STAGGERED+';
+                        console.log(`[takeDamage]: 흐트러짐+!!`);
+                        break;
+                    default:
+                        this.State = 'STAGGERED';
+                        console.log(`[takeDamage]: 흐트러짐!`);
+                        break;
+                }
+                this.Stg3checker = true;
             }
         }
-        
-        
         if (this.hp <= 0) 
         {
             this.hp = 0
             this.State = 'DEAD';
         };
+        this.statusCheck();
     }
 
     loseHP(damage: number)
@@ -202,9 +233,20 @@ export class Character
             case 'STAGGERED':
                 this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
                 break;
+            case 'STAGGERED+':
+                this.ResistP = {"Slash": 2.5, "Penetrate": 2.5, "Blunt": 2.5};
+                break;
+            case 'STAGGERED++':
+                this.ResistP = {"Slash": 3.0, "Penetrate": 3.0, "Blunt": 3.0};
+                break;
             case 'CLASHWIN':
                 this.sp += (10 + (this.parrycnt*2));
-                
+                this.parrycnt = 0;
+                break;
+            case 'CLASHLOSE':
+                // 합위력 증가 얻기
+                this.parrycnt = 0;
+                break;
         }
     }
 

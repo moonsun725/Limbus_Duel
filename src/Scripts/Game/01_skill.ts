@@ -6,7 +6,7 @@ export interface Skill {
   name: string;
   desc: string;
   category: string;  
-  skilltype: string; 
+  color: string; 
   BasePower: number;
   coinlist: Coin[];
 

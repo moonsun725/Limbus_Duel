@@ -7,21 +7,22 @@ import SkillData from '../../Data_WIP/Skills.json' with { type: 'json' };
 const yisang : Character = createSinnerFromData(10101);
 const faust : Character = createSinnerFromData(10201);
 
-yisang.addSkill(SkillData.dataList[0]!);
-//faust.addSkill(SkillData.dataList[1]!);
-
-yisang.sp = 45;
-
 yisang.Show();
-//faust.Show();
+faust.Show();
 
 yisang.ShowHp();
-//faust.ShowHp();
-//Clash(yisang, faust, yisang.Skills[0]!, faust.Skills[0]!)
 yisang.ShowSkillList();
 
-//yisang.ShowHp();
-//faust.ShowHp();
+faust.ShowHp();
+faust.ShowSkillList();
+
+for (var i = 0; i < 3; i++)
+{
+    Clash(yisang, faust, yisang.Skills[i]!, faust.Skills[i]!)
+
+    yisang.Show();
+    faust.Show();
+}
 
 // 실행 명령어
 // npx tsx src/Scripts/Game/000_TEST.ts
@@ -49,6 +50,10 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
         if(resP1 > resP2) sk2cpy.shift();
         else if (resP2 > resP1) sk1cpy.shift(); // 아 시발 존나 맘에안들어
         // 동률이면 다시 굴릴거니까 ㅇㅇ
+        ch1.parrycnt++;
+        ch2.parrycnt++;
+        console.log(`[Clash]: ${ch1.parrycnt}합`);
+        console.log(`[Clash]: ${ch2.parrycnt}합`);
     }
     while(sk1cpy.length !== 0 && sk2cpy.length !== 0)
 
@@ -67,6 +72,10 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
         coinlist = sk2cpy;
     }
     console.log(`[합 결과]: ${winner.name} 승리, ${target.name} 패배`);
+    winner.State = 'CLASHWIN';
+    target.State = 'CLASHLOSE';
+    winner.statusCheck();
+    target.statusCheck();
     winner.Attack(target, winnerskill, coinlist);
 }
 
