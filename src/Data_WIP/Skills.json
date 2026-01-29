@@ -6,7 +6,7 @@
       "name": "쳐내기",
       "desc": "",
       "category" : "attack",
-      "skilltype" : "blue",
+      "color" : "blue",
       "keywords": [
         "Sinking"
       ],
@@ -41,7 +41,7 @@
       "name": "밀어 찌르기",
       "desc": "",
       "category": "attack",
-      "skilltype": "violet",
+      "color": "violet",
       "keywords": [
         "Sinking"
       ],
@@ -81,7 +81,7 @@
       "name": "연격",
       "desc": "",
       "category": "attack",
-      "skilltype": "yellow",
+      "color": "yellow",
       "keywords": [
         "Sinking"
       ],
@@ -153,13 +153,153 @@
       "name": "가드",
       "desc": "",
       "category": "defence",
-      "skilltype": "blue",
+      "color": "blue",
       "BasePower": 7,
       "coinlist": [
         {
           "Type" : "Guard",
           "CoinPower": 3,
           "Color": "blue"
+        }
+      ]
+    },
+    {
+      "id": 1020101,
+      "level": 1,
+      "name": "내려베기",
+      "desc": "",
+      "category": "attack",
+      "color": "indigo",
+      "keywords": [],
+      "BasePower": 4,
+      "AtkLv": -1,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Blunt",
+          "Color": "indigo",
+          "CoinPower": 7,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 마비 1 부여"
+            }
+          ],
+          "effectB": [
+            {
+              "event": "OnSucceedAttack",
+              "target": "opponent",
+              "BattleUnitBuf": "Paralysis",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1020102,
+      "level": 2,
+      "name": "올려베기",
+      "desc": "",
+      "category": "attack",
+      "color": "yellow",
+      "keywords": [],
+      "BasePower": 5,
+      "AtkLv": -1,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Blunt",
+          "Color": "yellow",
+          "CoinPower": 4
+        },
+        {
+          "Type": "Blunt",
+          "Color": "yellow",
+          "CoinPower": 4,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 다음 턴에 공격 레벨 감소 3 부여"
+            }
+          ],
+          "effectB": [
+            {
+              "event": "OnSucceedAttack",
+              "target": "opponent",
+              "BattleUnitBuf": "AttackDown",
+              "amount": 3,
+              "nextTurn": true 
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1020103,
+      "level": 3,
+      "name": "후벼찌르기",
+      "desc": "",
+      "category": "attack",
+      "color": "green",
+      "keywords": [],
+      "BasePower": 7,
+      "AtkLv": -1,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Penetrate",
+          "Color": "green",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 다음 턴에 공격 위력 감소 1 부여"
+            }
+          ],
+          "effectB": [
+            {
+              "event": "OnSucceedAttackHead",
+              "target": "opponent",
+              "BattleUnitBuf": "AttackDown",
+              "amount": 3,
+              "nextTurn": true 
+            }
+          ]
+        },
+        {
+          "Type": "Penetrate",
+          "Color": "green",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 다음 턴에 공격 위력 감소 1 부여"
+            }
+          ],
+          "effectB": [
+            {
+              "event": "OnSucceedAttack",
+              "target": "opponent",
+              "BattleUnitBuf": "AttackDown",
+              "amount": 3,
+              "nextTurn": true 
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1020104,
+      "level": 1,
+      "name": "회피",
+      "desc": "",
+      "category": "defence",
+      "color": "indigo",
+      "keywords": [],
+      "BasePower": 2,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Evade",
+          "Color": "indigo",
+          "CoinPower": 10
         }
       ]
     }

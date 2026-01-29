@@ -7,6 +7,7 @@ export interface KeywordEffect {
   KeywordBuf: string;
   stack: number;
   count: number;
+  nextTurn?: boolean;
 }
 
 /*
@@ -17,4 +18,5 @@ export interface BattleUnitEffect {
   target: string;
   BattleUnitBuf: string;
   amount: number;
+  nextTurn?: boolean;
 }

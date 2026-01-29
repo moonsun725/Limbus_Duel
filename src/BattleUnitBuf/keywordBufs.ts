@@ -1,3 +1,4 @@
+import type { BattleUnitBuf } from "./BattleUnitBuf.js";
 /*
     의사코드
     KeywordBufX() : void
@@ -11,3 +12,12 @@
     }
 
 */
+
+// 7키워드 효과는 
+export interface KeywordBuf extends BattleUnitBuf
+{
+    stack: number;
+
+    count: number;
+    keyword: string;
+}
