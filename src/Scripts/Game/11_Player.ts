@@ -1,7 +1,7 @@
 import { Pokemon } from './pokemon.js';
 import type { Move } from './pokemon.js';
 import { Character } from './00_sinner.js';
-import { type Skill } from './01_skill.js';
+import { type Skill } from './01_0_skill.js';
 // (나중에 아이템 클래스도 import 필요)
 
 export class Player {

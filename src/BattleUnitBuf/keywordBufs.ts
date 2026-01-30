@@ -16,8 +16,15 @@ import type { BattleUnitBuf } from "./BattleUnitBuf.js";
 // 7키워드 효과는 
 export interface KeywordBuf extends BattleUnitBuf
 {
-    stack: number;
 
     count: number;
     keyword: string;
+    
+    activate(amount: number) : void
+
+}
+
+export interface Bleeding extends KeywordBuf
+{   
+    
 }

@@ -1,7 +1,7 @@
 import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'json'};
 import data_S from '../../Data_WIP/Skills.json' with {type: 'json'};
 // skill.ts 상속
-import type { Skill } from './01_skill.js'; 
+import type { Skill } from './01_0_skill.js'; 
 import { type Coin } from './02_coin.js';
 import type { Slot } from '../BattleSystem/slot.js';
 
