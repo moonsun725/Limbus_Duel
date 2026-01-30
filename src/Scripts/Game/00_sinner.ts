@@ -1,5 +1,6 @@
 import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'json'};
-import data_S from '../../Data_WIP/Skills.json' with {type: 'json'};
+import data_S from '../../Data_WIP/Skills.json' with {type: 'json'}; // 그냥 스킬 추가하는 메서드를 내가 살려놨응게
+import { GetMoves } from './01_1_ skillManager.js';
 // skill.ts 상속
 import type { Skill } from './01_0_skill.js'; 
 import { type Coin } from './02_coin.js';
@@ -257,12 +258,9 @@ export class Character
 
     addSkillByID()
     {
-        const mySkills = data_S.dataList.filter(skill => {
-        // 스킬 ID가 내 ID 범주 안에 있는지 확인
-        return Math.floor(skill.id / 100) === this.id;
-        });
-
-        this.Skills.push(...mySkills);
+        const mySkills = GetMoves(this.id);
+        if (mySkills) // != undefined
+            this.Skills = mySkills;
     }
 
     ResetCondition(): void {
