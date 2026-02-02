@@ -1,9 +1,10 @@
 import { Character, createSinnerFromData, } from './00_sinner.js'
 import { type Skill, CoinToss } from './01_0_skill.js';
-import { type Coin } from './02_coin.js';
+import { type Coin } from './02_0_coin.js';
 
-import SkillData from '../../Data_WIP/Skills.json' with { type: 'json' };
+import { LoadSkillData } from './01_1_ skillManager.js';
 
+LoadSkillData();
 const yisang : Character = createSinnerFromData(10101);
 const faust : Character = createSinnerFromData(10201);
 

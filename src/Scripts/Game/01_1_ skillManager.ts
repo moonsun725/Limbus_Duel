@@ -21,7 +21,7 @@ const jsonPath = path.join(__dirname, '../../Data_WIP/Skills.json');
 // 이름만 대면 기술이 툭 튀어나오게 저장
 export const MoveBundleRegistry: { [prefix: number]: Skill[] } = {};
 
-function addToBundle() {
+export function LoadSkillData() {
     try
     {
         const rawData = fs.readFileSync(jsonPath, 'utf-8'); // 파일 읽기

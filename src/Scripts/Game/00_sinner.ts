@@ -3,7 +3,7 @@ import data_S from '../../Data_WIP/Skills.json' with {type: 'json'}; // 그냥 �
 import { GetMoves } from './01_1_ skillManager.js';
 // skill.ts 상속
 import type { Skill } from './01_0_skill.js'; 
-import { type Coin } from './02_coin.js';
+import { type Coin } from './02_0_coin.js';
 import type { Slot } from '../BattleSystem/slot.js';
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"

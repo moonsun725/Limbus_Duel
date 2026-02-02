@@ -1,10 +1,11 @@
-import type { Coin } from "./02_coin.js";
+import type { Coin } from "./02_0_coin.js";
 
 export interface Skill {
   id: number;
   level: number;
   name: string;
   desc: string;
+  abilities: SkillAbility[];
   category: string;  
   color: string; 
   BasePower: number;
@@ -15,6 +16,19 @@ export interface Skill {
   keywords?: string[]; // 예: ["Sinking"] (가드 스킬에는 없음)
   AtkLv?: number;      // (가드 스킬에는 없음)
   Weight?: number;     // (가드 스킬에는 없음)
+}
+
+
+export type EffectTiming = 'OnUse' | 'OnHit' | 'OnTurnEnd' | 'OnBasePower';
+export type EffectTarget = 'Self' | 'Enemy' | 'RandomAlley' | 'RandomEnemy';
+
+export interface SkillAbility {
+  type: string;
+  timing: EffectTiming;
+  target: EffectTarget;
+
+  condition?: boolean;
+  data?: any;
 }
 
 export function CoinToss(coinlist:Coin[], sp:number, coinmultiplier?:number, gameState?: string) : number {
