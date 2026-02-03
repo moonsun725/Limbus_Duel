@@ -1,4 +1,4 @@
-import { Character } from "../Scripts/Game/00_sinner.js";
+import { Character } from "../Scripts/Game/00_0_sinner.js";
 export abstract class BattleUnitBuf
 {
     name: string;

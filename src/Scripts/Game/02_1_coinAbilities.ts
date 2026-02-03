@@ -1,5 +1,6 @@
-import { Character } from './00_sinner.js';
+import { Character } from './00_0_sinner.js';
 import type { Coin } from './02_0_coin.js';
+import type { BattleUnitBuf } from './03_battleUnitBufs.js';
 
 // 트리거 타입 정의: 언제 호출되었는가?
 export type EffectTrigger = 'OnHit' | 'OnParrying'| 'OnHeadHit' | 'OnBasePower';
@@ -100,5 +101,18 @@ export function GetPowerMultiplier(
 // =========================================================
 
 const AbilityRegistry: { [key: string]: AbilityLogic } = {
-
+    "AddKeywordBuf": {
+        Execute: (target, data, damage, user) => {
+            
+            const status: BattleUnitBuf = {
+                typeId: data.id,
+                source: user,
+                Owner: target,
+                stack: data.stack,
+                count: data.count
+            };
+            
+            target.bufList.AddBuf(data.id, status);
+        }
+    },
 };

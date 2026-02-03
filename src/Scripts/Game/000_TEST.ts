@@ -1,4 +1,4 @@
-import { Character, createSinnerFromData, } from './00_sinner.js'
+import { Character, createSinnerFromData, } from './00_0_sinner.js'
 import { type Skill, CoinToss } from './01_0_skill.js';
 import { type Coin } from './02_0_coin.js';
 

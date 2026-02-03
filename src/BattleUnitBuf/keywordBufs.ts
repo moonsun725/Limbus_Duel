@@ -1,5 +1,5 @@
 import  { BattleUnitBuf } from "./BattleUnitBuf.js";
-import { Character } from "../Scripts/Game/00_sinner.js";
+import { Character } from "../Scripts/Game/00_0_sinner.js";
 /*
     의사코드
     KeywordBufX() : void

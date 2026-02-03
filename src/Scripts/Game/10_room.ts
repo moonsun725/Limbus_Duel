@@ -2,7 +2,7 @@
 import { Server } from 'socket.io';
 import { Player } from './11_Player.js';
 import { Pokemon, createPokemon,} from './pokemon.js';
-import { Character, createSinnerFromData } from './00_sinner.js';
+import { Character, createSinnerFromData } from './00_0_sinner.js';
 import { type Skill } from './01_0_skill.js';
 
 import type { Move } from './pokemon.js';

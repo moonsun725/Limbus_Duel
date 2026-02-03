@@ -1,10 +1,11 @@
 import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'json'};
-import data_S from '../../Data_WIP/Skills.json' with {type: 'json'}; // 그냥 스킬 추가하는 메서드를 내가 살려놨응게
+import data_S from '../../Data_WIP/Skills.json' with {type: 'json'}; // 그냥 스킬 추가하는 메서드를 내가 살려놨으니까 일단은 둔다
 import { GetMoves } from './01_1_ skillManager.js';
 // skill.ts 상속
 import type { Skill } from './01_0_skill.js'; 
 import { type Coin } from './02_0_coin.js';
 import type { Slot } from '../BattleSystem/slot.js';
+import { BattleUnitBufList } from './00_2_BufList.js';
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
 
@@ -55,6 +56,7 @@ export class Character
         "violet": 1.0
     }; 
 
+    public bufList: BattleUnitBufList;
     public minSpeed: number; // 최소 속도
     public maxSpeed: number; // 최대 속도
     public currentSpeed: number; // 현재 속도
@@ -71,7 +73,7 @@ export class Character
     // public Bpassive: Passive; // 전투 패시브
     // public Spassive: Passive; // 비전투 패시브
 
-    constructor( name: string, id: number, lv: number,  maxHp: number, hpRate: number, defLv: number, RSlash: number, RPenetrate: number, RBlunt: number, minSpeed: number, maxSpeed: number, stg1: number, stg2?: number, stg3?: number, Rred?: number, Rorange?: number, Ryellow?: number, Rgreen?: number, Rblue?: number, Rindigo?: number, Rviolet?: number)
+    constructor(name: string, id: number, lv: number,  maxHp: number, hpRate: number, defLv: number, RSlash: number, RPenetrate: number, RBlunt: number, minSpeed: number, maxSpeed: number, stg1: number, stg2?: number, stg3?: number, Rred?: number, Rorange?: number, Ryellow?: number, Rgreen?: number, Rblue?: number, Rindigo?: number, Rviolet?: number)
     {
         this.name = name;
         this.id = id;
@@ -92,6 +94,9 @@ export class Character
         this.ResistP.Penetrate = RPenetrate;
         this.ResistP.Blunt = RBlunt; 
 
+        // 버프 리스트
+        this.bufList = new BattleUnitBufList;
+
         this.minSpeed = minSpeed;
         this.maxSpeed = maxSpeed;   
         this.currentSpeed = minSpeed;
@@ -101,6 +106,8 @@ export class Character
             this.stg2 = Math.floor(this.maxHp*stg2); // 아 이건 좀 싶은데
         if (stg3)
             this.stg3 = Math.floor(this.maxHp*stg3);
+
+        
     }
 
     Show() : void // js/ts에서는 클래스 내부에 함수 정의할 때 function 뺀다
@@ -152,7 +159,7 @@ export class Character
     takeDamage(damage: number): void
     {
         this.hp -= damage;
-        if(this.stg1)
+        if(this.stg1) // 이건 또 언제 고치냐
         { 
             if (this.hp <= this.stg1 && !this.Stg1checker)
             {
@@ -270,7 +277,6 @@ export class Character
                 
         // (2) 상태 돌리기
         this.State = "NORMAL";
-
     }
 
 
