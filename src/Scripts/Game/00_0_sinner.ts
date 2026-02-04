@@ -7,7 +7,7 @@ import { type Coin } from './02_0_coin.js';
 import type { Slot } from '../BattleSystem/slot.js';
 import { BattleUnitBufList } from './00_3_BufList.js';
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
-import type { BattleStateManager } from './00_2_BattleStateManager.js';
+import { BattleStateManager } from './00_2_BattleStateManager.js';
 
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
@@ -20,6 +20,7 @@ export interface Resist2 { [key: string]: number }
 export class Character
 {
     public name: string; // 인격 이름
+    public id: number;
     public Stats: SinnerInfo;
 
     public Skills: Skill[]; // 스킬 목록
@@ -27,7 +28,7 @@ export class Character
 
     public lv: number = 1; // 레벨
 
-    public State: BattleStateManager;
+    public BattleState: BattleStateManager;
 
     public parrycnt: number = 0;
     private minusSP: 1 | -1 | 0 = 1;
@@ -63,12 +64,13 @@ export class Character
     // public Bpassive: Passive; // 전투 패시브
     // public Spassive: Passive; // 비전투 패시브
 
-    constructor(name: string, data: IsinnerData)
+    constructor(name: string, id: number, data: IsinnerData)
     {
         this.name = name;
-
+        this.id = id;
         // 기본 능력치
         this.Stats = new SinnerInfo(data, data.lv, this);
+        this.BattleState = new BattleStateManager(this);
 
         this.Skills = [];
         this.addSkillByID();
@@ -99,7 +101,7 @@ export class Character
             let Power = atkSkill.BasePower;
             console.log(`[Attack]: 기본위력: ${Power}`)
             coinList.forEach(element => {
-            if(100*Math.random() < (this.sp+50) )
+            if(100*Math.random() < (this.Stats.sp+50) )
             {  
                 console.log(`[Attack]: 앞면: + ${element.CoinPower}`);
                 Power += element.CoinPower; 
@@ -118,108 +120,50 @@ export class Character
         });
     }
 
-    takeDamage(damage: number): void // 곧 옮길거니까 조금만 참아
+    loseHP(amount: number)
     {
-        this.hp -= damage;
-        if(this.stg1) // 이건 또 언제 고치냐
-        { 
-            if (this.hp <= this.stg1 && !this.Stg1checker)
+        this.Stats.LoseHP(amount);
+    }
+    loseSP(amount: number)
+    {
+        this.Stats.LoseHP(amount);
+    }
+    takeDamage(damage: number)
+    {
+        const result = this.Stats.takeDamage(damage);
+        let staggerResult = result.StaggerState;
+        if (staggerResult > 0)
+        {
+            switch(this.BattleState.GetState())
             {
-                this.State = 'STAGGERED';
+                case "STAGGERED+": // 얘는 두번 증가시켜야되고
+                    staggerResult++; 
+                case "STAGGERED":
+                    staggerResult++; // 얘는 한번 증가시키면 되니까 ㅇㅇ
+            }
+        }
+        if (staggerResult > 3)
+            staggerResult = 3;
+        switch(staggerResult)
+        {
+            case 1:
+                this.BattleState.ChangeState("STAGGERED");
                 console.log(`[takeDamage]: 흐트러짐!`);
-                this.Stg1checker = true;
-            }
-        }
-        if(this.stg2)
-        { 
-            if (this.hp <= this.stg2 && !this.Stg2checker)
-            {
-                switch(this.State)
-                {
-                    case 'STAGGERED':
-                        this.State = 'STAGGERED+';
-                        console.log(`[takeDamage]: 흐트러짐+!!`);
-                        break;
-                    default:
-                        this.State = 'STAGGERED';
-                        console.log(`[takeDamage]: 흐트러짐!`);
-                        break;
-                }
-                this.Stg2checker = true;
-            }
-        }
-        if(this.stg3)
-        { 
-            if (this.hp <= this.stg3 && !this.Stg3checker)
-            {
-                switch(this.State)
-                {
-                    case 'STAGGERED+':
-                        this.State = 'STAGGERED++';
-                        console.log(`[takeDamage]: 흐트러짐++!!!`);
-                        break;
-                    case 'STAGGERED':
-                        this.State = 'STAGGERED+';
-                        console.log(`[takeDamage]: 흐트러짐+!!`);
-                        break;
-                    default:
-                        this.State = 'STAGGERED';
-                        console.log(`[takeDamage]: 흐트러짐!`);
-                        break;
-                }
-                this.Stg3checker = true;
-            }
-        }
-        if (this.hp <= 0) 
-        {
-            this.hp = 0
-            this.State = 'DEAD';
-        };
-        this.statusCheck();
-    }
-
-    loseHP(damage: number)
-    {
-        this.hp -= damage;
-        if (this.hp <= 0) 
-        {
-            this.hp = 0
-            this.State = 'DEAD';
-        };
-    }
-
-    recoverSp(spAmount: number) : void
-    {
-        if (this.sp + spAmount > 45)
-            spAmount = 45 - this.sp;
-        else if (this.sp + spAmount < -45)
-            spAmount = -45 - this.sp;
-        this.sp += spAmount;
-    }
-
-    statusCheck() : void { // 상태에 따라 만들기
-        switch(this.State)
-        {
-            case 'STAGGERED':
-                this.ResistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
                 break;
-            case 'STAGGERED+':
-                this.ResistP = {"Slash": 2.5, "Penetrate": 2.5, "Blunt": 2.5};
+            case 2:
+                this.BattleState.ChangeState("STAGGERED+");
+                console.log(`[takeDamage]: 흐트러짐+!!`);
                 break;
-            case 'STAGGERED++':
-                this.ResistP = {"Slash": 3.0, "Penetrate": 3.0, "Blunt": 3.0};
-                break;
-            case 'CLASHWIN':
-                this.sp += (10 + (this.parrycnt*2));
-                this.parrycnt = 0;
-                break;
-            case 'CLASHLOSE':
-                // 합위력 증가 얻기
-                this.parrycnt = 0;
+            case 3: 
+                this.BattleState.ChangeState("STAGGERED++");
+                console.log(`[takeDamage]: 흐트러짐++!!!`);
                 break;
         }
-    }
 
+        if (result.isDead) {
+            this.BattleState.ChangeState("DEAD");
+        }
+    }
     addSkill(skill:Skill) : void {
         this.Skills.push(skill);
         console.log(`[Sinner]/[addSkill]: ${skill.name}을 스킬 목록에 추가`);
@@ -234,11 +178,10 @@ export class Character
 
     ResetCondition(): void {
         // (1) 체력, 정신력 초기화
-        this.hp = this.maxHp;
-        this.sp = 0;
-                
-        // (2) 상태 돌리기
-        this.State = "NORMAL";
+        this.Stats.reset();
+        this.BattleState.ChangeState("NORMAL");
+        
+        
     }
 
 
@@ -251,6 +194,6 @@ export function createSinnerFromData(id: number): Character
     if (!sinnerData) {
         throw new Error(`수감자 ID ${id}에 해당하는 데이터를 찾을 수 없습니다.`);
     }
-    return new Character(sinnerData.name, sinnerData);
+    return new Character(sinnerData.name, sinnerData.id, sinnerData);
 }
 

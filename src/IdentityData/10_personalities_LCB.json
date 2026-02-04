@@ -10,13 +10,13 @@
             "Def": -2, 
             "ResistP":
             {
-                "RSlash": 2.0, 
-                "RPenetrate": 0.5, 
-                "RBlunt": 1.0 
+                "Slash": 2.0, 
+                "Penetrate": 0.5, 
+                "Blunt": 1.0 
             },
             "minSpeed": 4, 
             "maxSpeed": 8, 
-            "staggerGauge":[ 0.65, 0.35, 0.15 ]
+            "staggerGauge":[ 0.15, 0.35, 0.65 ]
         },
         
         {
@@ -35,7 +35,7 @@
             },
             "minSpeed": 2,
             "maxSpeed": 4,
-            "staggerGauge":[ 0.60, 0.30, 0.15 ]
+            "staggerGauge":[ 0.15, 0.30, 0.60 ]
         },
 
         {
@@ -48,13 +48,13 @@
             "Def": -2, 
             "ResistP":
             {
-                "RSlash": 1.0, 
-                "RPenetrate": 0.5, 
-                "RBlunt": 2.0
+                "Slash": 1.0, 
+                "Penetrate": 0.5, 
+                "Blunt": 2.0
             },
             "minSpeed": 2,
             "maxSpeed": 4,
-            "staggerGauge": [ 0.60, 0.30, 0.15 ]
+            "staggerGauge": [ 0.20, 0.40, 0.70 ]
         },
 
          {
@@ -64,16 +64,16 @@
             "lv": 1, 
             "hp": 66, 
             "hpRate": 2.28, 
-            "Def": -2, 
+            "Def": -4, 
             "ResistP":
             { 
-                "RSlash": 2.0, 
-                "RPenetrate": 0.5, 
-                "RBlunt": 1.0
+                "Slash": 1.0, 
+                "Penetrate": 0.5, 
+                "Blunt": 2.0
             },
-            "minSpeed": 2,
-            "maxSpeed": 4,
-            "staggerGauge":[ 0.60, 0.30, 0.15 ]
+            "minSpeed": 3,
+            "maxSpeed": 6,
+            "staggerGauge": [ 0.20, 0.40, 0.70 ]
         },
 
         {
@@ -86,13 +86,13 @@
             "Def": 3, 
             "ResistP":
             {
-                "RSlash": 1.0, 
-                "RPenetrate": 2.0, 
-                "RBlunt": 0.5
+                "Slash": 1.0, 
+                "Penetrate": 2.0, 
+                "Blunt": 0.5
             },
             "minSpeed": 2,
             "maxSpeed": 3,
-            "staggerGauge":[ 0.50, 0.20 ]
+            "staggerGauge":[ 0.20, 0.50 ]
         }
     ]
 }

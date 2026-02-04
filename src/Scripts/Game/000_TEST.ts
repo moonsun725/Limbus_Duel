@@ -73,10 +73,8 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
         coinlist = sk2cpy;
     }
     console.log(`[합 결과]: ${winner.name} 승리, ${target.name} 패배`);
-    winner.State = 'CLASHWIN';
-    target.State = 'CLASHLOSE';
-    winner.statusCheck();
-    target.statusCheck();
+    winner.BattleState.ChangeState('CLASHWIN');
+    target.BattleState.ChangeState('CLASHLOSE');
     winner.Attack(target, winnerskill, coinlist);
 }
 

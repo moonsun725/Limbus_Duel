@@ -8,7 +8,6 @@ export interface IsinnerData
 {
     Snumber: number;
     name: string;
-    id: number;
     lv: number; 
     hp: number; 
     hpRate: number; 
@@ -44,7 +43,7 @@ export class SinnerInfo // 각종 스탯, 내성
         "violet": 1.0
     }; 
     speed: number;
-    stagger: number[] = [];
+    stagger: number[];
 
     constructor(data: IsinnerData, level: number, owner: Character)
     {
@@ -58,6 +57,7 @@ export class SinnerInfo // 각종 스탯, 내성
 
         this.speed = data.minSpeed; // 값만 정해놓고 실제로는 턴마다 갱신할거니까
         this.resistP = data.ResistP;
+        this.stagger = [];
         data.staggerGauge.forEach(element => {
             this.stagger.push(Math.floor(element*this.maxHp));
         });
@@ -65,19 +65,72 @@ export class SinnerInfo // 각종 스탯, 내성
 
     ShowStats()
     {
-        console.log("이름:", this.owner.name, "ID:", this.baseInfo.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.baseInfo.Def, "정신력:", this.sp);
+        console.log("이름:", this.owner.name, "ID:", this.owner.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.baseInfo.Def, "정신력:", this.sp);
         console.log("속도:", this.baseInfo.minSpeed , "~" , this.baseInfo.maxSpeed);
         console.log("흐트러짐 게이지:", this.stagger[0] , "/" , this.stagger[1] , "/", this.stagger[2]);
         console.log("참격내성:", this.resistP.Slash, "관통내성:", this.resistP.Penetrate, "타격내성:", this.resistP.Blunt);
     }
+    reset()
+    {
+        this.hp = this.maxHp;
+        this.sp = 0;
+        this.resistP = this.baseInfo.ResistP;
+        this.baseInfo.staggerGauge.forEach(element => {
+            this.stagger.push(Math.floor(element*this.maxHp));
+        });
+    }
 
-    LoseHP(amount: number)
+    LoseHP(amount: number) : boolean
     {   
         this.hp -= amount;
+        return this.hp <= 0;
     }
-    LoseSP(amount: number)
+    recoverHP(amount: number)
     {
-        this.sp -= amount;
+        this.hp += amount
+        if (this.hp > this.maxHp) 
+            this.hp = this.maxHp
+    }
+
+    recoverSp(spAmount: number) : void
+    {
+        if (this.sp + spAmount > 45)
+            spAmount = 45 - this.sp;
+        this.sp += spAmount;
+    }
+    LoseSP(spAmount: number)
+    {
+        if (this.sp + spAmount < -45)
+            spAmount = -45 - this.sp;
+        this.sp -= spAmount;
     }   
-    
+
+    getStaggerDamage(stgDmg: number) : boolean
+    {
+        this.stagger[this.stagger.length -1]! += stgDmg; // >< 이거 나중에 수정해야될수도 있음
+        if (this.stagger.at(-1)! >= this.hp)
+        {
+            this.stagger.pop();
+        }
+        return (this.stagger.at(-1)! >= this.hp);
+    }
+   
+    takeDamage(damage: number): { isDead: boolean, StaggerState: number } // 곧 옮길거니까 조금만 참아
+    {
+        this.hp -= damage;
+        
+        let staggerCount = 0;
+        this.stagger.forEach(element => {
+            if (this.hp <= element)
+                staggerCount++;
+        });
+        for (var i = 0; i < staggerCount; i++)
+            this.stagger.pop();
+
+        return { 
+            isDead: this.hp === 0, 
+            StaggerState: staggerCount // 이러면 넘버를 반환하고, 기본: 0, 흐트: 1, 흐트+: 2, 흐트++: 3에서 유효값은 1,2다 ㅇㅇ
+        };
+    }
+
 }

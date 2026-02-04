@@ -10,10 +10,41 @@ export class BattleStateManager {
         this.state = 'NORMAL';
     } 
     
-    ChangeState()
+    ChangeState(state: SinnerBattleState)
     {
-        
+        this.state = state;
+        this.statusCheck();
     }
 
+    GetState()
+    {
+        return this.state;
+    }
+
+    statusCheck() : void 
+    { 
+        // 상태에 따라 만들기
+        switch(this.state)
+            {
+                case 'STAGGERED':
+                    this.owner.Stats.resistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
+                    break;
+                case 'STAGGERED+':
+                    this.owner.Stats.resistP = {"Slash": 2.5, "Penetrate": 2.5, "Blunt": 2.5};
+                    break;
+                case 'STAGGERED++':
+                    this.owner.Stats.resistP = {"Slash": 3.0, "Penetrate": 3.0, "Blunt": 3.0};
+                    break;
+                case 'CLASHWIN':
+                    // this.sp += (10 + (this.parrycnt*2));
+                    // this.parrycnt = 0;
+                    break;
+                case 'CLASHLOSE':
+                    // 합위력 증가 얻기: 나중에
+                    // this.parrycnt = 0;
+                    break;
+            }
+        
+    }
     
 }
