@@ -14,7 +14,6 @@ const __dirname = path.dirname(__filename);
     src/Scripts/Game/매니저
 
 */
-
 const jsonPath = path.join(__dirname, '../../Data_WIP/Skills.json');
 
 // ★ 기술 도감 (Dictionary)

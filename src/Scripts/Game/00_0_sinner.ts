@@ -5,7 +5,10 @@ import { GetMoves } from './01_1_ skillManager.js';
 import type { Skill } from './01_0_skill.js'; 
 import { type Coin } from './02_0_coin.js';
 import type { Slot } from '../BattleSystem/slot.js';
-import { BattleUnitBufList } from './00_2_BufList.js';
+import { BattleUnitBufList } from './00_3_BufList.js';
+import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
+import type { BattleStateManager } from './00_2_BattleStateManager.js';
+
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
 
@@ -14,25 +17,17 @@ export interface Resist1 { [key: string]: number }
 export interface Resist2 { [key: string]: number }
 
 
-type SinnerBattleState = 'NORMAL' | 'STARTCOMBAT' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' |'STAGGERED' | 'STAGGERED+' | 'STAGGERED++' | 'PANIC' | 'ERODE' |'DEAD'; // 당장은 이대로만
 export class Character
 {
     public name: string; // 인격 이름
-    public id: number; // 인격 ID
+    public Stats: SinnerInfo;
 
     public Skills: Skill[]; // 스킬 목록
     public Cycle: Slot[];
 
-    public lv: number; // 레벨
+    public lv: number = 1; // 레벨
 
-    public hp: number; // 체력
-    public sp: number = 0; // 정신력
-    public maxSp: number = 45;
-    public minSp: number = -45;
-    public maxHp: number; // 최대체력
-    public hpRate: number; // 체력 레벨당 계수
-    public defLv: number; // 방렙
-    public State: SinnerBattleState = 'NORMAL';
+    public State: BattleStateManager;
 
     public parrycnt: number = 0;
     private minusSP: 1 | -1 | 0 = 1;
@@ -57,70 +52,37 @@ export class Character
     }; 
 
     public bufList: BattleUnitBufList;
-    public minSpeed: number; // 최소 속도
-    public maxSpeed: number; // 최대 속도
-    public currentSpeed: number; // 현재 속도
 
-    public stg1?: number; // 흐트러짐 게이지 1
+    
     Stg1checker: boolean = false; // 흐트러짐 된 이후면 켜짐
 
-    public stg2?: number; // 흐트러짐 게이지 2
     Stg2checker: boolean = false;
 
-    public stg3?: number; // 흐트러짐 게이지 3
     Stg3checker: boolean = false;
 
     // public Bpassive: Passive; // 전투 패시브
     // public Spassive: Passive; // 비전투 패시브
 
-    constructor(name: string, id: number, lv: number,  maxHp: number, hpRate: number, defLv: number, RSlash: number, RPenetrate: number, RBlunt: number, minSpeed: number, maxSpeed: number, stg1: number, stg2?: number, stg3?: number, Rred?: number, Rorange?: number, Ryellow?: number, Rgreen?: number, Rblue?: number, Rindigo?: number, Rviolet?: number)
+    constructor(name: string, data: IsinnerData)
     {
         this.name = name;
-        this.id = id;
+
+        // 기본 능력치
+        this.Stats = new SinnerInfo(data, data.lv, this);
 
         this.Skills = [];
         this.addSkillByID();
         this.Cycle = [];
         // this.EGO_Skills = [];
 
-        this.lv = lv;
-        this.maxHp = maxHp + Math.floor(lv*hpRate);
-        this.hp = maxHp + Math.floor(lv*hpRate);
-        this.hpRate = hpRate;
-        this.defLv = defLv;
-        
-        // 물리 내성
-        this.ResistP.Slash = RSlash;
-        this.ResistP.Penetrate = RPenetrate;
-        this.ResistP.Blunt = RBlunt; 
-
         // 버프 리스트
         this.bufList = new BattleUnitBufList;
-
-        this.minSpeed = minSpeed;
-        this.maxSpeed = maxSpeed;   
-        this.currentSpeed = minSpeed;
-
-        this.stg1 = Math.floor(this.maxHp*stg1);
-        if(stg2)
-            this.stg2 = Math.floor(this.maxHp*stg2); // 아 이건 좀 싶은데
-        if (stg3)
-            this.stg3 = Math.floor(this.maxHp*stg3);
-
         
-    }
-
-    Show() : void // js/ts에서는 클래스 내부에 함수 정의할 때 function 뺀다
-    {
-        console.log("이름:", this.name, "ID:", this.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.defLv, "정신력:", this.sp);
-        console.log("속도:", this.minSpeed , "~" , this.maxSpeed);
-        console.log("흐트러짐 게이지:", this.stg1 , "/" , this.stg2 , "/", this.stg3);
-        console.log("참격내성:", this.ResistP.Slash, "관통내성:", this.ResistP.Penetrate, "타격내성:", this.ResistP.Blunt);
     }
 
     ShowHp() : void
     {
-        console.log("이름:", this.name, "체력:", this.hp + "/" + this.maxHp);
+        console.log("이름:", this.name, "체력:", this.Stats.hp + "/" + this.Stats.maxHp);
     }
 
     ShowSkillList() : void
@@ -156,7 +118,7 @@ export class Character
         });
     }
 
-    takeDamage(damage: number): void
+    takeDamage(damage: number): void // 곧 옮길거니까 조금만 참아
     {
         this.hp -= damage;
         if(this.stg1) // 이건 또 언제 고치냐
@@ -289,23 +251,6 @@ export function createSinnerFromData(id: number): Character
     if (!sinnerData) {
         throw new Error(`수감자 ID ${id}에 해당하는 데이터를 찾을 수 없습니다.`);
     }
-    return new Character(
-        sinnerData.name,
-        sinnerData.id,
-        sinnerData.lv,
-        sinnerData.hp, // 초기 체력은 최대 체력과 동일하게
-        sinnerData.hpRate,
-        sinnerData.Def,
-        
-        sinnerData.RSlash,
-        sinnerData.RPenetrate,
-        sinnerData.RBlunt,
-
-        sinnerData.minSpeed,
-        sinnerData.maxSpeed,
-        sinnerData.stg1,
-        sinnerData.stg2,
-        sinnerData.stg3
-    );
+    return new Character(sinnerData.name, sinnerData);
 }
 

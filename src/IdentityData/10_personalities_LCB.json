@@ -8,14 +8,15 @@
             "hp": 72, 
             "hpRate": 2.48, 
             "Def": -2, 
-            "RSlash": 2.0, 
-            "RPenetrate": 0.5, 
-            "RBlunt": 1.0, 
+            "ResistP":
+            {
+                "RSlash": 2.0, 
+                "RPenetrate": 0.5, 
+                "RBlunt": 1.0 
+            },
             "minSpeed": 4, 
             "maxSpeed": 8, 
-            "stg1": 0.65, 
-            "stg2": 0.35, 
-            "stg3": 0.15
+            "staggerGauge":[ 0.65, 0.35, 0.15 ]
         },
         
         {
@@ -26,68 +27,72 @@
             "hp": 84, 
             "hpRate": 2.90, 
             "Def": 1, 
-            "RSlash": 2.0, 
-            "RPenetrate": 0.5, 
-            "RBlunt": 1.0,
+            "ResistP":
+            {
+                "RSlash": 2.0, 
+                "RPenetrate": 0.5, 
+                "RBlunt": 1.0
+            },
             "minSpeed": 2,
             "maxSpeed": 4,
-            "stg1": 0.60,
-            "stg2": 0.30,
-            "stg3": 0.15
+            "staggerGauge":[ 0.60, 0.30, 0.15 ]
         },
 
         {
             "Snumber": 3, 
-            "name": "LCB 수감자", 
+            "name": "LCB 수감자 돈키호테", 
             "id": 10301,
             "lv": 1, 
             "hp": 66, 
             "hpRate": 2.28, 
             "Def": -2, 
-            "RSlash": 1.0, 
-            "RPenetrate": 0.5, 
-            "RBlunt": 2.0,
+            "ResistP":
+            {
+                "RSlash": 1.0, 
+                "RPenetrate": 0.5, 
+                "RBlunt": 2.0
+            },
             "minSpeed": 2,
             "maxSpeed": 4,
-            "stg1": 0.60,
-            "stg2": 0.30,
-            "stg3": 0.15
+            "staggerGauge": [ 0.60, 0.30, 0.15 ]
         },
 
          {
             "Snumber": 4, 
-            "name": "LCB 수감자", 
+            "name": "LCB 수감자 료슈", 
             "id": 10401,
             "lv": 1, 
             "hp": 66, 
             "hpRate": 2.28, 
             "Def": -2, 
-            "RSlash": 2.0, 
-            "RPenetrate": 0.5, 
-            "RBlunt": 1.0,
+            "ResistP":
+            { 
+                "RSlash": 2.0, 
+                "RPenetrate": 0.5, 
+                "RBlunt": 1.0
+            },
             "minSpeed": 2,
             "maxSpeed": 4,
-            "stg1": 0.60,
-            "stg2": 0.30,
-            "stg3": 0.15
+            "staggerGauge":[ 0.60, 0.30, 0.15 ]
         },
 
         {
             "Snumber": 5, 
-            "name": "LCB 수감자",
+            "name": "LCB 수감자 뫼르소",
             "id": 10501,
             "lv": 1, 
             "hp": 90, 
             "hpRate": 3.10, 
             "Def": 3, 
-            "RSlash": 1.0, 
-            "RPenetrate": 2.0, 
-            "RBlunt": 0.5,
+            "ResistP":
+            {
+                "RSlash": 1.0, 
+                "RPenetrate": 2.0, 
+                "RBlunt": 0.5
+            },
             "minSpeed": 2,
-            "maxSpeed": 4,
-            "stg1": 0.60,
-            "stg2": 0.30,
-            "stg3": 0.15
+            "maxSpeed": 3,
+            "staggerGauge":[ 0.50, 0.20 ]
         }
     ]
 }
