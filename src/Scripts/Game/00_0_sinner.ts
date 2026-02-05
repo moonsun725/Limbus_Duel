@@ -8,6 +8,8 @@ import type { Slot } from '../BattleSystem/slot.js';
 import { BattleUnitBufList } from './00_3_BufList.js';
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
 import { BattleStateManager } from './00_2_BattleStateManager.js';
+import { ProcessCoinEffects } from './02_2_coinAbilities.js';
+import { ProcessMoveEffects } from './01_2_skillAbilityLogic.js';
 
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
@@ -32,34 +34,8 @@ export class Character
 
     public parrycnt: number = 0;
     private minusSP: 1 | -1 | 0 = 1;
-    
-
-    public ResistP : Resist1 =
-    {
-        "Slash": 1.0,
-        "Penetrate": 1.0,
-        "Blunt": 1.0
-    };
-
-    public ResistS : Resist2 = 
-    {
-        "red": 1.0,
-        "orange": 1.0,
-        "yellow": 1.0,    
-        "green": 1.0,
-        "blue": 1.0,
-        "indigo": 1.0,
-        "violet": 1.0
-    }; 
 
     public bufList: BattleUnitBufList;
-
-    
-    Stg1checker: boolean = false; // 흐트러짐 된 이후면 켜짐
-
-    Stg2checker: boolean = false;
-
-    Stg3checker: boolean = false;
 
     // public Bpassive: Passive; // 전투 패시브
     // public Spassive: Passive; // 비전투 패시브
@@ -82,11 +58,6 @@ export class Character
         
     }
 
-    ShowHp() : void
-    {
-        console.log("이름:", this.name, "체력:", this.Stats.hp + "/" + this.Stats.maxHp);
-    }
-
     ShowSkillList() : void
     {
         for (var i = 0; i < 4; i++)
@@ -97,26 +68,29 @@ export class Character
 
     Attack(target: Character, atkSkill: Skill, coinList: Coin[]) // 아니 씨부레 이러면 코인 부서진거 반영을 못하잖아 아 결국엔 따로 받아오냐
     {
-            console.log(`[Attack]: 공격자: ${this.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
-            let Power = atkSkill.BasePower;
-            console.log(`[Attack]: 기본위력: ${Power}`)
-            coinList.forEach(element => {
+        if (this.BattleState.GetState() === "NORMAL")
+            ProcessMoveEffects(atkSkill, target, this, "OnUse"); // 나중에는 switch로 사용불가/Onuse 발동x
+
+        console.log(`[Attack]: 공격자: ${this.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
+        let Power = atkSkill.BasePower;
+        console.log(`[Attack]: 기본위력: ${Power}`)
+
+        coinList.forEach(element => {
             if(100*Math.random() < (this.Stats.sp+50) )
             {  
                 console.log(`[Attack]: 앞면: + ${element.CoinPower}`);
                 Power += element.CoinPower; 
                 console.log(`[Attack]: 위력: ${Power}`);
-                
-                let damage = Power*(target.ResistP[element.Type]!+target.ResistS[element.Color]!); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
-                target.takeDamage(Math.floor(damage)); 
             }
             else
             {
                 console.log(`[Attack]: 뒷면: + 0`);
-                console.log(`[Attack]: 위력: ${Power}`);
-                let damage = Power*(target.ResistP[element.Type]!+target.ResistS[element.Color]!); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
-                target.takeDamage(Math.floor(damage)); 
+                console.log(`[Attack]: 위력: ${Power}`); 
             }
+            let damage = Power*(target.Stats.resistP[element.Type]!+target.Stats.resistS[element.Color]!);
+            console.log(`[Attack]: 피해량: ${target.Stats.resistP[element.Type]!+target.Stats.resistS[element.Color]!}배`); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
+            target.takeDamage(Math.floor(damage)); 
+            ProcessCoinEffects(element, target, this, "OnHit"); // 이것도 OnHit/OnHeadsHit/OnTailsHit/OnCritHit/... 나눠야 함
         });
     }
 
@@ -128,22 +102,25 @@ export class Character
     {
         this.Stats.LoseHP(amount);
     }
+    recoverSP(amount: number)
+    {
+        this.Stats.recoverSp(amount);
+    }
+
     takeDamage(damage: number)
     {
         const result = this.Stats.takeDamage(damage);
         let staggerResult = result.StaggerState;
-        if (staggerResult > 0)
+        switch(this.BattleState.GetState())
         {
-            switch(this.BattleState.GetState())
-            {
-                case "STAGGERED+": // 얘는 두번 증가시켜야되고
-                    staggerResult++; 
-                case "STAGGERED":
-                    staggerResult++; // 얘는 한번 증가시키면 되니까 ㅇㅇ
-            }
+            case "STAGGERED+": // 얘는 두번 증가시켜야되고
+                staggerResult++; 
+            case "STAGGERED":
+                staggerResult++; // 얘는 한번 증가시키면 되니까 ㅇㅇ
         }
         if (staggerResult > 3)
             staggerResult = 3;
+        
         switch(staggerResult)
         {
             case 1:
@@ -180,11 +157,17 @@ export class Character
         // (1) 체력, 정신력 초기화
         this.Stats.reset();
         this.BattleState.ChangeState("NORMAL");
-        
-        
+        // >< 버프리스트 초기화
     }
-
-
+    ClashWin()
+    {
+        this.recoverSP(10 + (this.parrycnt*2)); // 초상마냥 정신력조건 뒤집힌 애도 있고 필싱처럼 회복량 다른 경우도 있어서 나중에는 stat으로 보내야함...
+        this.parrycnt = 0;
+    }
+    ClashLose()
+    {
+        this.parrycnt = 0;
+    }
 }
 
 export function createSinnerFromData(id: number): Character 

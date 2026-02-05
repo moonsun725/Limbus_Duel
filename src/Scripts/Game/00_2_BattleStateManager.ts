@@ -36,11 +36,11 @@ export class BattleStateManager {
                     this.owner.Stats.resistP = {"Slash": 3.0, "Penetrate": 3.0, "Blunt": 3.0};
                     break;
                 case 'CLASHWIN':
-                    // this.sp += (10 + (this.parrycnt*2));
-                    // this.parrycnt = 0;
+                    this.owner.ClashWin();
                     break;
                 case 'CLASHLOSE':
                     // 합위력 증가 얻기: 나중에
+                    this.owner.ClashLose();
                     // this.parrycnt = 0;
                     break;
             }

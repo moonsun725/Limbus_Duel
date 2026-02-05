@@ -11,12 +11,22 @@ const faust : Character = createSinnerFromData(10201);
 yisang.Stats.ShowStats();
 faust.Stats.ShowStats();
 
-yisang.ShowHp();
 yisang.ShowSkillList();
 
-faust.ShowHp();
 faust.ShowSkillList();
 
+
+// 테스트 1: 내성 확인용
+yisang.loseSP(-45);
+yisang.Attack(faust, yisang.Skills[2]!, yisang.Skills[2]?.coinlist!);
+faust.Stats.ShowStats();
+yisang.Attack(faust, yisang.Skills[2]!, yisang.Skills[2]?.coinlist!);
+faust.Stats.ShowStats();
+yisang.Attack(faust, yisang.Skills[2]!, yisang.Skills[2]?.coinlist!);
+faust.Stats.ShowStats();
+
+// 테스트 2: 합 확인용
+/*
 for (var i = 0; i < 3; i++)
 {
     Clash(yisang, faust, yisang.Skills[i]!, faust.Skills[i]!)
@@ -24,6 +34,7 @@ for (var i = 0; i < 3; i++)
     yisang.Stats.ShowStats();
     faust.Stats.ShowStats();
 }
+*/
 
 // 실행 명령어
 // npx tsx src/Scripts/Game/000_TEST.ts
@@ -37,7 +48,7 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
     let target: Character;
     let winnerskill: Skill;
     let coinlist: Coin[];
-
+    
     do
     {
         console.log(`[Clash]: 스킬명: ${sk1.name}`);
@@ -48,7 +59,7 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
         let resP2 = CoinToss(sk2cpy, ch2.Stats.sp) + sk2.BasePower;
         console.log(`[Clash]: 스킬위력: ${resP2}`);
 
-        if(resP1 > resP2) sk2cpy.shift();
+        if(resP1 > resP2) sk2cpy.shift(); 
         else if (resP2 > resP1) sk1cpy.shift(); // 아 시발 존나 맘에안들어
         // 동률이면 다시 굴릴거니까 ㅇㅇ
         ch1.parrycnt++;

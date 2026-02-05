@@ -29,9 +29,9 @@
             "Def": 1, 
             "ResistP":
             {
-                "RSlash": 2.0, 
-                "RPenetrate": 0.5, 
-                "RBlunt": 1.0
+                "Slash": 2.0, 
+                "Penetrate": 0.5, 
+                "Blunt": 1.0
             },
             "minSpeed": 2,
             "maxSpeed": 4,

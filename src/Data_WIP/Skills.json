@@ -2,7 +2,7 @@
   "dataList": [
     {
       "id": 1010101,
-      "level": 11,
+      "level": 10,
       "name": "쳐내기",
       "desc": "",
       "category" : "attack",
@@ -37,7 +37,7 @@
     },
     {
       "id": 1010102,
-      "level": 21,
+      "level": 20,
       "name": "밀어 찌르기",
       "desc": "",
       "category": "attack",
@@ -77,7 +77,7 @@
     },
     {
       "id": 1010103,
-      "level": 31,
+      "level": 30,
       "name": "연격",
       "desc": "",
       "category": "attack",
@@ -149,7 +149,7 @@
     },
     {
       "id": 1010104,
-      "level": 10,
+      "level": 40,
       "name": "가드",
       "desc": "",
       "category": "defence",
@@ -165,7 +165,7 @@
     },
     {
       "id": 1020101,
-      "level": 1,
+      "level": 10,
       "name": "내려베기",
       "desc": "",
       "category": "attack",
@@ -197,7 +197,7 @@
     },
     {
       "id": 1020102,
-      "level": 2,
+      "level": 20,
       "name": "올려베기",
       "desc": "",
       "category": "attack",
@@ -235,7 +235,7 @@
     },
     {
       "id": 1020103,
-      "level": 3,
+      "level": 30,
       "name": "후벼찌르기",
       "desc": "",
       "category": "attack",
@@ -287,7 +287,7 @@
     },
     {
       "id": 1020104,
-      "level": 1,
+      "level": 40,
       "name": "회피",
       "desc": "",
       "category": "defence",
@@ -305,20 +305,20 @@
     },
     {
       "id": 1030101,
-      "level": 2,
+      "level": 10,
       "name": "찌르기",
       "desc": "[WinDuel] 다음 턴에 신속 2 얻음",
-      "category": "",
-      "skilltype": "",
+      "category": "attack",
+      "color": "orange",
       "keywords": [],
-      "BasePower": 0,
-      "AtkLv": 0,
+      "BasePower": 3,
+      "AtkLv": 2,
       "Weight": 1,
       "coinlist": [
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Penetrate",
+          "Color": "orange",
+          "CoinPower": 7,
           "effectK": [],
           "effectB": []
         }
@@ -326,20 +326,20 @@
     },
     {
       "id": 1030102,
-      "level": 4,
+      "level": 20,
       "name": "모아 찌르기",
       "desc": "[WinDuel] 다음 턴에 공격 위력 증가 2 얻음",
-      "category": "",
-      "skilltype": "",
+      "category": "attack",
+      "color": "violet",
       "keywords": [],
-      "BasePower": 0,
-      "AtkLv": 0,
+      "BasePower": 4,
+      "AtkLv": 2,
       "Weight": 1,
       "coinlist": [
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
+          "CoinPower": 12,
           "coindescs": [
             {
               "desc": "[OnSucceedAttackHead] 출혈 2 부여"
@@ -352,14 +352,14 @@
     },
     {
       "id": 1030103,
-      "level": 4,
+      "level": 30,
       "name": "정의를 위해!",
       "desc": "속도가 10 이상이면, 코인 위력 +2",
       "category": "",
       "skilltype": "",
       "keywords": [],
       "BasePower": 0,
-      "AtkLv": 0,
+      "AtkLv": 2,
       "Weight": 1,
       "coinlist": [
         {
@@ -402,14 +402,14 @@
     },
     {
       "id": 1030104,
-      "level": 1,
+      "level": 40,
       "name": "회피",
       "desc": "",
       "category": "",
       "skilltype": "",
       "keywords": [],
       "BasePower": 0,
-      "AtkLv": 0,
+      "AtkLv": -2,
       "Weight": 1,
       "coinlist": [
         {

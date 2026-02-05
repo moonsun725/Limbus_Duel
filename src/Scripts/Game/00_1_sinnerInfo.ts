@@ -68,7 +68,7 @@ export class SinnerInfo // 각종 스탯, 내성
         console.log("이름:", this.owner.name, "ID:", this.owner.id, "레벨:", this.lv, "체력:", this.hp + "/" + this.maxHp, "방렙:", this.baseInfo.Def, "정신력:", this.sp);
         console.log("속도:", this.baseInfo.minSpeed , "~" , this.baseInfo.maxSpeed);
         console.log("흐트러짐 게이지:", this.stagger[0] , "/" , this.stagger[1] , "/", this.stagger[2]);
-        console.log("참격내성:", this.resistP.Slash, "관통내성:", this.resistP.Penetrate, "타격내성:", this.resistP.Blunt);
+        console.log("내성:", this.resistP);
     }
     reset()
     {
@@ -105,7 +105,7 @@ export class SinnerInfo // 각종 스탯, 내성
         this.sp -= spAmount;
     }   
 
-    getStaggerDamage(stgDmg: number) : boolean
+    takeStaggerDamage(stgDmg: number) : boolean
     {
         this.stagger[this.stagger.length -1]! += stgDmg; // >< 이거 나중에 수정해야될수도 있음
         if (this.stagger.at(-1)! >= this.hp)
@@ -118,16 +118,20 @@ export class SinnerInfo // 각종 스탯, 내성
     takeDamage(damage: number): { isDead: boolean, StaggerState: number } // 곧 옮길거니까 조금만 참아
     {
         this.hp -= damage;
+        if (this.hp < 0)
+            this.hp = 0;
         
         let staggerCount = 0;
         this.stagger.forEach(element => {
             if (this.hp <= element)
+            {
                 staggerCount++;
+            }
         });
         for (var i = 0; i < staggerCount; i++)
             this.stagger.pop();
 
-        return { 
+        return {
             isDead: this.hp === 0, 
             StaggerState: staggerCount // 이러면 넘버를 반환하고, 기본: 0, 흐트: 1, 흐트+: 2, 흐트++: 3에서 유효값은 1,2다 ㅇㅇ
         };
