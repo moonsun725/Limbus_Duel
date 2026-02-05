@@ -7,10 +7,11 @@ type KeyWords = 'BURN' | 'BLEEDING' | 'THREMOR' | 'RUPTURE' | 'SINKING' | 'POISE
 export interface BattleUnitBuf {
    typeId: string;
     stack: number;
-    count: number;
+    count: number | null;
     Owner: Character;
     source?: Character | undefined;
-    keyword?: KeyWords | undefined;
+    isNegative?: boolean; // 
+    keyword?: KeyWords
 }
 
 export interface TriggerEvents {
@@ -25,7 +26,7 @@ export interface TriggerEvents {
     OnTurnEnd?(owner: Character, BufData: any): void;
     
     // 맞았을 때 발동 
-    OnBeingHit?(owner: Character, BufData: any, attacker: Character, damage: number): void;
+    OnBeingHit?(owner: Character, BufData: any, attacker?: Character, damage?: number): void;
 
     GetDamageIncreseRate?(): number
 }
@@ -38,10 +39,7 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
             data.count--;
         },
         OnAddBuf: (owner, data) => {
-            if (owner.bufList.getKeywordBufCount(data.Id) === 0)
-                owner.bufList.AddKeyWordBuf("BURN", 0, 1);
-            if (owner.bufList.getKeywordBufCount(data.Id) === 0)
-                owner.bufList.AddKeyWordBuf("BURN", 1, 0);
+
         },
         OnTurnEnd: (owner, data) => {
             owner.takeDamage(data.stack);
@@ -89,7 +87,7 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         OnAddBuf: () => {
 
         },
-        OnBeingHit: (owner, data, attacker, damage) => {
+        OnBeingHit: (owner, data) => {
             owner.loseSP(data.stack);
             data.count--;
         },

@@ -1,5 +1,5 @@
 import type { Character } from "./00_0_sinner.js";
-import type { BattleUnitBuf } from "./03_battleUnitBufs.js";
+import type { BattleUnitBuf } from "./04_battleUnitBufs.js";
 
 export interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
@@ -11,28 +11,28 @@ export interface AbilityLogic {
 export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     "AddKeywordBuf": {
         Execute: (target, data, damage, user) => {
-                
             const status: BattleUnitBuf = {
-                typeId: data.id,
+                typeId: data.KeywordBuf,
                 source: user,
                 Owner: target,
                 stack: data.stack,
-                count: data.count
+                count: data.count,
+                keyword: data.KeywordBuf
             };
-            target.bufList.AddBuf(data.id, status);
+            target.bufList.AddKeyWordBuf(status.keyword!, status); // 얘도 임시처리니까 나중에 체크해야한다~~
         }
     },
-    "AddBuf": {
+    "AddBuf": { // 이새끼는 당분간 보류다
         Execute: (target, data, damage, user) => {
                 
             const status: BattleUnitBuf = {
-                typeId: data.id,
+                typeId: data.BufId,
                 source: user,
                 Owner: target,
                 stack: data.stack,
                 count: 0 // 대부분의 버프는 횟수가 없음 ㅇㅇ
             };
-            target.bufList.AddBuf(data.id, status);
+            target.bufList.AddBuf(status.typeId, status);
         }
     }
 }

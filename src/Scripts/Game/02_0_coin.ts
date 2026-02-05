@@ -10,16 +10,17 @@ export interface Coin {
   // 나중엔 코인 자체에 즉발로 적용되는 효과도
 }
 
-export type EffectTiming = 'OnUse' | 'OnHit' | 'OnTurnEnd' | 'OnBasePower';
-export type EffectTarget = 'Self' | 'Enemy' | 'RandomAlley' | 'RandomEnemy';
+export type EffectTiming = 'OnToss' | 'OnHit' | 'OnHeadsHit' | 'OnTailsHit';
+export type EffectTarget = 'self' | 'opponent' | 'randomAlley' | 'randomEnemy';
 
 export interface CoinAbility {
-  type: string;
+  Type: string;
   timing: EffectTiming;
   target: EffectTarget;
 
-  condition?: boolean;
   data?: any;
+  condition?: boolean;
+  
 }
 
 

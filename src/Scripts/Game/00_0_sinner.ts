@@ -8,7 +8,7 @@ import type { Slot } from '../BattleSystem/slot.js';
 import { BattleUnitBufList } from './00_3_BufList.js';
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
 import { BattleStateManager } from './00_2_BattleStateManager.js';
-import { ProcessCoinEffects } from './02_2_coinAbilities.js';
+import { ProcessCoinEffects } from './02_1_coinAbilityLogic.js';
 import { ProcessMoveEffects } from './01_2_skillAbilityLogic.js';
 
 
@@ -33,7 +33,6 @@ export class Character
     public BattleState: BattleStateManager;
 
     public parrycnt: number = 0;
-    private minusSP: 1 | -1 | 0 = 1;
 
     public bufList: BattleUnitBufList;
 
@@ -54,11 +53,11 @@ export class Character
         // this.EGO_Skills = [];
 
         // 버프 리스트
-        this.bufList = new BattleUnitBufList;
+        this.bufList = new BattleUnitBufList(this);
         
     }
 
-    ShowSkillList() : void
+    ShowSkillList() : void // 나중에 스킬도 나눠놔야지
     {
         for (var i = 0; i < 4; i++)
         {
@@ -89,7 +88,8 @@ export class Character
             }
             let damage = Power*(target.Stats.resistP[element.Type]!+target.Stats.resistS[element.Color]!);
             console.log(`[Attack]: 피해량: ${target.Stats.resistP[element.Type]!+target.Stats.resistS[element.Color]!}배`); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
-            target.takeDamage(Math.floor(damage)); 
+            target.takeDamage(Math.floor(damage));
+            target.bufList.OnHit(this, Math.floor(damage)); 
             ProcessCoinEffects(element, target, this, "OnHit"); // 이것도 OnHit/OnHeadsHit/OnTailsHit/OnCritHit/... 나눠야 함
         });
     }
@@ -100,7 +100,7 @@ export class Character
     }
     loseSP(amount: number)
     {
-        this.Stats.LoseHP(amount);
+        this.Stats.LoseSP(amount);
     }
     recoverSP(amount: number)
     {
@@ -141,6 +141,7 @@ export class Character
             this.BattleState.ChangeState("DEAD");
         }
     }
+
     addSkill(skill:Skill) : void {
         this.Skills.push(skill);
         console.log(`[Sinner]/[addSkill]: ${skill.name}을 스킬 목록에 추가`);

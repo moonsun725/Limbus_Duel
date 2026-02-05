@@ -17,6 +17,7 @@ faust.ShowSkillList();
 
 
 // 테스트 1: 내성 확인용
+/*
 yisang.loseSP(-45);
 yisang.Attack(faust, yisang.Skills[2]!, yisang.Skills[2]?.coinlist!);
 faust.Stats.ShowStats();
@@ -24,7 +25,7 @@ yisang.Attack(faust, yisang.Skills[2]!, yisang.Skills[2]?.coinlist!);
 faust.Stats.ShowStats();
 yisang.Attack(faust, yisang.Skills[2]!, yisang.Skills[2]?.coinlist!);
 faust.Stats.ShowStats();
-
+*/ 
 // 테스트 2: 합 확인용
 /*
 for (var i = 0; i < 3; i++)
@@ -35,6 +36,13 @@ for (var i = 0; i < 3; i++)
     faust.Stats.ShowStats();
 }
 */
+// 테스트 3: 상태이상 부여 제대로 되나?
+yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+faust.bufList.Show();
+yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+faust.bufList.Show();
+faust.Stats.ShowStats();
 
 // 실행 명령어
 // npx tsx src/Scripts/Game/000_TEST.ts
@@ -48,7 +56,7 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
     let target: Character;
     let winnerskill: Skill;
     let coinlist: Coin[];
-    
+
     do
     {
         console.log(`[Clash]: 스킬명: ${sk1.name}`);

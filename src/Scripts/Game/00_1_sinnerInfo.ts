@@ -94,15 +94,15 @@ export class SinnerInfo // 각종 스탯, 내성
 
     recoverSp(spAmount: number) : void
     {
-        if (this.sp + spAmount > 45)
-            spAmount = 45 - this.sp;
         this.sp += spAmount;
+        if (this.sp > this.maxSp)  
+            this.sp = this.maxSp;
     }
     LoseSP(spAmount: number)
     {
-        if (this.sp + spAmount < -45)
-            spAmount = -45 - this.sp;
         this.sp -= spAmount;
+        if (this.sp < this.minSp)
+            this.sp = this.minSp;
     }   
 
     takeStaggerDamage(stgDmg: number) : boolean

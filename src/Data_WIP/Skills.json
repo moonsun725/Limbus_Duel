@@ -23,13 +23,16 @@
               "desc": "[OnSucceedAttack] 침잠 2 부여"
             }
           ],
-          "effectK": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "Type": "AddKeywordBuf",
+              "timing": "OnHit",
               "target": "opponent",
-              "KeywordBuf": "Sinking",
-              "stack": 2,
-              "count": 0
+              "data": 
+              {
+                "KeywordBuf": "Sinking",
+                "stack": 2
+              }
             }
           ]
         }
@@ -63,13 +66,17 @@
               "desc": "[OnSucceedAttack] 침잠 2 부여. 침잠 횟수 1 증가"
             }
           ],
-          "effectK": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "Type": "AddKeywordBuf",
+              "timing": "OnSucceedAttack",
               "target": "opponent",
-              "KeywordBuf": "Sinking",
-              "stack": 2,
-              "count": 1
+              "data": 
+              {
+                "KeywordBuf": "Sinking",
+                "stack": 2,
+                "count": 1
+              }
             }
           ]
         }
@@ -98,9 +105,9 @@
               "desc": "[OnSucceedAttack] 침잠 2 부여"
             }
           ],
-          "effectK": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "timing": "OnHit",
               "target": "opponent",
               "KeywordBuf": "Sinking",
               "stack": 2,
@@ -117,9 +124,9 @@
               "desc": "[OnSucceedAttack] 침잠 1 부여"
             }
           ],
-          "effectK": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "timing": "OnHit",
               "target": "opponent",
               "KeywordBuf": "Sinking",
               "stack": 2,
@@ -136,9 +143,9 @@
               "desc": "[OnSucceedAttack] 대상의 정신력이 0미만이면 다음 턴에 취약 1 부여"
             }
           ],
-          "effectB": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "timing": "OnHit",
               "target": "opponent",
               "BattleUnitBuf": "Vulnerable",
               "amount": 1
@@ -184,9 +191,9 @@
               "desc": "[OnSucceedAttack] 마비 1 부여"
             }
           ],
-          "effectB": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "timing": "OnHit",
               "target": "opponent",
               "BattleUnitBuf": "Paralysis",
               "amount": 1
@@ -221,9 +228,9 @@
               "desc": "[OnSucceedAttack] 다음 턴에 공격 레벨 감소 3 부여"
             }
           ],
-          "effectB": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "timing": "OnHit",
               "target": "opponent",
               "BattleUnitBuf": "AttackDown",
               "amount": 3,
@@ -254,9 +261,9 @@
               "desc": "[OnSucceedAttackHead] 다음 턴에 공격 위력 감소 1 부여"
             }
           ],
-          "effectB": [
+          "abilities": [
             {
-              "event": "OnSucceedAttackHead",
+              "timing": "OnHeadsHit",
               "target": "opponent",
               "BattleUnitBuf": "AttackDown",
               "amount": 3,
@@ -273,9 +280,9 @@
               "desc": "[OnSucceedAttack] 다음 턴에 공격 위력 감소 1 부여"
             }
           ],
-          "effectB": [
+          "abilities": [
             {
-              "event": "OnSucceedAttack",
+              "timing": "OnHit",
               "target": "opponent",
               "BattleUnitBuf": "AttackDown",
               "amount": 3,
@@ -319,8 +326,7 @@
           "Type": "Penetrate",
           "Color": "orange",
           "CoinPower": 7,
-          "effectK": [],
-          "effectB": []
+          "abilities": []
         }
       ]
     },
@@ -345,8 +351,9 @@
               "desc": "[OnSucceedAttackHead] 출혈 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+
+          ]
         }
       ]
     },
@@ -371,8 +378,9 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+
+          ]
         },
         {
           "Type": "",
@@ -383,8 +391,9 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+
+          ]
         },
         {
           "Type": "",
@@ -395,8 +404,9 @@
               "desc": "[OnSucceedAttack] 출혈 횟수 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+
+          ]
         }
       ]
     },
@@ -416,8 +426,9 @@
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+
+          ]
         }
       ]
     }

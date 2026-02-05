@@ -1,6 +1,6 @@
 import type { Character } from "./00_0_sinner.js";
 import type { Skill } from "./01_0_skill.js";
-import { AbilityRegistry } from "./01_3_skillAbilities.js";
+import { AbilityRegistry } from "./03_Abilities.js";
 
 
 // 트리거 타입 정의: 언제 호출되었는가?
@@ -22,7 +22,7 @@ export function ProcessMoveEffects(move: Skill, defender: Character, attacker: C
     
     if (!move.abilities) return;
 
-    for (const ability of move.abilities) // effects가 effect의 배열이니 foreach로 내용물 확인
+    for (const ability of move.abilities) // effects가 effect의 배열이니 for...of로 내용물 확인
     { 
         
         // 1. 타이밍 체크
