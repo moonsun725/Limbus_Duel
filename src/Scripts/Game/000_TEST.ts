@@ -39,10 +39,14 @@ for (var i = 0; i < 3; i++)
 // 테스트 3: 상태이상 부여 제대로 되나?
 yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
 faust.bufList.Show();
-yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+console.log(faust.Stats.sp);
 yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
 faust.bufList.Show();
-faust.Stats.ShowStats();
+console.log(faust.Stats.sp);
+yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+faust.bufList.Show();
+console.log(faust.Stats.sp);
+
 
 // 실행 명령어
 // npx tsx src/Scripts/Game/000_TEST.ts
@@ -72,6 +76,8 @@ export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : 
         // 동률이면 다시 굴릴거니까 ㅇㅇ
         ch1.parrycnt++;
         ch2.parrycnt++;
+        ch1.bufList.OnCoinToss();
+        ch2.bufList.OnCoinToss();
         console.log(`[Clash]: ${ch1.parrycnt}합`);
         console.log(`[Clash]: ${ch2.parrycnt}합`);
     }

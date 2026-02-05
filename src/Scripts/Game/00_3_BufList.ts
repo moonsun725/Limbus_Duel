@@ -17,6 +17,12 @@ export class BattleUnitBufList
         // 그냥 set만 쓰면 키가 중복될 때 갱신됨.
         this.BufList.set(Id, data);
     }
+    RemoveBuf(id: string) {
+        if (this.BufList.delete(id)) {
+            console.log(`✨ ${this.owner.name}의 [${id}] 상태 해제`);
+        }
+    }
+
     Show() : void
     {
         console.log("버프 리스트:");
@@ -33,6 +39,17 @@ export class BattleUnitBufList
             console.log(`[CheckOnHit]: `);
             if (logic && logic.OnBeingHit) {
                 logic.OnBeingHit(this.owner, status, attacker, damage);
+            }
+        }
+    }
+    OnCoinToss()
+    {
+        for (const [id, status] of this.BufList) {
+            const logic = BufRegistry[id];
+            console.log(id);
+            console.log(`[CheckOnToss]: `);
+            if (logic && logic.OnCoinToss) {
+                logic.OnCoinToss(this.owner, status);
             }
         }
     }

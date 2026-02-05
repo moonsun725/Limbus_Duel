@@ -74,7 +74,8 @@ export class Character
         let Power = atkSkill.BasePower;
         console.log(`[Attack]: 기본위력: ${Power}`)
 
-        coinList.forEach(element => {
+        for (const element of coinList) {
+            this.bufList.OnCoinToss();
             if(100*Math.random() < (this.Stats.sp+50) )
             {  
                 console.log(`[Attack]: 앞면: + ${element.CoinPower}`);
@@ -90,10 +91,10 @@ export class Character
             console.log(`[Attack]: 피해량: ${target.Stats.resistP[element.Type]!+target.Stats.resistS[element.Color]!}배`); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
             target.takeDamage(Math.floor(damage));
             target.bufList.OnHit(this, Math.floor(damage)); 
+            // setTimeout(ProcessCoinEffects, 1000, element, target, this, "OnHit"); 아 시발 setTimeOut은 병렬로 처리하네(대기시간동안 나머지 처리한단 뜻)
             ProcessCoinEffects(element, target, this, "OnHit"); // 이것도 OnHit/OnHeadsHit/OnTailsHit/OnCritHit/... 나눠야 함
-        });
+        }
     }
-
     loseHP(amount: number)
     {
         this.Stats.LoseHP(amount);
