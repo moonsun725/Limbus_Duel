@@ -1,4 +1,4 @@
-import type { Character } from "./00_0_sinner.js";
+import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { BattleUnitBuf } from "./04_battleUnitBufs.js";
 
 export interface AbilityLogic {
@@ -10,10 +10,9 @@ export interface AbilityLogic {
 
 export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     "AddKeywordBuf": {
-        Execute: (target, data, damage, user) => {
+        Execute: (target, data, damage) => {
             const status: BattleUnitBuf = {
                 typeId: data.KeywordBuf,
-                source: user,
                 Owner: target,
                 stack: data.stack,
                 count: data.count,
@@ -26,13 +25,26 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
         Execute: (target, data, damage, user) => {
                 
             const status: BattleUnitBuf = {
-                typeId: data.BufId,
+                typeId: data.BattleUnitBuf,
                 source: user,
                 Owner: target,
                 stack: data.stack,
                 count: 0 // 대부분의 버프는 횟수가 없음 ㅇㅇ
             };
             target.bufList.AddBuf(status.typeId, status);
+        }
+    },
+    "AddBufNextTurn": {
+        Execute: (target, data, damage, user) => {
+                
+            const status: BattleUnitBuf = {
+                typeId: data.BattleUnitBuf,
+                source: user,
+                Owner: target,
+                stack: data.stack,
+                count: 0 // 대부분의 버프는 횟수가 없음 ㅇㅇ
+            };
+            target.bufList.AddBufNextTurn(status.typeId, status);
         }
     }
 }

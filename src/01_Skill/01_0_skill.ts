@@ -1,4 +1,4 @@
-import type { Coin } from "./02_0_coin.js";
+import type { Coin } from "../02_Coin/02_0_coin.js";
 
 export interface Skill {
   id: number;

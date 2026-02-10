@@ -5,6 +5,7 @@
       "level": 10,
       "name": "쳐내기",
       "desc": "",
+      "abilities": [],
       "category" : "attack",
       "color" : "blue",
       "keywords": [
@@ -107,11 +108,14 @@
           ],
           "abilities": [
             {
+              "Type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
-              "KeywordBuf": "Sinking",
-              "stack": 2,
-              "count": 1
+              "data": 
+              {
+                "KeywordBuf": "Sinking",
+                "stack": 2
+              }
             }
           ]
         },
@@ -126,11 +130,14 @@
           ],
           "abilities": [
             {
+              "Type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
-              "KeywordBuf": "Sinking",
-              "stack": 2,
-              "count": 0
+              "data": 
+              {
+                "KeywordBuf": "Sinking",
+                "stack": 1
+              }
             }
           ]
         },
@@ -145,10 +152,14 @@
           ],
           "abilities": [
             {
+              "Type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
-              "BattleUnitBuf": "Vulnerable",
-              "amount": 1
+              "data": 
+              {
+                "BattleUnitBuf": "Fragile",
+                "stack": 1
+              }
             }
           ]
         }
@@ -193,10 +204,14 @@
           ],
           "abilities": [
             {
+              "Type": "AddBuf",
               "timing": "OnHit",
               "target": "opponent",
-              "BattleUnitBuf": "Paralysis",
-              "amount": 1
+              "data": 
+              {
+                "BattleUnitBuf": "Paralyze",
+                "stack": 1
+              }
             }
           ]
         }
@@ -230,11 +245,14 @@
           ],
           "abilities": [
             {
+              "Type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
-              "BattleUnitBuf": "AttackDown",
-              "amount": 3,
-              "nextTurn": true 
+              "data": 
+              {
+                "BattleUnitBuf": "AtkLvDown",
+                "stack": 3
+              }
             }
           ]
         }

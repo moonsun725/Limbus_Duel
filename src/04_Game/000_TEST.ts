@@ -1,8 +1,7 @@
-import { Character, createSinnerFromData, } from './00_0_sinner.js'
-import { type Skill, CoinToss } from './01_0_skill.js';
-import { type Coin } from './02_0_coin.js';
-
-import { LoadSkillData } from './01_1_ skillManager.js';
+import { Character, createSinnerFromData, } from '../00_Sinner/00_0_sinner.js'
+import { type Skill, CoinToss } from '../01_Skill/01_0_skill.js';
+import { type Coin } from '../02_Coin/02_0_coin.js';
+import { LoadSkillData } from '../01_Skill/01_2_ skillLoader.js';
 
 LoadSkillData();
 const yisang : Character = createSinnerFromData(10101);
@@ -11,9 +10,9 @@ const faust : Character = createSinnerFromData(10201);
 yisang.Stats.ShowStats();
 faust.Stats.ShowStats();
 
-yisang.ShowSkillList();
+yisang.Skills.ShowSkillList();
 
-faust.ShowSkillList();
+faust.Skills.ShowSkillList();
 
 
 // 테스트 1: 내성 확인용
@@ -27,26 +26,26 @@ yisang.Attack(faust, yisang.Skills[2]!, yisang.Skills[2]?.coinlist!);
 faust.Stats.ShowStats();
 */ 
 // 테스트 2: 합 확인용
-/*
 for (var i = 0; i < 3; i++)
 {
-    Clash(yisang, faust, yisang.Skills[i]!, faust.Skills[i]!)
+    Clash(yisang, faust, yisang.Skill(i), faust.Skill(i))
 
     yisang.Stats.ShowStats();
     faust.Stats.ShowStats();
 }
-*/
-// 테스트 3: 상태이상 부여 제대로 되나?
-yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
-faust.bufList.Show();
-console.log(faust.Stats.sp);
-yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
-faust.bufList.Show();
-console.log(faust.Stats.sp);
-yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
-faust.bufList.Show();
-console.log(faust.Stats.sp);
 
+// 테스트 3: 상태이상 부여 제대로 되나?
+/*
+yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+faust.bufList.Show();
+console.log(faust.Stats.sp);
+yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+faust.bufList.Show();
+console.log(faust.Stats.sp);
+yisang.Attack(faust, yisang.Skills[0]!, yisang.Skills[0]?.coinlist!);
+faust.bufList.Show();
+console.log(faust.Stats.sp);
+*/
 
 // 실행 명령어
 // npx tsx src/Scripts/Game/000_TEST.ts

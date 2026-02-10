@@ -1,10 +1,10 @@
 import type cluster from "cluster";
-import type { Character } from "./00_0_sinner.js";
+import type { Character } from "../00_Sinner/00_0_sinner.js";
 
 /*
  * 키워드 버프 효과 (예: 침잠) - JSON상 배열로 존재
  */
-type KeyWords = 'BURN' | 'BLEEDING' | 'THREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE'
+type KeyWords = 'BURN' | 'BLEEDING' | 'TREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE'
 export interface BattleUnitBuf {
    typeId: string;
     stack: number;
@@ -12,14 +12,20 @@ export interface BattleUnitBuf {
     Owner: Character;
     source?: Character | undefined;
     isNegative?: boolean; // 
-    keyword?: KeyWords
+    keyword?: KeyWords;
+    usage?: number;
 }
 
 export interface TriggerEvents {
     // 강제 발동
-    Activate?(owner: Character, BufData: any, stack?: number, count?: number) : void
+    Activate?(owner: Character, BufData: any) : void 
+
+    //횟수/위력 사용
+    UseStack?(owner: Character, BufData: any, amount: number) : boolean
+    UseCount?(owner: Character, BufData: any, amount: number) : boolean
+
     // 효과 부여 시점
-    OnAddBuf?(owner: Character, BufData: any): void
+    OnAddBuf(owner: Character, BufData: any): void
 
     OnCoinToss?(owner: Character, BufData: any): void; 
     
@@ -33,10 +39,10 @@ export interface TriggerEvents {
     IsCritical?(owner: Character, BufData: any) : boolean;
 
     // 내가 주는 피해 버프 
-    GetDamageMultiplier?(): number
+    GetDamageMultiplier?(owner: Character, BufData: any): number
 
     // 내가 받는 피해
-    GetDamageReductionRate?(): number
+    GetDamageReductionRate?(owner: Character, BufData: any): number
 
     // 마비 매커니즘
     ParalyzeMechanic?(): boolean
@@ -68,7 +74,9 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
             owner.takeDamage(data.stack);
             data.count--;
         },
-        OnAddBuf: (owner, data) => {}, // 혹시 몰라서 남겨는 놓음
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        }, // 혹시 몰라서 남겨는 놓음
         OnTurnEnd: (owner, data) => {
             owner.takeDamage(data.stack);
             data.count--;
@@ -80,7 +88,9 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
             owner.loseHP(data.stack);
             data.count--;
         },
-        OnAddBuf: () => {},
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        },
         OnCoinToss: (owner, data) =>
         {
             owner.loseHP(data.stack);
@@ -89,11 +99,11 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
                 owner.bufList.RemoveBuf("Bleeding");
         }
     },
-    "Thremor":
+    "Themor":
     {
         Activate: () => {},
-        OnAddBuf: () => {
-
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
         },
     },
     "Rupture":
@@ -122,8 +132,8 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
             if (data.count <= 0)
                 owner.bufList.RemoveBuf("Sinking");
         },
-        OnAddBuf: () => {
-
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
         },
         OnBeingHit: (owner, data) => {
             owner.loseSP(data.stack);
@@ -135,7 +145,9 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
     "Poise":
     {
         Activate: (owner, data) => {},
-        OnAddBuf: () => {},
+        OnAddBuf: (owner, data) => {
+            data.isNegative = false;
+        },
         OnTurnEnd: (owner, data) =>
         {
             data.count--;
@@ -144,7 +156,7 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         },
         IsCritical: (owner, data) =>
         {
-            if (data.stack*5 < Math.random()*100)
+            if (data.stack*0.05 > Math.random())
             {
                 data.count--;
                 if (data.count <= 0)
@@ -157,11 +169,78 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
     },
     "Charge":
     {
-        Activate: (owner, data, stack, count) => {
-            
-        }, // 이새낀 더미라서 괜찮아
-        OnAddBuf: () => {},
+        Activate: (owner, data) => { // useStack처럼 쓸거임
+           // 아 충전이면 data에 누적값 하나 더 달고 다녀야하네 
+        }, 
+        OnAddBuf: (owner, data) => {
+            data.isNegative = false;
+        },
+        OnTurnEnd: (owner, data) =>
+        {
+            data.count--;
+            if (data.count <= 0 && data.stack <= 1)
+                owner.bufList.RemoveBuf("Charge");
+        },
     },
-
+    "Protection":
+    {
+        OnAddBuf: (owner, data) =>
+        {
+            data.isNegative = false;
+        },
+        GetDamageReductionRate: (owner, data) =>
+        {
+            return data.stack;
+        }
+    },
+    "Fragile":
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        },
+        GetDamageReductionRate: (owner, data) =>
+        {
+            return -data.stack;
+        }
+    },
+    "DmgUp":
+    {
+        OnAddBuf: (owner, data) =>
+        {
+            data.isNegative = false;
+        }
+    },
+    "DmgDown":
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        },
+    },
+    "AtkLvUp":
+    {
+        OnAddBuf: (owner, data) =>
+        {
+            data.isNegative = false;
+        }
+    },
+    "AtkLvDown":
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        },
+    },
+    "DefLvUp":
+    {
+        OnAddBuf: (owner, data) =>
+        {
+            data.isNegative = false;
+        }
+    },
+    "DefLvDown":
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        },
+    },  
 }
 

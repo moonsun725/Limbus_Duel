@@ -1,4 +1,4 @@
-import { Character } from "./00_0_sinner.js";
+import { Character } from "../../00_Sinner/00_0_sinner.js";
 
 type SinnerBattleState = 'NORMAL' | 'STARTCOMBAT' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' |'STAGGERED' | 'STAGGERED+' | 'STAGGERED++' | 'PANIC' | 'ERODE' |'DEAD'; // 당장은 이대로만
 export class BattleStateManager {  

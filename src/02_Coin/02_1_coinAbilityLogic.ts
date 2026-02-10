@@ -1,9 +1,9 @@
-import type { Character } from "./00_0_sinner.js";
+import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { Coin } from "./02_0_coin.js";
-import { AbilityRegistry } from "./03_Abilities.js";
+import { AbilityRegistry } from "../05_Ability/03_Abilities.js";
 
 // 트리거 타입 정의: 언제 호출되었는가?
-export type CoinEffectTrigger = 'OnToss' | 'OnHit' | 'OnBasePower';
+export type CoinEffectTrigger = 'OnToss' | 'OnHit' | 'OnBasePower' | 'OnHeadsHit' | 'OnTailsHit';
 
 interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
@@ -18,7 +18,6 @@ interface AbilityLogic {
 
 export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Character, currentTiming: CoinEffectTrigger, damage: number = 0): void 
 {
-    
     if (!coin.abilities) return;
 
     for (const abilitiy of coin.abilities) // abilities가 ability의 배열이니 for...of로 내용물 확인
@@ -32,9 +31,8 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
         if (entryTiming !== currentTiming) continue;
     
 
-        // 3. 타겟 결정 (JSON 데이터 기반)
-        // entry.target이 'Self'면 attacker, 'Enemy'면 defender
-        // 기본값: OnUse는 Self, OnHit은 Enemy로 설정하면 편함
+        // 3. 타겟 결정
+        // entry.target이 'self'면 attacker, 'opponent'면 defender
         let actualTarget = defender; 
         if (abilitiy.target === 'self') {
             actualTarget = attacker;

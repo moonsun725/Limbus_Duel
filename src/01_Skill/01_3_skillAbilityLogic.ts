@@ -1,6 +1,6 @@
-import type { Character } from "./00_0_sinner.js";
+import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { Skill } from "./01_0_skill.js";
-import { AbilityRegistry } from "./03_Abilities.js";
+import { AbilityRegistry } from "../05_Ability/03_Abilities.js";
 
 
 // 트리거 타입 정의: 언제 호출되었는가?

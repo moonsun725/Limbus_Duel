@@ -1,7 +1,7 @@
-import { Pokemon } from './pokemon.js';
-import type { Move } from './pokemon.js';
-import { Character } from './00_0_sinner.js';
-import { type Skill } from './01_0_skill.js';
+import { Pokemon } from '../Scripts/Game/pokemon.js';
+import type { Move } from '../Scripts/Game/pokemon.js';
+import { Character } from '../00_Sinner/00_0_sinner.js';
+import { type Skill } from '../01_Skill/01_0_skill.js';
 // (나중에 아이템 클래스도 import 필요)
 
 export class Player {
@@ -20,17 +20,17 @@ export class Player {
             this.activeSinner = this.party[this.count]!; // >< 임시처리
             console.log(`[System] ${this.id}의 선봉: ${this.activeSinner.name}`);
         } else {
-            throw new Error("포켓몬 엔트리가 비어있습니다!");
+            throw new Error("엔트리가 비어있습니다!");
         }
     }
 
-    // 포켓몬 교체 메서드
+    // 교체 메서드
     switchCharacter(index: number): boolean {
         const target = this.party[index];
 
-        // 예외 처리: 없는 인덱스 or 이미 기절함 or 지금 나와있는 놈임
+        // 예외 처리: 없는 인덱스 or 이미 사망 or 지금 나와있는 놈임
         if (!target) return false;
-        if (target.hp <= 0) return false;
+        if (target.Stats.hp <= 0) return false;
         if (target === this.activeSinner) return false;
 
         console.log(`🔄 [Switch] ${this.id}: ${this.activeSinner.name} -> ${target.name} 교체!`);
@@ -49,11 +49,11 @@ export class Player {
     // 패배 체크 (파티 전멸 확인)
     isDefeated(): boolean {
         // 모든 포켓몬의 HP가 0 이하면 패배
-        return this.party.every(p => p.State == "DEAD");
+        return this.party.every(p => p.BattleState.GetState() == "DEAD");
     }
 
     hasRemainingPokemon(): boolean
     {
-        return !this.party.every(p => p.State == "DEAD");
+        return !this.party.every(p => p.BattleState.GetState() == "DEAD");
     }
 }

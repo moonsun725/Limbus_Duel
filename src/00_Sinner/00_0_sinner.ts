@@ -1,15 +1,16 @@
-import data from '../../IdentityData/10_personalities_LCB.json' with {type: 'json'};
-import data_S from '../../Data_WIP/Skills.json' with {type: 'json'}; // 그냥 스킬 추가하는 메서드를 내가 살려놨으니까 일단은 둔다
-import { GetMoves } from './01_1_ skillManager.js';
+import data from '../06_Data/IdentityData/10_personalities_LCB.json' with {type: 'json'};
+import { GetMoves } from '../01_Skill/01_2_ skillLoader.js';
 // skill.ts 상속
-import type { Skill } from './01_0_skill.js'; 
-import { type Coin } from './02_0_coin.js';
-import type { Slot } from '../BattleSystem/slot.js';
-import { BattleUnitBufList } from './00_3_BufList.js';
+import type { Skill } from '../01_Skill/01_0_skill.js'; 
+import { type Coin } from '../02_Coin/02_0_coin.js';
+
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
 import { BattleStateManager } from './00_2_BattleStateManager.js';
-import { ProcessCoinEffects } from './02_1_coinAbilityLogic.js';
-import { ProcessMoveEffects } from './01_2_skillAbilityLogic.js';
+import { BattleUnitBufList } from './00_3_BufList.js';
+import { calculateDamage } from './00_4_dmgCalc.js';
+import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
+import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
+import { SkillManager } from '../01_Skill/01_1_SkillManager.js';
 
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
@@ -25,8 +26,7 @@ export class Character
     public id: number;
     public Stats: SinnerInfo;
 
-    public Skills: Skill[]; // 스킬 목록
-    public Cycle: Slot[];
+    public Skills: SkillManager // 스킬 목록
 
     public lv: number = 1; // 레벨
 
@@ -47,24 +47,17 @@ export class Character
         this.Stats = new SinnerInfo(data, data.lv, this);
         this.BattleState = new BattleStateManager(this);
 
-        this.Skills = [];
-        this.addSkillByID();
-        this.Cycle = [];
+        this.Skills = new SkillManager(this);
         // this.EGO_Skills = [];
 
         // 버프 리스트
         this.bufList = new BattleUnitBufList(this);
         
     }
-
-    ShowSkillList() : void // 나중에 스킬도 나눠놔야지
+    Skill(i: number) : Skill
     {
-        for (var i = 0; i < 4; i++)
-        {
-            console.log("스킬목록", i, this.Skills[i]?.name);
-        }
+        return this.Skills.GetSkill(i);
     }
-
     Attack(target: Character, atkSkill: Skill, coinList: Coin[]) // 아니 씨부레 이러면 코인 부서진거 반영을 못하잖아 아 결국엔 따로 받아오냐
     {
         if (this.BattleState.GetState() === "NORMAL")
@@ -73,24 +66,29 @@ export class Character
         console.log(`[Attack]: 공격자: ${this.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
         let Power = atkSkill.BasePower;
         console.log(`[Attack]: 기본위력: ${Power}`)
-
+        let Side: boolean;
         for (const element of coinList) {
             this.bufList.OnCoinToss();
-            if(100*Math.random() < (this.Stats.sp+50) )
+            if(100*Math.random() < (this.Stats.sp+50))
             {  
                 console.log(`[Attack]: 앞면: + ${element.CoinPower}`);
                 Power += element.CoinPower; 
                 console.log(`[Attack]: 위력: ${Power}`);
+                let damage = calculateDamage(this, target, atkSkill, element, Power);
+                target.takeDamage(damage);
+                target.bufList.OnHit(this, Math.floor(damage)); 
+                ProcessCoinEffects(element, target, this, "OnHeadsHit"); 
             }
             else
             {
                 console.log(`[Attack]: 뒷면: + 0`);
                 console.log(`[Attack]: 위력: ${Power}`); 
+                let damage = calculateDamage(this, target, atkSkill, element, Power);
+                target.takeDamage(damage);
+                target.bufList.OnHit(this, Math.floor(damage)); 
+                ProcessCoinEffects(element, target, this, "OnTailsHit"); 
             }
-            let damage = Power*(target.Stats.resistP[element.Type]!+target.Stats.resistS[element.Color]!);
-            console.log(`[Attack]: 피해량: ${target.Stats.resistP[element.Type]!+target.Stats.resistS[element.Color]!}배`); // 당장은 위력과 내성만 따지고, 나중에 CalcuateDamage함수 만들어야지... 정확한 계산식은 아니니까
-            target.takeDamage(Math.floor(damage));
-            target.bufList.OnHit(this, Math.floor(damage)); 
+            
             // setTimeout(ProcessCoinEffects, 1000, element, target, this, "OnHit"); 아 시발 setTimeOut은 병렬로 처리하네(대기시간동안 나머지 처리한단 뜻)
             ProcessCoinEffects(element, target, this, "OnHit"); // 이것도 OnHit/OnHeadsHit/OnTailsHit/OnCritHit/... 나눠야 함
         }
@@ -143,17 +141,6 @@ export class Character
         }
     }
 
-    addSkill(skill:Skill) : void {
-        this.Skills.push(skill);
-        console.log(`[Sinner]/[addSkill]: ${skill.name}을 스킬 목록에 추가`);
-    }
-
-    addSkillByID()
-    {
-        const mySkills = GetMoves(this.id);
-        if (mySkills) // != undefined
-            this.Skills = mySkills;
-    }
 
     ResetCondition(): void {
         // (1) 체력, 정신력 초기화
