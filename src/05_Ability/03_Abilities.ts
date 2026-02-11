@@ -4,7 +4,7 @@ import type { BattleUnitBuf } from "./04_battleUnitBufs.js";
 export interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
     Execute(target: Character, data: any, damage?: number, source?: Character): void;
-    // 객기, 베놈쇼크: 한쪽만 검사 | 자이로볼, 히트스탬프: 쌍방 검사라 user랑 target 구분할 필요 있음
+    
     GetPowerMultiplier?(target: Character, user: Character, data: any) : number;
 }
 

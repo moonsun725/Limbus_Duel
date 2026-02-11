@@ -18,7 +18,6 @@ export interface Skill {
   Weight?: number;     // (가드 스킬에는 없음)
 }
 
-
 export type EffectTiming = 'OnUse' | 'OnHit' | 'OnTurnEnd' | 'OnBasePower';
 export type EffectTarget = 'Self' | 'Enemy' | 'RandomAlley' | 'RandomEnemy';
 

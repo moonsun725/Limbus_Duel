@@ -7,7 +7,7 @@ export function calculateDamage(attacker: Character, target: Character, atkSkill
     let resistP = target.Stats.resistP[atkCoin.Type]!;
     let resistS = target.Stats.resistS[atkCoin.Color]!;
     if (resistP)
-        resistP = (resistP < 1) ? resistP/2 : resistP; // 내성이 1보다 작다면 절반을 취하라
+        resistP = (resistP < 1) ? resistP/2 : resistP; // 내성이 1보다 작다면 절반을 취한다
     if (resistS)
         resistS = (resistS < 1) ? resistS/2 : resistS;
 
