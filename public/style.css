@@ -73,13 +73,19 @@ body {
     font-size: 18px;
 }
 
-/* === 메인 (Main Layer) === */
+/* === 메인 (Main Layer) 수정 === */
 .main-layer {
-    flex: 1; /* 남은 공간 모두 차지 */
+    width: 100%;
+    height: 100%; /* 전체 높이 사용 */
     display: flex;
     justify-content: space-between;
     align-items: center; /* 수직 중앙 정렬 */
     padding: 0 20px;
+    
+    /* [핵심] 하단 패널이 absolute로 뜨기 때문에, 
+       유닛들이 가려지지 않도록 패널 높이만큼 밑에 여백을 줍니다. */
+    padding-bottom: 220px; 
+    box-sizing: border-box;
 }
 
 /* 사이드바 */
@@ -118,18 +124,26 @@ body {
 
 /* === 하단 (Bottom Layer) 수정 === */
 .bottom-layer {
-    height: 280px; /* 기존 200px -> 280px로 확대 (버튼 1개 높이만큼 공간 확보) */
+    /* [핵심] Flex 흐름에서 빼내어 바닥에 강제 고정 */
+    position: absolute; 
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    
+    height: 220px; /* 패널의 높이 고정 */
+    
     display: flex;
     justify-content: center;
-    align-items: center;       /* 수직 중앙 정렬 유지 */
+    align-items: flex-end; /* 내용물을 아래쪽으로 정렬 */
     gap: 50px;
-    background-color: #f1f1f1;
-    border-top: 2px solid #ccc;
-    margin-top: 10px;
     
-    /* [핵심] 버튼들을 위로 살짝 밀어 올리는 효과 */
-    padding-bottom: 60px; 
-    box-sizing: border-box; /* 패딩이 높이에 포함되도록 설정 */
+    /*background-color: #f1f1f1;
+    border-top: 2px solid #ccc;*/
+    
+    /* 버튼들을 바닥에서 얼마나 띄울지 결정 (일정한 거리 유지) */
+    padding-bottom: 40px; 
+    box-sizing: border-box;
+    z-index: 10; /* 유닛보다 위에 보이도록 설정 */
 }
 
 .control-panel {
@@ -177,3 +191,71 @@ body {
     box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
 }
 .hidden { display: none; }
+
+/* ========================================= */
+/* 반응형 (Responsive Design) 설정       */
+/* ========================================= */
+
+/* 1. 노트북 및 작은 화면 (폭 1400px 이하) */
+@media screen and (max-width: 1400px) {
+    
+    /* 전체 컨테이너 여백 줄임 */
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        padding: 5px;
+    }
+
+    /* 유닛/버튼 크기를 전체적으로 20% 축소 */
+    .box { width: 45px; height: 45px; font-size: 10px; }
+    .circle { width: 45px; height: 45px; }
+    
+    /* 사이드바 미니 박스 더 축소 */
+    .box.mini { width: 35px; height: 35px; }
+    
+    /* 배틀 필드 유닛 기둥 축소 */
+    .unit-column { width: 45px; }
+    .unit-column .box, .unit-column .circle {
+        width: 45px; 
+        height: 65px; /* 높이도 축소 */
+    }
+
+    /* 배틀 필드 간격 좁히기 (핵심) */
+    .battle-field { gap: 40px; } /* 양 팀 간격 대폭 축소 */
+    .team-container { gap: 4px; }
+    
+    /* 지그재그 높이차 줄이기 */
+    .unit-column.up { transform: translateY(-30px); }
+    .unit-column.down { transform: translateY(30px); }
+
+    /* 하단 패널 높이 및 버튼 크기 조정 */
+    .bottom-layer {
+        height: 220px; /* 패널 높이 줄임 */
+        padding-bottom: 30px; /* 버튼 띄우는 정도 줄임 */
+        gap: 20px;
+    }
+    
+    .circle.large {
+        width: 90px; height: 90px; /* 왕버튼 축소 */
+    }
+}
+
+/* 2. 높이가 낮은 와이드 모니터 (높이 800px 이하) */
+@media screen and (max-height: 800px) {
+    /* 위아래가 좁으므로 상단/하단 레이어를 납작하게 만듦 */
+    .top-layer { height: 40px; }
+    .player-info-box { font-size: 14px; }
+    
+    /* 하단 패널 높이 및 버튼 크기 조정 */
+    .bottom-layer {
+        height: 180px; /* 작은 화면에서는 패널 높이를 줄임 */
+        padding-bottom: 20px; /* 바닥에서 띄우는 거리도 살짝 줄임 */
+        gap: 20px;
+    }
+    
+    /* 패널이 작아졌으니 메인 레이어 여백도 줄임 */
+    .main-layer {
+        padding-bottom: 180px;
+    }
+}
