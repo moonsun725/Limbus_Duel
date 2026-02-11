@@ -1,0 +1,161 @@
+/* 기본 초기화 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f0f0f0;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* 게임 컨테이너 */
+#game-container {
+    width: 100%;
+    max-width: 1200px;
+    height: 800px;
+    background-color: white;
+    border: 1px solid #ccc;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+/* --- 공통 객체 스타일 (Rule 1, 2) --- */
+.box {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%; /* 원형 버튼 */
+    border: 1px solid #333;
+    cursor: pointer;
+    background-size: cover; /* 나중에 이미지 넣을 때를 대비 */
+}
+
+/* Rule 4: 색상 정의 */
+.type-gray { background-color: #eee; }
+.type-gray-light { background-color: #ddd; }
+.type-pink { background-color: #ff00ff; margin-bottom: 5px; }
+.type-blue { background-color: #4a90e2; }
+.type-orange { background-color: #ff9900; }
+.type-white { background-color: #fff; }
+.type-red { background-color: #ff0000; margin: 2px; }
+.type-green { background-color: #00ff00; margin: 2px; }
+.type-yellow { background-color: #ffff00; }
+
+/* Rule 3: 호버 가능한 객체 커서 변경 */
+[data-has-info="true"] {
+    cursor: help;
+}
+
+/* --- 레이아웃 상세 --- */
+
+/* 상단 */
+.top-layer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.player-info-box {
+    width: 200px;
+    height: 60px;
+}
+
+/* 메인 (사이드바 + 배틀필드) */
+.main-layer {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.sidebar {
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+.border-box {
+    border: 1px solid #999;
+    padding: 5px;
+}
+
+/* 중앙 배틀 필드 */
+.battle-field {
+    flex: 1;
+    display: flex;
+    justify-content: center; /* 중앙 정렬 */
+    gap: 50px; /* 좌우 진영 사이 간격 */
+    align-items: center;
+}
+
+.field-row {
+    display: flex;
+    gap: 10px;
+}
+
+.unit-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* 박스끼리 붙이기 */
+    width: 50px;
+}
+.unit-column .box, .unit-column .circle {
+    width: 50px;
+    height: 60px; /* 세로로 긴 형태 반영 */
+}
+/* 지그재그 배치 효과 */
+.unit-column.up {
+    transform: translateY(-30px);
+}
+
+/* 하단 컨트롤 */
+.bottom-layer {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding-top: 20px;
+}
+
+.controls-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.row { display: flex; }
+
+.circle.large {
+    width: 100px;
+    height: 100px;
+}
+
+/* --- 툴팁 (Rule 3) --- */
+#info-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    pointer-events: none; /* 마우스 이벤트 방해 금지 */
+    z-index: 100;
+    font-size: 12px;
+}
+.hidden {
+    display: none;
+}
