@@ -116,16 +116,20 @@ body {
 .unit-column.up { transform: translateY(-40px); }
 .unit-column.down { transform: translateY(40px); }
 
-/* === 하단 (Bottom Layer) === */
+/* === 하단 (Bottom Layer) 수정 === */
 .bottom-layer {
-    height: 200px; /* 하단 영역 확보 */
+    height: 280px; /* 기존 200px -> 280px로 확대 (버튼 1개 높이만큼 공간 확보) */
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center;       /* 수직 중앙 정렬 유지 */
     gap: 50px;
     background-color: #f1f1f1;
     border-top: 2px solid #ccc;
     margin-top: 10px;
+    
+    /* [핵심] 버튼들을 위로 살짝 밀어 올리는 효과 */
+    padding-bottom: 60px; 
+    box-sizing: border-box; /* 패딩이 높이에 포함되도록 설정 */
 }
 
 .control-panel {
