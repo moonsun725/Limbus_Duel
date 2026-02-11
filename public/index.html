@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Client Prototype</title>
+    <title>Game Client - 6vs6 Battle</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="game-container">
-        
         <div id="info-tooltip" class="hidden">
-            <span id="tooltip-text">정보 로딩 중...</span>
+            <span id="tooltip-text">정보</span>
         </div>
 
         <div class="top-layer">
@@ -23,85 +22,112 @@
             
             <div class="sidebar left">
                 <div class="stack-group">
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
                 </div>
+                <div class="spacer"></div>
                 <div class="stack-group">
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
-                    <div class="box type-pink" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
                 </div>
             </div>
 
             <div class="battle-field">
-                <div class="field-row left-side">
-                    <div class="unit-column">
+                
+                <div class="team-container left-team">
+                    <div class="unit-column down">
                         <div class="box type-blue" data-has-info="true"></div>
                         <div class="box type-orange" data-has-info="true"></div>
                     </div>
-                    <div class="unit-column up"> <div class="box type-blue" data-has-info="true"></div>
+                    <div class="unit-column up">
+                        <div class="box type-blue" data-has-info="true"></div>
                         <div class="box type-orange" data-has-info="true"></div>
                     </div>
-                    <div class="unit-column">
+                    <div class="unit-column down">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column up">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column down">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column up">
                         <div class="box type-blue" data-has-info="true"></div>
                         <div class="box type-orange" data-has-info="true"></div>
                     </div>
                 </div>
 
-                <div class="field-row right-side">
-                    <div class="unit-column">
-                        <button class="circle type-white"></button> <div class="box type-orange" data-has-info="true"></div>
+                <div class="team-container right-team">
+                    <div class="unit-column up">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column down">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
                     </div>
                     <div class="unit-column up">
                         <button class="circle type-white"></button>
                         <div class="box type-orange" data-has-info="true"></div>
                     </div>
-                    <div class="unit-column">
+                    <div class="unit-column down">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column up">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column down">
                         <button class="circle type-white"></button>
                         <div class="box type-orange" data-has-info="true"></div>
                     </div>
                 </div>
+
             </div>
 
             <div class="sidebar right">
                 <div class="stack-group border-box">
-                    <div class="box type-gray-light"></div>
-                    <div class="box type-gray-light"></div>
-                    <div class="box type-gray-light"></div>
-                    <div class="box type-gray-light"></div>
-                    <div class="box type-gray-light"></div>
-                    <div class="box type-gray-light"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
                 </div>
             </div>
         </div>
 
         <div class="bottom-layer">
-            <div class="controls-grid">
-                <div class="red-group">
-                    <div class="row">
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                    </div>
-                    <div class="row">
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                        <button class="circle type-red" data-has-info="true"></button>
-                    </div>
+            <div class="control-panel">
+                <div class="red-grid">
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
                 </div>
-                
-                <div class="green-group">
+                <div class="green-row">
                     <button class="circle type-green" data-has-info="true"></button>
                     <button class="circle type-green" data-has-info="true"></button>
                     <button class="circle type-green" data-has-info="true"></button>
@@ -111,11 +137,10 @@
                 </div>
             </div>
 
-            <div class="big-action">
+            <div class="big-button-area">
                 <button class="circle type-yellow large" data-has-info="true"></button>
             </div>
         </div>
-
     </div>
 
     <script src="client.js"></script>
