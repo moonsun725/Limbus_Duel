@@ -48,7 +48,7 @@ console.log(faust.Stats.sp);
 */
 
 // 실행 명령어
-// npx tsx src/Scripts/Game/000_TEST.ts
+// npx tsx src/04_Game/000_TEST.ts 
 
 // 시부레 1대1 기본로직은 끝이다 시벌거
 export function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) : void {

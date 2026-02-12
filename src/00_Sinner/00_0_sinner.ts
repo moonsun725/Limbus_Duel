@@ -14,21 +14,26 @@ import { SkillManager } from '../01_Skill/01_1_SkillManager.js';
 
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
-
-export interface Resist1 { [key: string]: number }
-
-export interface Resist2 { [key: string]: number }
-
+type color =  'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'indigo' | 'violet';
+type skilltype = 'atk' | 'def';
+export interface Iskill 
+{
+    owner: Character;
+    skill: Skill;
+}
 
 export class Character
 {
     public name: string; // 인격 이름
     public id: number;
+    public lv: number = 1; // 레벨
+    public minSpeed;
+    public maxSpeed;
+    public speed: number;
+
     public Stats: SinnerInfo;
 
     public Skills: SkillManager // 스킬 목록
-
-    public lv: number = 1; // 레벨
 
     public BattleState: BattleStateManager;
 
@@ -38,6 +43,10 @@ export class Character
 
     // public Bpassive: Passive; // 전투 패시브
     // public Spassive: Passive; // 비전투 패시브
+    public deck: Iskill[];
+    public readyDeck: Iskill[];
+
+    public readySkill: Skill | null = null;
 
     constructor(name: string, id: number, data: IsinnerData)
     {
@@ -52,7 +61,23 @@ export class Character
 
         // 버프 리스트
         this.bufList = new BattleUnitBufList(this);
+
+        // 속도는 객체랑 같이 다녀야지
+        this.speed = data.minSpeed;
+        this.minSpeed = data.minSpeed;
+        this.maxSpeed = data.maxSpeed;
         
+        this.deck = [];
+        this.deck.push({owner: this, skill: this.Skills.GetSkill(0)});
+        this.deck.push({owner: this, skill: this.Skills.GetSkill(0)});
+        this.deck.push({owner: this, skill: this.Skills.GetSkill(0)});
+        this.deck.push({owner: this, skill: this.Skills.GetSkill(1)});
+        this.deck.push({owner: this, skill: this.Skills.GetSkill(1)});
+        this.deck.push({owner: this, skill: this.Skills.GetSkill(2)});
+        this.readyDeck = [...this.deck]; // 아니 근데 레디덱을 돌리면 전략성이란게 너무 없어지잖아 그러면 당장은 덱 하나로 하자
+
+        this.shuffleDeck(this.deck);
+        this.shuffleDeck(this.readyDeck); // 일단은 더미로 남겨놓긴 했음 ㅇㅇ
     }
     Skill(i: number) : Skill
     {
@@ -141,7 +166,6 @@ export class Character
         }
     }
 
-
     ResetCondition(): void {
         // (1) 체력, 정신력 초기화
         this.Stats.reset();
@@ -156,6 +180,33 @@ export class Character
     ClashLose()
     {
         this.parrycnt = 0;
+    }
+
+    shuffleDeck(deck: Iskill[])
+    {
+        deck.sort(() => Math.random() - 0.5);
+    }
+
+    useSkill(choice: 0 | 1) : Skill | void
+    {
+        if(this.deck[choice])
+        {
+            if(choice === 0)
+            {
+                this.deck.push(this.deck[choice]); // 맨 뒤로 보내고
+                this.deck.shift(); // 1칸 민다
+            }
+            else // choice === 1
+            {
+                let tmp = this.deck[0]; // 사실 얘는 무조건 있는거긴함
+                this.deck.push(this.deck[choice]); // 밀고
+                this.deck.shift();
+                if (tmp)
+                    this.deck[0] = tmp;
+            }
+            return this.deck[choice].skill;
+        }
+        
     }
 }
 

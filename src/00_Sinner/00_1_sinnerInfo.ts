@@ -3,7 +3,6 @@ import { Character } from "./00_0_sinner.js";
 export interface Resist1 { [key: string]: number }
 export interface Resist2 { [key: string]: number }
 
-
 export interface IsinnerData
 {
     Snumber: number;
@@ -69,6 +68,12 @@ export class SinnerInfo // 각종 스탯, 내성
         console.log("속도:", this.baseInfo.minSpeed , "~" , this.baseInfo.maxSpeed);
         console.log("흐트러짐 게이지:", this.stagger[0] , "/" , this.stagger[1] , "/", this.stagger[2]);
         console.log("내성:", this.resistP);
+    }
+    Get(stat: keyof IsinnerData) : number
+    {
+        if (stat !== 'ResistP' && stat !== 'name' && stat !== 'staggerGauge')
+            return this.baseInfo[stat];
+        return -1;
     }
     reset()
     {

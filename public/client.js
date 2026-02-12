@@ -94,12 +94,12 @@ function handleMouseMove(event) {
 
 // 요소의 클래스를 분석하여 타입(색상) 반환
 function getElementType(element) {
-    if (element.classList.contains('type-pink')) return 'pink';
-    if (element.classList.contains('type-blue')) return 'blue';
-    if (element.classList.contains('type-orange')) return 'orange';
-    if (element.classList.contains('type-red')) return 'red';
-    if (element.classList.contains('type-green')) return 'green';
-    if (element.classList.contains('type-yellow')) return 'yellow';
+    if (element.classList.contains('type-pink')) return 'pink'; // 핑크: 전투 패시브/서포트 패시브
+    if (element.classList.contains('type-blue')) return 'blue'; // 아군 스킬 슬롯
+    if (element.classList.contains('type-orange')) return 'orange'; // 단순 스프라이트/나중에는 버튼으로?
+    if (element.classList.contains('type-red')) return 'red'; // 스킬 패널 -> 스킬 버튼
+    if (element.classList.contains('type-green')) return 'green'; // 초상화 있어야하는 곳인데 당장은 눌렀을 때 수비 나가게
+    if (element.classList.contains('type-yellow')) return 'yellow'; // 전투 시작 버튼
     return 'unknown';
 }
 

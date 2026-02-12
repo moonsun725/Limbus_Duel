@@ -4,17 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import type { Skill } from './01_0_skill.js'; // 위에서 만든 타입 import
 
-// __dirname 설정 (ES Module 환경)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// JSON 파일 경로 (위치에 따라 수정 필요)
-/*
-    src/Data/스킬데이터
-    src/Scripts/Game/매니저
-
-*/
-const jsonPath = path.join(__dirname, '../../Data_WIP/Skills.json');
+import Skills from '../06_Data/SkillData/Skills.json' with {type: 'json'}
 
 // ★ 기술 도감 (Dictionary)
 // 이름만 대면 기술이 툭 튀어나오게 저장
@@ -23,10 +13,7 @@ export const MoveBundleRegistry: { [prefix: number]: Skill[] } = {};
 export function LoadSkillData() {
     try
     {
-        const rawData = fs.readFileSync(jsonPath, 'utf-8'); // 파일 읽기
-        const json = JSON.parse(rawData);
-
-        const moveList = json.dataList as Skill[]; // json 배열 돌기
+        const moveList = Skills.dataList as unknown as Skill[]; // json 배열 돌기
         
         moveList.forEach((move) => {
             // 1. 소수점 제거하여 정수 그룹 키 생성
