@@ -16,11 +16,6 @@ import { SkillManager } from '../01_Skill/01_1_SkillManager.js';
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
 type color =  'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'indigo' | 'violet';
 type skilltype = 'atk' | 'def';
-export interface Iskill 
-{
-    owner: Character;
-    skill: Skill;
-}
 
 export class Character
 {
@@ -43,10 +38,11 @@ export class Character
 
     // public Bpassive: Passive; // 전투 패시브
     // public Spassive: Passive; // 비전투 패시브
-    public deck: Iskill[];
-    public readyDeck: Iskill[];
+    public deck: Skill[];
+    public readyDeck: Skill[];
 
     public readySkill: Skill | null = null;
+    private skillIndex: number | null = null;
 
     constructor(name: string, id: number, data: IsinnerData)
     {
@@ -68,12 +64,12 @@ export class Character
         this.maxSpeed = data.maxSpeed;
         
         this.deck = [];
-        this.deck.push({owner: this, skill: this.Skills.GetSkill(0)});
-        this.deck.push({owner: this, skill: this.Skills.GetSkill(0)});
-        this.deck.push({owner: this, skill: this.Skills.GetSkill(0)});
-        this.deck.push({owner: this, skill: this.Skills.GetSkill(1)});
-        this.deck.push({owner: this, skill: this.Skills.GetSkill(1)});
-        this.deck.push({owner: this, skill: this.Skills.GetSkill(2)});
+        this.deck.push(this.Skill(0)); // 참조 복사라 괜찮아요
+        this.deck.push(this.Skill(0));
+        this.deck.push(this.Skill(0));
+        this.deck.push(this.Skill(1));
+        this.deck.push(this.Skill(1));
+        this.deck.push(this.Skill(2));
         this.readyDeck = [...this.deck]; // 아니 근데 레디덱을 돌리면 전략성이란게 너무 없어지잖아 그러면 당장은 덱 하나로 하자
 
         this.shuffleDeck(this.deck);
@@ -117,6 +113,8 @@ export class Character
             // setTimeout(ProcessCoinEffects, 1000, element, target, this, "OnHit"); 아 시발 setTimeOut은 병렬로 처리하네(대기시간동안 나머지 처리한단 뜻)
             ProcessCoinEffects(element, target, this, "OnHit"); // 이것도 OnHit/OnHeadsHit/OnTailsHit/OnCritHit/... 나눠야 함
         }
+        // 임시 코드
+        this.consumeSkill();
     }
     loseHP(amount: number)
     {
@@ -182,11 +180,20 @@ export class Character
         this.parrycnt = 0;
     }
 
-    shuffleDeck(deck: Iskill[])
+    shuffleDeck(deck: Skill[])
     {
         deck.sort(() => Math.random() - 0.5);
     }
 
+    targetLock(SelectedSkill: Skill, skillIndex: number)
+    {
+        this.readySkill = SelectedSkill;
+        this.skillIndex = skillIndex; // 0 또는 1이 저장됨
+    }
+    consumeSkill()
+    {
+        this.readySkill = null;
+    }
     useSkill(choice: 0 | 1) : Skill | void
     {
         if(this.deck[choice])
@@ -204,9 +211,8 @@ export class Character
                 if (tmp)
                     this.deck[0] = tmp;
             }
-            return this.deck[choice].skill;
+            return this.deck[choice];
         }
-        
     }
 }
 

@@ -361,8 +361,8 @@
       "Weight": 1,
       "coinlist": [
         {
-          "Type": "",
-          "Color": "",
+          "Type": "Penetrate",
+          "Color": "violet",
           "CoinPower": 12,
           "coindescs": [
             {
@@ -380,17 +380,17 @@
       "level": 30,
       "name": "정의를 위해!",
       "desc": "속도가 10 이상이면, 코인 위력 +2",
-      "category": "",
-      "skilltype": "",
+      "category": "attack",
+      "color": "green",
       "keywords": [],
-      "BasePower": 0,
+      "BasePower": 3,
       "AtkLv": 2,
       "Weight": 1,
       "coinlist": [
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Penetrate",
+          "Color": "green",
+          "CoinPower": 3,
           "coindescs": [
             {
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
@@ -401,9 +401,9 @@
           ]
         },
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Penetrate",
+          "Color": "green",
+          "CoinPower": 3,
           "coindescs": [
             {
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
@@ -414,9 +414,9 @@
           ]
         },
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Penetrate",
+          "Color": "green",
+          "CoinPower": 3,
           "coindescs": [
             {
               "desc": "[OnSucceedAttack] 출혈 횟수 2 부여"
@@ -433,17 +433,17 @@
       "level": 40,
       "name": "회피",
       "desc": "",
-      "category": "",
-      "skilltype": "",
+      "category": "defence",
+      "color": "orange",
       "keywords": [],
-      "BasePower": 0,
+      "BasePower": 2,
       "AtkLv": -2,
       "Weight": 1,
       "coinlist": [
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Evade",
+          "Color": "orange",
+          "CoinPower": 10,
           "abilities" :[
 
           ]
