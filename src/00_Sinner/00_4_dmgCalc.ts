@@ -7,11 +7,11 @@ export function calculateDamage(attacker: Character, target: Character, atkSkill
     let resistP = target.Stats.resistP[atkCoin.Type]!;
     let resistS = target.Stats.resistS[atkCoin.Color]!;
     if (resistP)
-        resistP = (resistP < 1) ? 1-resistP/2 : resistP; // 내성이 1보다 작다면 절반을 취한다
+        resistP = (resistP < 1) ? 1-resistP/2 : resistP; // 내성이 1보다 작다면 절반만 적용된다 ex: -0.5 -> -0.25 -> 실적용 75%만 
     if (resistS)
         resistS = (resistS < 1) ? 1-resistS/2 : resistS;
 
-    let Rmultiplier = ((resistP!+resistS! - 2) + attacker.bufList.IsCritical()); // 0.25 + 1 - 2 = -0.75(감소), 2+1-2 = 1(증가)
+    let Rmultiplier = (1 + (resistP!+resistS! - 2) + attacker.bufList.IsCritical()); // 이게 기본식임
     console.log(`[calculateDamage]: 내성 배율: ${Rmultiplier}`);
     let Bmultiplier = attacker.bufList.GetDamageMultiplier() - target.bufList.GetDamageReduction(); 
     console.log(`[calculateDamage]: 버프 배율: ${Bmultiplier}`);
