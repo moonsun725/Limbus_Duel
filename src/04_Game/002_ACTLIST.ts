@@ -36,7 +36,7 @@ type Target = {
     //몇번째 타깃인지
     index: number
 }
-let ActorList = new Map<Character, Target >(); // user, target
+let ActorList = new Map<Character, Target>(); // user, target
 
 let lockOrder = 0;
 function targetLock(user: Character, target: Character, SelectedSkill: Skill, index: number = 0)

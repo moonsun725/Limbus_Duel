@@ -126,11 +126,11 @@ export class BattleUnitBufList
             const logic = BufRegistry["Poise"];
             if (logic && logic.IsCritical) {
                 if(logic.IsCritical(this.owner, this.BufList.get("Poise")))
-                    return 1.2;
+                    return 0.2;
             }
         }
         
-        return 1.0;
+        return 0;
     }
     GetDamageMultiplier() : number
     {

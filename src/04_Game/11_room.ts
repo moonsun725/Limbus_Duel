@@ -110,12 +110,13 @@ export class GameRoom {
 
         switch (this.gameState) {
             case 'MOVE_SELECT':
-            case 'WAITING_OPPONENT': // 이 두 상태는 '전투 입력'을 받는 단계
                 this.handleBattleInput(socketId, action, io);
                 break;
 
+            case 'WAITING_OPPONENT': // 얘는 아무것도 못하게 대기
+                break;
+
             case 'FORCE_SWITCH': // 기절 교체 대기 중
-                this.handleForceSwitchInput(socketId, action, io);
                 break;
 
             case 'BATTLE': // 연산 중일 때는 입력 차단
@@ -175,7 +176,6 @@ export class GameRoom {
             this.resetGame(io); 
         }
     }
-
 
     private sortActs(p1: Player, p2: Player, act1: BattleAction, act2: BattleAction) : { player: Player, act: BattleAction, speed: number, priority: number }[] 
     {
@@ -369,7 +369,7 @@ export class GameRoom {
             }
         }
  
-    }
+    }    
 
     // 행동 취소 반영 함수
     cancelAction(socketId: string, io: Server)
@@ -455,3 +455,4 @@ export class GameRoom {
         io.to(this.roomId).emit('turn_start');
     }
 }
+
