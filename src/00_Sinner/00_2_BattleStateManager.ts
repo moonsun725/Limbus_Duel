@@ -1,9 +1,10 @@
 import { Character } from "./00_0_sinner.js";
 
-type SinnerBattleState = 'NORMAL' | 'TURNSTART' | 'STARTCOMBAT' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' |'STAGGERED' | 'STAGGERED+' | 'STAGGERED++' | 'PANIC' | 'ERODE' | 'DEAD'; // 당장은 이대로만
-export class BattleStateManager {  
+type SinnerBattleState = 'NORMAL' | 'TURNSTART' | 'STARTCOMBAT' | 'USESKILL' | 'STARTCLASH' | 'CLASHWIN' | 'CLASHLOSE' | 'EXHAUSTED' | 'GUARDING' | 'STAGGERED' | 'STAGGERED+' | 'STAGGERED++' | 'PANIC' | 'ERODE' | 'DEAD'; // 당장은 이대로만
+export class BattleStateManager {  // 야 시발 합승리 패배는 따로 관리해
     private owner: Character;
     private state: SinnerBattleState;
+    private exhaustHandler: number = 0;
     constructor(owner: Character)
     {
         this.owner = owner;
@@ -28,9 +29,10 @@ export class BattleStateManager {
             {
                 case 'TURNSTART':
                     this.SpeedSetting();
-                    this.owner.deck.forEach(slot => {
-                        slot.speed = this.owner.speed;
-                    });
+                    break;
+                    // 여기서부터는 피격 시 전환됨
+                case 'EXHAUSTED':
+                    this.ExhaustHandle();
                     break;
                 case 'STAGGERED':
                     this.owner.Stats.resistP = {"Slash": 2.0, "Penetrate": 2.0, "Blunt": 2.0};
@@ -40,14 +42,6 @@ export class BattleStateManager {
                     break;
                 case 'STAGGERED++':
                     this.owner.Stats.resistP = {"Slash": 3.0, "Penetrate": 3.0, "Blunt": 3.0};
-                    break;
-                case 'CLASHWIN':
-                    this.owner.ClashWin();
-                    break;
-                case 'CLASHLOSE':
-                    // 합위력 증가 얻기: 나중에
-                    this.owner.ClashLose();
-                    // this.parrycnt = 0;
                     break;
             }
         
@@ -61,4 +55,15 @@ export class BattleStateManager {
             this.owner.speed = 1;
     }
     
+    ExhaustHandle()
+    {
+        if (this.exhaustHandler >= 1) 
+            this.ChangeState('STAGGERED');
+    }
+
+    EndTurn()
+    {
+        if (this.state == 'EXHAUSTED' && this.exhaustHandler == 0)
+            this.exhaustHandler++;
+    }
 }

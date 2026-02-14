@@ -33,8 +33,6 @@ export class Character
 
     public BattleState: BattleStateManager;
 
-    public parrycnt: number = 0;
-
     public bufList: BattleUnitBufList;
 
     // public Bpassive: Passive; // 전투 패시브
@@ -133,24 +131,25 @@ export class Character
         this.BattleState.ChangeState("NORMAL");
         // >< 버프리스트 초기화
     }
-    ClashWin()
+    
+    // 이벤트 관리들
+
+    CoinToss()
     {
-        this.recoverSP(10 + (this.parrycnt*2)); // 초상마냥 정신력조건 뒤집힌 애도 있고 필싱처럼 회복량 다른 경우도 있어서 나중에는 stat으로 보내야함...
-        this.parrycnt = 0;
+        this.bufList.OnCoinToss();
+    }
+    ClashWin(clashCount: number)
+    {
+        this.recoverSP(10 + (clashCount*2)); // 초상마냥 정신력조건 뒤집힌 애도 있고 필싱처럼 회복량 다른 경우도 있어서 나중에는 stat으로 보내야함...
     }
     ClashLose()
     {
-        this.parrycnt = 0;
+        // 나중에 추가   
     }
 
     shuffleDeck(deck: Skill[])
     {
         deck.sort(() => Math.random() - 0.5);
-    }
-    
-    Attack(target: Character, atkSkill: Skill, coinList: Coin[], slotID: number = 0)
-    {
-        this.Slots[slotID]?.Attack(target, atkSkill, coinList);
     }
 
     useSkill(choice: 0 | 1) : Skill | void

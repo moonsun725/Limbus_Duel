@@ -3,8 +3,8 @@ import { Server } from 'socket.io';
 import { buildParty } from './Utils/buildParty.js';
 
 import { Player } from './10_Player.js';
-import { TurnManager } from './12_turnManager.js';
-import { ActManager } from './13_actManager.js';
+import { TurnManager } from './13_turnManager.js';
+import { ActManager } from './12_actManager.js';
 
 // 행동의 종류: 기술(move) or 교체(switch)
 export type ActionType = 'move' | 'switch';
