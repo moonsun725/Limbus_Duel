@@ -7,10 +7,11 @@ import { type Coin } from '../02_Coin/02_0_coin.js';
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
 import { BattleStateManager } from './00_2_BattleStateManager.js';
 import { BattleUnitBufList } from './00_3_BufList.js';
-import { calculateDamage } from './00_4_dmgCalc.js';
+import { calculateDamage } from './00_7_dmgCalc.js';
 import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
 import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
 import { SkillManager } from '../01_Skill/01_1_SkillManager.js';
+import { BattleSlot } from './00_4_Slot.js';
 
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
@@ -40,7 +41,7 @@ export class Character
     // public Spassive: Passive; // 비전투 패시브
     public deck: Skill[];
     public readyDeck: Skill[];
-
+    
     public readySkill: Skill | null = null;
     private skillIndex: number | null = null;
 
@@ -128,7 +129,6 @@ export class Character
     {
         this.Stats.recoverSp(amount);
     }
-
     takeDamage(damage: number)
     {
         const result = this.Stats.takeDamage(damage);
@@ -214,6 +214,7 @@ export class Character
             return this.deck[choice];
         }
     }
+    
 }
 
 export function createSinnerFromData(id: number): Character 
