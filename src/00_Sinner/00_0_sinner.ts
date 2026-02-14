@@ -42,8 +42,7 @@ export class Character
     public deck: Skill[];
     public readyDeck: Skill[];
     
-    public readySkill: Skill | null = null;
-    private skillIndex: number | null = null;
+    public Slots: BattleSlot[];
 
     constructor(name: string, id: number, data: IsinnerData)
     {
@@ -75,47 +74,11 @@ export class Character
 
         this.shuffleDeck(this.deck);
         this.shuffleDeck(this.readyDeck); // 일단은 더미로 남겨놓긴 했음 ㅇㅇ
+        this.Slots = [];
     }
     Skill(i: number) : Skill
     {
         return this.Skills.GetSkill(i);
-    }
-    Attack(target: Character, atkSkill: Skill, coinList: Coin[]) // 아니 씨부레 이러면 코인 부서진거 반영을 못하잖아 아 결국엔 따로 받아오냐
-    {
-        if (this.BattleState.GetState() === "NORMAL")
-            ProcessMoveEffects(atkSkill, target, this, "OnUse"); // 나중에는 switch로 사용불가/Onuse 발동x
-
-        console.log(`[Attack]: 공격자: ${this.name}, 공격대상: ${target.name}, 스킬명: ${atkSkill.name}`);
-        let Power = atkSkill.BasePower;
-        console.log(`[Attack]: 기본위력: ${Power}`)
-        let Side: boolean;
-        for (const element of coinList) {
-            this.bufList.OnCoinToss();
-            if(100*Math.random() < (this.Stats.sp+50))
-            {  
-                console.log(`[Attack]: 앞면: + ${element.CoinPower}`);
-                Power += element.CoinPower; 
-                console.log(`[Attack]: 위력: ${Power}`);
-                let damage = calculateDamage(this, target, atkSkill, element, Power);
-                target.takeDamage(damage);
-                target.bufList.OnHit(this, Math.floor(damage)); 
-                ProcessCoinEffects(element, target, this, "OnHeadsHit"); 
-            }
-            else
-            {
-                console.log(`[Attack]: 뒷면: + 0`);
-                console.log(`[Attack]: 위력: ${Power}`); 
-                let damage = calculateDamage(this, target, atkSkill, element, Power);
-                target.takeDamage(damage);
-                target.bufList.OnHit(this, Math.floor(damage)); 
-                ProcessCoinEffects(element, target, this, "OnTailsHit"); 
-            }
-            
-            // setTimeout(ProcessCoinEffects, 1000, element, target, this, "OnHit"); 아 시발 setTimeOut은 병렬로 처리하네(대기시간동안 나머지 처리한단 뜻)
-            ProcessCoinEffects(element, target, this, "OnHit"); // 이것도 OnHit/OnHeadsHit/OnTailsHit/OnCritHit/... 나눠야 함
-        }
-        // 임시 코드
-        this.consumeSkill();
     }
     loseHP(amount: number)
     {
@@ -184,16 +147,12 @@ export class Character
     {
         deck.sort(() => Math.random() - 0.5);
     }
+    
+    Attack(target: Character, atkSkill: Skill, coinList: Coin[], slotID: number = 0)
+    {
+        this.Slots[slotID]?.Attack(target, atkSkill, coinList);
+    }
 
-    targetLock(SelectedSkill: Skill, skillIndex: number)
-    {
-        this.readySkill = SelectedSkill;
-        this.skillIndex = skillIndex; // 0 또는 1이 저장됨
-    }
-    consumeSkill()
-    {
-        this.readySkill = null;
-    }
     useSkill(choice: 0 | 1) : Skill | void
     {
         if(this.deck[choice])
