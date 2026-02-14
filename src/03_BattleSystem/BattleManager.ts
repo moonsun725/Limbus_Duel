@@ -16,7 +16,7 @@ export class BattleManager {
      * 두 슬롯 간의 합(Clash)을 진행합니다.
      * 승리한 캐릭터가 패배한 캐릭터를 공격하는 로직까지 연결할 수 있습니다.
      */
-    public static async ProcessClash(slot1: BattleSlot, slot2: BattleSlot): Promise<void> {
+    public static async Clash(slot1: BattleSlot, slot2: BattleSlot): Promise<void> {
         const char1 = slot1.owner;
         const char2 = slot2.owner;
         const skill1 = slot1.readySkill;
@@ -39,21 +39,23 @@ export class BattleManager {
             char2.CoinToss();
 
             // 코인 토스 및 위력 계산
-            const power1 = this.CalculateClashPower(char1, skill1, coins1);
-            const power2 = this.CalculateClashPower(char2, skill2, coins2);
+            console.log(`[Clash]: 스킬명: ${skill1.name}`);
+            const power1 = await this.CoinToss(char1, skill1, coins1);
+            console.log(`[Clash]: 스킬위력: ${power1}`);
 
-            console.log(`   [Clash ${clashCount}] ${char1.name}: ${power1} vs ${char2.name}: ${power2}`);
-            await wait(300); // 합 팅! 팅! 하는 연출 시간
+             console.log(`[Clash]: 스킬명: ${skill2.name}`);
+            const power2 = await this.CoinToss(char2, skill2, coins2);
+            console.log(`[Clash]: 스킬위력: ${power2}`);
+
+            console.log(`   [Clash ${clashCount}합] ${char1.name}: ${power1} vs ${char2.name}: ${power2}`);
+            await wait(1000); // 합 팅! 팅! 하는 연출 시간
 
             if (power1 > power2) {
                 coins2.shift(); // 패배한 쪽 코인 하나 제거 (앞에서부터)
-                console.log(`   -> ${char2.name} 코인 파괴! (남은 코인: ${coins2.length})`);
             } else if (power2 > power1) {
                 coins1.shift();
-                console.log(`   -> ${char1.name} 코인 파괴! (남은 코인: ${coins1.length})`);
-            } else {
-                console.log(`   -> 비김! (다시 굴림)`);
-            }
+            } 
+            console.log(`[Clash]: ${clashCount}합`);
             
             // 합 횟수에 따른 정신력/상태 업데이트 등은 여기서
         }
@@ -61,26 +63,30 @@ export class BattleManager {
         // 승자 판별 및 공격 이행
         if (coins1.length > 0) {
             this.ApplyClashResult(char1, char2, "WIN", clashCount);
-            await this.ProcessAttack(char1, char2, skill1, coins1); // 남은 코인으로 공격
+            await this.Attack(char1, char2, skill1, coins1); // 남은 코인으로 공격
             slot2.consumeSkill(); // 패배한 스킬 소멸
         } else {
             this.ApplyClashResult(char2, char1, "WIN", clashCount);
-            await this.ProcessAttack(char2, char1, skill2, coins2);
+            await this.Attack(char2, char1, skill2, coins2);
             slot1.consumeSkill();
         }
     }
 
     // 합 위력 계산 헬퍼
-    private static CalculateClashPower(char: Character, skill: Skill, coins: Coin[]): number {
+    private static async CoinToss(char: Character, skill: Skill, coins: Coin[]): Promise<number> {
         let power = skill.BasePower;
         let headsCount = 0;
         
         for (const coin of coins) {
             // 정신력 기반 코인 토스
             if (Math.random() * 100 < (char.Stats.sp + 50)) {
+                console.log(`[CoinToss]: 앞면: + ${coin.CoinPower}`);
                 power += coin.CoinPower;
                 headsCount++;
             }
+            else
+                console.log(`[CoinToss]: 뒷면: + 0`);
+            await wait(300);
         }
         return power;
     }
@@ -95,10 +101,10 @@ export class BattleManager {
     /**
      * 일방 공격 또는 합 승리 후 공격을 수행합니다.
      */
-    public static async ProcessAttack(attacker: Character, target: Character, skill: Skill, activeCoins: Coin[]) {
+    public static async Attack(attacker: Character, target: Character, skill: Skill, activeCoins: Coin[]) {
         console.log(`[Attack Start] ${attacker.name} -> ${target.name} (스킬: ${skill.name})`);
 
-        // 공격 시작 시 효과 (OnUse)
+        // 일방공격이라면 공격 시작 시 효과 (OnUse) 이때 발동
         if (attacker.BattleState.GetState() === "NORMAL") {
             ProcessMoveEffects(skill, target, attacker, "OnUse");
         }
@@ -107,7 +113,7 @@ export class BattleManager {
 
         for (const coin of activeCoins) {
             // 연출을 위한 딜레이 (코인 하나하나 때리는 느낌)
-            await wait(500);
+            await wait(2000);
 
             attacker.bufList.OnCoinToss();
             const isHeads = Math.random() * 100 < (attacker.Stats.sp + 50);
@@ -126,8 +132,8 @@ export class BattleManager {
             // 적중 시 효과 처리
             target.bufList.OnHit(attacker, Math.floor(damage));
             
-            const effectType = isHeads ? "OnHeadsHit" : "OnTailsHit";
-            ProcessCoinEffects(coin, target, attacker, effectType);
+            // const effectType = isHeads ? "OnHeadsHit" : "OnTailsHit";
+            // ProcessCoinEffects(coin, target, attacker, effectType);
             ProcessCoinEffects(coin, target, attacker, "OnHit");
             
             // 만약 대상이 죽거나 흐트러지면 중단할지 여부 체크 로직 추가 가능

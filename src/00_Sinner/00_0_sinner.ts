@@ -141,10 +141,12 @@ export class Character
     ClashWin(clashCount: number)
     {
         this.recoverSP(10 + (clashCount*2)); // 초상마냥 정신력조건 뒤집힌 애도 있고 필싱처럼 회복량 다른 경우도 있어서 나중에는 stat으로 보내야함...
+        this.BattleState.ChangeState('CLASHWIN');
     }
     ClashLose()
     {
         // 나중에 추가   
+        this.BattleState.ChangeState('CLASHLOSE');
     }
 
     shuffleDeck(deck: Skill[])

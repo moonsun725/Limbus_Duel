@@ -30,18 +30,4 @@ export interface SkillAbility {
   data?: any;
 }
 
-export function CoinToss(coinlist:Coin[], sp:number, coinmultiplier?:number, gameState?: string) : number {
-  let finalpower: number = 0;
-  coinlist.forEach(element => {
-    if(100*Math.random() < (sp+50) )
-    {  
-      console.log(`[CoinToss]: 앞면: + ${element.CoinPower}`);
-      finalpower += element.CoinPower; 
-    }
-    else
-      console.log(`[CoinToss]: 뒷면: + 0`);
-  });
-
-  return finalpower;
-}
 

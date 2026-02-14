@@ -4,8 +4,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GameRoom } from './04_Game/10_room.js'; 
-import type { BattleAction } from './04_Game/10_room.js';
+import { GameRoom } from './04_Game/포켓몬 기준 룸.js'; 
+import type { BattleAction } from './04_Game/포켓몬 기준 룸.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +72,25 @@ io.on('connection', (socket) => {
     if (roomId && rooms[roomId]) {
         rooms[roomId].cancelAction(socket.id, io);
     }
+    });
+
+    // 스킬 선택
+    socket.on('action_select',(actionData: BattleAction) => {
+        const roomId = socketToRoom[socket.id];
+    });
+
+    // 타겟 선택
+    socket.on('action_select',(actionData: BattleAction) => {
+        const roomId = socketToRoom[socket.id];
+    });
+
+    socket.on('target_select',(actionData: BattleAction) => {
+        const roomId = socketToRoom[socket.id];
+    });
+
+    // 전투 시작 버튼
+    socket.on('start_battle',(actionData: BattleAction) => {
+        const roomId = socketToRoom[socket.id];
     });
 
     // 3. 퇴장 처리

@@ -22,16 +22,15 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
 
     for (const abilitiy of coin.abilities) // abilities가 ability의 배열이니 for...of로 내용물 확인
     { 
-        console.log("[ProcessCoinEffects]: 부가효과:", abilitiy);
         // 1. [필터링] 타이밍 체크
         // JSON에 타이밍이 적혀있는데, 지금 시점과 다르면 스킵!
         // (타이밍이 안 적혀있으면 '항상 발동'으로 간주하거나, 기본값 설정)
         const entryTiming = abilitiy.timing || 'OnHit'; // 기본값은 상황에 따라
-        console.log("[ProcessCoinEffects]: 타이밍:",entryTiming, abilitiy.timing);
+        console.log("[ProcessCoinEffects]: 타이밍:", currentTiming, entryTiming);
+        console.log("[ProcessCoinEffects]: 부가효과:", abilitiy);
         if (entryTiming !== currentTiming) continue;
-    
 
-        // 3. 타겟 결정
+        // 2. 타겟 결정
         // entry.target이 'self'면 attacker, 'opponent'면 defender
         let actualTarget = defender; 
         if (abilitiy.target === 'self') {
@@ -44,7 +43,7 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
              console.log("[ProcessCoinEffects]: 부가효과의 타겟이 명시되어 있지 않음.")
         }
 
-        // 4. 로직 실행
+        // 3. 로직 실행
         const logic = AbilityRegistry[abilitiy.Type];
         console.log(logic);
         if (logic) {
