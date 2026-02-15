@@ -736,7 +736,7 @@
       "name": "내려베기",
       "desc": "",
       "category": "",
-      "skilltype": "",
+      "color": "indigo",
       "keywords": [],
       "BasePower": 0,
       "AtkLv": 0,
@@ -751,8 +751,9 @@
               "desc": "[OnSucceedAttack] 침잠 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities": [
+
+          ]
         }
       ]
     },
@@ -777,8 +778,9 @@
               "desc": "[OnSucceedAttack] 침잠 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -789,8 +791,9 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -828,8 +831,9 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -848,9 +852,7 @@
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "CoinPower": 0
         }
       ]
     },
@@ -876,8 +878,9 @@
               "desc": "[OnSucceedAttack] 진동 3 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -902,8 +905,9 @@
               "desc": "[OnSucceedAttackHead] 진동 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -928,8 +932,9 @@
               "desc": "[OnSucceedAttackHead] 다음 코인 위력 +2"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -940,8 +945,9 @@
               "desc": "[OnSucceedAttack] 진동 폭발"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -960,9 +966,7 @@
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "CoinPower": 0
         }
       ]
     },
@@ -988,8 +992,9 @@
               "desc": "[OnSucceedAttack] 진동 횟수 1 증가"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1014,8 +1019,9 @@
               "desc": "[OnSucceedAttack] 진동 3 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1040,8 +1046,9 @@
               "desc": "[OnSucceedAttack] 진동 폭발. 타격 취약 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1060,9 +1067,7 @@
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "CoinPower": 0
         }
       ]
     },
@@ -1088,8 +1093,9 @@
               "desc": "[OnSucceedAttack] 출혈 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1114,8 +1120,9 @@
               "desc": "[OnSucceedAttack] 출혈 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1129,8 +1136,9 @@
               "desc": "[OnSucceedAttackHead] 출혈 횟수 1 증가"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1155,8 +1163,9 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1167,8 +1176,9 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1179,8 +1189,9 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1191,8 +1202,9 @@
               "desc": "[OnSucceedAttack] 대상의 [Laceration]이 6 이상이면, 피해량 +20%"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1212,8 +1224,9 @@
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1239,8 +1252,9 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1260,28 +1274,31 @@
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
     {
       "id": 1100103,
-      "level": 4,
+      "level": 30,
       "name": "헤집어 베기",
       "desc": "[WinDuel] 공격 위력 증가 1 얻음",
       "category": "",
@@ -1300,8 +1317,9 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+            "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1312,8 +1330,9 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1324,14 +1343,15 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
     {
       "id": 1100104,
-      "level": 1,
+      "level": 40,
       "name": "반격",
       "desc": "",
       "category": "",
@@ -1344,16 +1364,14 @@
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "CoinPower": 0
         }
       ]
     },
 
     {
       "id": 1110101,
-      "level": 4,
+      "level": 10,
       "name": "칼날 빼기",
       "desc": "",
       "category": "",
@@ -1366,9 +1384,7 @@
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "CoinPower": 0
         },
         {
           "Type": "",
@@ -1379,8 +1395,9 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1391,8 +1408,9 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1417,8 +1435,9 @@
               "desc": "대상보다 속도가 빠르면 피해량 +20%"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1429,8 +1448,9 @@
               "desc": "대상보다 속도가 빠르면 피해량 +20%"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1455,8 +1475,9 @@
               "desc": "[OnSucceedAttack] 파열 횟수 1 증가"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1475,9 +1496,7 @@
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "CoinPower": 0
         }
       ]
     },
@@ -1503,8 +1522,9 @@
               "desc": "[OnSucceedAttackHead] 파열 4 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1535,8 +1555,9 @@
               "desc": "[OnSucceedAttackHead] 파열 2 부여"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1561,8 +1582,9 @@
               "desc": "[OnSucceedAttack] 대상에게 [Burst]이 있을 때 피해량 +10%"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         },
         {
           "Type": "",
@@ -1576,8 +1598,9 @@
               "desc": "[OnSucceedAttackHead] 피해량의 30%만큼 체력 회복"
             }
           ],
-          "effectK": [],
-          "effectB": []
+          "abilities" :[
+            
+          ]
         }
       ]
     },
@@ -1596,9 +1619,7 @@
         {
           "Type": "",
           "Color": "",
-          "CoinPower": 0,
-          "effectK": [],
-          "effectB": []
+          "CoinPower": 0
         }
       ]
     }
