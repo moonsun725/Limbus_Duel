@@ -1,21 +1,19 @@
-// room.ts
 import { Server } from 'socket.io';
+import { Player } from './10_Player.js'; // Player 내부엔 Character[]가 있다고 가정
 import { buildParty } from './Utils/buildParty.js';
+import { BattleManager, type BattleCallbacks } from '../03_BattleSystem/BattleManager.js'; // ★ 매니저 추가
+import { Character } from '../00_Sinner/00_0_sinner.js';
 
-import { Player } from './10_Player.js';
-import { TurnManager } from './13_turnManager.js';
-import { ActManager } from './12_actManager.js';
-
-// 행동의 종류: 기술(move) or 교체(switch)
-export type ActionType = 'move' | 'switch';
+// 행동의 종류: 스킬 선택 / 타깃 선택 / 선택 완료 버튼 선택 / 수비 스킬 선택 / 에고 스킬 선택
+export type ActionType = 'skillSelect' | 'targetSelect' | 'BattleStart';
 
 // 상태 머신: typescript에서는 enum보다 유니온 쓰는 게 낫대!
-type RoomState = 'MOVE_SELECT' | 'BATTLE' | 'FORCE_SWITCH' | 'WAITING_OPPONENT';
+type RoomState = 'MOVE_SELECT' | 'BATTLE' | 'RESULT';
 
 // 행동 데이터 구조체
 export interface BattleAction {
     type: ActionType;
-    index: number; // 기술 번호(0~3) 혹은 파티 번호(0~5)
+    index: number; // 시작 버튼(0), 슬롯 인덱스(0,1) 또는 타깃 인덱스(0~6), 에고(0,1,2,3,4)
 }
 
 // 딜레이 함수
@@ -26,26 +24,60 @@ export class GameRoom {
     
     // 게임 상태 변수들 (server.ts의 전역 변수들이 멤버 변수가 됨)
     
-    // 플레이어 객체 / 포켓몬 객체 생성
-    p1: Player | null = null; // 이거 자세한 의미좀 알고 가야겠어
-    // >< 의미: "p1 변수는 Player 객체일 수도 있고, 아무도 안 들어와서 null일 수도 있다. 그리고 시작할 때는 null이다."
+    // 플레이어 객체 
+    p1: Player | null = null; 
     p2: Player | null = null;
     public players: { [socketId: string]: 'p1' | 'p2' } = {}; // 소켓ID -> 역할 매핑
     
-    private p1Action: BattleAction | null = null;
-    private p2Action: BattleAction | null = null;
+    private p1Action: BattleAction[] | null = null; // 여러 슬롯을 지정할 수 있으므로 배열
+    private p2Action: BattleAction[] | null = null;
 
     // ★ [New] 현재 방의 상태 (기본값: 전투 중)
     public gameState: RoomState = 'MOVE_SELECT'; 
-    public turnManager = new TurnManager();
-    public actManager = new ActManager();
+    private battleManager: BattleManager;
+    
     
     // ★ [New] 누가 교체해야 하는지 기억해둘 변수 (기절한 플레이어 ID)
     public faintPlayerId: string | null = null;
 
-    constructor(id: string) {
+    constructor(id: string, io: Server) {
         this.roomId = id;
+        // ★ BattleManager 초기화 (콜백 주입 - 여기서 UI 갱신 로직 정의)
+        this.battleManager = new BattleManager({
+            onLog: (msg) => {
+                console.log(`[Battle] ${msg}`);
+                io.to(this.roomId).emit('chat message', msg);
+            },
+            onAttackStart: async (atkId, targetId, skillName) => {
+                io.to(this.roomId).emit('anim_attack_start', { atkId, targetId, skillName });
+                await this.sleep(1000); // 클라이언트 애니메이션 대기
+            },
+            onClashStart: async (c1, c2) => {
+                io.to(this.roomId).emit('anim_clash_start', { c1Id: c1.id, c2Id: c2.id });
+                await this.sleep(800);
+            },
+            onCoinToss: async (isHeads) => {
+                io.to(this.roomId).emit('indiviual_coin_result', {isHead: isHeads})
+            },
+            onClashResult: async (c1, p1, c2, p2, clashCount) => {
+                // 합 도중 팅! 팅! 하는 연출 데이터 전송
+                io.to(this.roomId).emit('anim_clash_coin', { 
+                    c1: { id: c1.id, power: p1 },
+                    c2: { id: c2.id, power: p2 },
+                    clashCount: clashCount
+                });
+                await this.sleep(500);
+            },
+            onCoinResult: async (isHeads, power) => {
+                io.to(this.roomId).emit('anim_coin_toss', { isHeads, power });
+                await this.sleep(300);
+            },
+            onDamage: (targetId, dmg, newHp) => {
+                io.to(this.roomId).emit('update_hp', { targetId, dmg, newHp });
+            }
+        });
     }
+    private sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
     // entry : Pokemon[] = [createPokemon("피카츄"), createPokemon("이상해씨")]; // 당장은 더미로 만들어
     // >< 이렇게 만들면 레퍼런스 복사라 플레이어별로 따로 만들어줘야 함
 
@@ -267,109 +299,21 @@ export class GameRoom {
 
     // 턴 종료 시 공통 처리 (함수로 분리 추천)
     private endTurn(io: Server) {
-        console.log(`[room.ts]/[endTurn]: 턴 종료 처리 시작`);
-        if (!this.p1 || !this.p2) return;
-
-        let activePoke: { player: any, speed: number }[] = [];
-        activePoke.push({player: this.p1, speed: this.p1.activePokemon.GetStat('spe')});
-        activePoke.push({player: this.p2, speed: this.p2.activePokemon.GetStat('spe')});
-
-        activePoke.sort((a,b)=>{
-            if(a.speed !== b.speed)
-            {
-                return b.speed-a.speed;
-            }
-            return Math.random() - 0.5; 
-        });
-            
-        for (const active of activePoke)
-        {
-            const p = active.player.activePokemon;
-            
-            p.ability.OnTurnEnd(); // 1. 특성 발동 (가속 등)
-
-            p.item.OnTurnEnd(); // 2. 아이템 발동 (먹다남은음식 등)
-
-            // 3. 기존 로직
-            p.volatileList.UpdateTurn(); // 가변상태
-            if (p.hp <= 0) continue;
-            ResolveStatusEffects(p); // 상태이상
-            if (p.hp <= 0) continue;
-            
-            /* 실제 순서
-                날씨 (모래바람/싸라기눈)
-
-                기술 효과 (설치형 기술 등)
-
-                아이템 (먹다남은음식 / 검은진흙)
-
-                가변 상태 (씨뿌리기 / 아쿠아링) ← volatileList
-
-                상태 이상 (독 / 화상) ← ResolveStatusEffects
-            */ 
-        }
+        console.log("=== 턴 종료 ===");
         
-        // 행동 초기화
+        // 버프/상태이상 업데이트
+        // p1.activePokemon.bufList.UpdateTurn()... 
+        
         this.p1Action = null;
         this.p2Action = null;
+        this.gameState = 'MOVE_SELECT';
 
-        // UI 업데이트 및 턴 시작 신호
+        // UI 전체 갱신 (혹시 모를 싱크 맞추기)
         this.broadcastState(io);
         
-        if(this.p1.activePokemon.BattleState.Get() === "FNT")
-        {
-            this.handleFaint(this.p1, io);
-        } 
-        else if (this.p2.activePokemon.BattleState.Get() === "FNT")
-        {
-            this.handleFaint(this.p2, io);
-        }
-        else 
-        {
-            // ====================================================
-            // ★ [수정] 다음 턴 시작 및 자동 행동(잠금) 체크 로직
-            // ====================================================
-            console.log(`[room.ts]/[endTurn]: State (BATTLE -> MOVE_SELECT) / 다음 턴 시작`);
-            this.gameState = 'MOVE_SELECT';
-
-            // 1. P1 잠금 확인
-            const p1Lock = this.p1.activePokemon.BattleState.lockedMoveIndex;
-            if (p1Lock !== null) {
-                console.log(`🔒 Player 1 행동 고정: Move ${p1Lock}`);
-                // 입력을 기다리지 않고 서버가 바로 행동을 설정
-                this.p1Action = { type: 'move', index: p1Lock };
-                // 클라이언트에게 UI 잠금 신호 전송
-                io.to(this.p1.id).emit('input_locked'); 
-            }
-
-            // 2. P2 잠금 확인
-            const p2Lock = this.p2.activePokemon.BattleState.lockedMoveIndex;
-            if (p2Lock !== null) {
-                console.log(`🔒 Player 2 행동 고정: Move ${p2Lock}`);
-                this.p2Action = { type: 'move', index: p2Lock };
-                io.to(this.p2.id).emit('input_locked');
-            }
-
-            // 3. 상황별 처리
-            if (this.p1Action && this.p2Action) {
-                // Case A: 둘 다 행동 고정 (예: 둘 다 솔라빔 충전 중)
-                console.log("⚡ 양쪽 모두 행동 고정 -> 즉시 턴 실행");
-                
-                // 1초 뒤에 바로 배틀 실행 (입력 단계 스킵)
-                setTimeout(() => {
-                    this.gameState = 'BATTLE';
-                    this.resolveTurn(io);
-                }, 1000);
-            } 
-            else {
-                // Case B: 한 명이라도 입력을 해야 함
-                // turn_start를 보내서 입력을 받을 수 있는 상태로 만듦
-                // (이미 잠긴 플레이어는 input_locked를 받았으므로 클라이언트에서 버튼 비활성화 처리 필요)
-                io.to(this.roomId).emit('turn_start');
-            }
-        }
- 
-    }    
+        // 다음 턴 입력 시작 신호
+        io.to(this.roomId).emit('turn_start_input');
+    }
 
     // 행동 취소 반영 함수
     cancelAction(socketId: string, io: Server)

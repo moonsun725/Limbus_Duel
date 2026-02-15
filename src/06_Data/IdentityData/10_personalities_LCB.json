@@ -57,7 +57,7 @@
             "staggerGauge": [ 0.20, 0.40, 0.70 ]
         },
 
-         {
+        {
             "Snumber": 4, 
             "name": "LCB 수감자 료슈", 
             "id": 10401,
@@ -93,6 +93,139 @@
             "minSpeed": 2,
             "maxSpeed": 3,
             "staggerGauge":[ 0.20, 0.50 ]
+        },
+         
+        {
+            "Snumber": 6, 
+            "name": "LCB 수감자 홍루", 
+            "id": 10601,
+            "lv": 1, 
+            "hp": 66, 
+            "hpRate": 2.28, 
+            "Def": -2, 
+            "ResistP":
+            { 
+                "Slash": 2.0, 
+                "Penetrate": 1.0, 
+                "Blunt": 0.5
+            },
+            "minSpeed": 3,
+            "maxSpeed": 6,
+            "staggerGauge": [ 0.20, 0.40, 0.70 ]
+        },
+
+        {
+            "Snumber": 7, 
+            "name": "LCB 수감자 히스클리프",
+            "id": 10701,
+            "lv": 1, 
+            "hp": 78, 
+            "hpRate": 2.69, 
+            "Def": 0, 
+            "ResistP":
+            {
+                "Slash": 2.0, 
+                "Penetrate": 1.0, 
+                "Blunt": 0.5
+            },
+            "minSpeed": 2,
+            "maxSpeed": 5,
+            "staggerGauge":[ 0.15, 0.35, 0.65 ]
+        },
+
+        {
+            "Snumber": 8, 
+            "name": "LCB 수감자 이스마엘",
+            "id": 10801,
+            "lv": 1, 
+            "hp": 78, 
+            "hpRate": 2.69, 
+            "Def": 0,  
+            "ResistP":
+            {
+                "Slash": 2.0, 
+                "Penetrate": 1.0, 
+                "Blunt": 0.5
+            },
+            "minSpeed": 5,
+            "maxSpeed": 8,
+            "staggerGauge":[ 0.30, 0.60 ]
+        },
+
+        {
+            "Snumber": 9, 
+            "name": "LCB 수감자 로쟈",
+            "id": 10901,
+            "lv": 1, 
+            "hp": 78, 
+            "hpRate": 2.69, 
+            "Def": 0, 
+            "ResistP":
+            {
+                "Slash": 0.5, 
+                "Penetrate": 2.0, 
+                "Blunt": 1.0
+            },
+            "minSpeed": 2,
+            "maxSpeed": 5,
+            "staggerGauge":[ 0.15, 0.35, 0.65 ]
+        },
+
+        {
+            "Snumber": 10, 
+            "name": "LCB 수감자 싱클레어", 
+            "id": 11001,
+            "lv": 1, 
+            "hp": 60, 
+            "hpRate": 2.07, 
+            "Def": -4, 
+            "ResistP":
+            { 
+                "Slash": 0.5, 
+                "Penetrate": 2.0, 
+                "Blunt": 1.0
+            },
+            "minSpeed": 3,
+            "maxSpeed": 7,
+            "staggerGauge": [ 0.20, 0.40, 0.70 ]
+        },
+
+        {
+            "Snumber": 11, 
+            "name": "LCB 수감자 오티스", 
+            "id": 11001,
+            "lv": 1, 
+            "hp": 60, 
+            "hpRate": 2.07, 
+            "Def": -4, 
+            "ResistP":
+            { 
+                "Slash": 0.5, 
+                "Penetrate": 1.0, 
+                "Blunt": 2.0
+            },
+            "minSpeed": 3,
+            "maxSpeed": 7,
+            "staggerGauge": [ 0.20, 0.40, 0.70 ]
+        },
+
+        {
+            "Snumber": 12, 
+            "name": "LCB 수감자 그레고르", 
+            "id": 10401,
+            "lv": 1, 
+            "hp": 72, 
+            "hpRate": 2.48, 
+            "Def": 0, 
+            "ResistP":
+            { 
+                "Slash": 1.0, 
+                "Penetrate": 0.5, 
+                "Blunt": 2.0
+            },
+            "minSpeed": 3,
+            "maxSpeed": 7,
+            "staggerGauge": [ 0.30, 0.70 ]
         }
     ]
 }

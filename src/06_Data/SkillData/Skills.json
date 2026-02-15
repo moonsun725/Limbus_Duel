@@ -181,6 +181,7 @@
         }
       ]
     },
+
     {
       "id": 1020101,
       "level": 10,
@@ -328,6 +329,7 @@
         }
       ]
     },
+
     {
       "id": 1030101,
       "level": 10,
@@ -355,7 +357,7 @@
       "desc": "[WinDuel] 다음 턴에 공격 위력 증가 2 얻음",
       "category": "attack",
       "color": "violet",
-      "keywords": [],
+      "keywords": ["Bleeding"],
       "BasePower": 4,
       "AtkLv": 2,
       "Weight": 1,
@@ -382,7 +384,7 @@
       "desc": "속도가 10 이상이면, 코인 위력 +2",
       "category": "attack",
       "color": "green",
-      "keywords": [],
+      "keywords": ["Bleeding"],
       "BasePower": 3,
       "AtkLv": 2,
       "Weight": 1,
@@ -447,6 +449,1540 @@
           "abilities" :[
 
           ]
+        }
+      ]
+    },
+
+    {
+      "id": 1040101,
+      "level": 10,
+      "name": "칠하기",
+      "desc": "",
+      "category": "attack",
+      "color": "green",
+      "keywords": ["Poise"],
+      "BasePower": 4,
+      "AtkLv": 2,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Slash",
+          "Color": "green",
+          "CoinPower": 7,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 다음 턴에 호흡 2 얻음"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1040102,
+      "level": 20,
+      "name": "흩뿌리기",
+      "desc": "",
+      "category": "attack",
+      "color": "orange",
+      "keywords": [],
+      "BasePower": 4,
+      "AtkLv": 2,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Slash",
+          "Color": "orange",
+          "CoinPower": 5,
+          "coindescs": [
+            {
+              "desc": "대상이 이번 턴에 피해를 받은 상태면 피해량 +30%"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        },
+        {
+          "Type": "Slash",
+          "Color": "orange",
+          "CoinPower": 5,
+          "coindescs": [
+            {
+              "desc": "대상이 이번 턴에 피해를 받은 상태면 피해량 +30%"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1040103,
+      "level": 30,
+      "name": "그려내기",
+      "desc": "[StartBattle] 참격 피해량 증가 2를 얻음",
+      "category": "attack",
+      "color": "indigo",
+      "keywords": ["Poise"],
+      "BasePower": 5,
+      "AtkLv": 2,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Slash",
+          "Color": "indigo",
+          "CoinPower": 3
+        },
+        {
+          "Type": "Slash",
+          "Color": "indigo",
+          "CoinPower": 3,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 다음 턴에 호흡 2 얻음"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        },
+        {
+          "Type": "Slash",
+          "Color": "indigo",
+          "CoinPower": 3
+        }
+      ]
+    },
+    {
+      "id": 1040104,
+      "level": 40,
+      "name": "회피",
+      "desc": "",
+      "category": "defence",
+      "color": "green",
+      "keywords": [],
+      "BasePower": 2,
+      "AtkLv": -2,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Evade",
+          "Color": "green",
+          "CoinPower": 10
+        }
+      ]
+    },
+
+    {
+      "id": 1050101,
+      "level": 10,
+      "name": "원, 투",
+      "desc": "",
+      "category": "attack",
+      "color": "yellow",
+      "keywords": ["Tremor"],
+      "BasePower": 3,
+      "AtkLv": -3,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Blunt",
+          "Color": "yellow",
+          "CoinPower": 4,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 진동 1 부여"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        },
+        {
+          "Type": "Blunt",
+          "Color": "yellow",
+          "CoinPower": 4,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 진동 1 부여"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1050102,
+      "level": 20,
+      "name": "주먹꽂기",
+      "desc": "[WhenUse] 다음 턴에 수비 위력 증가 3 얻음",
+      "category": "attack",
+      "color": "indigo",
+      "keywords": ["Tremor"],
+      "BasePower": 6,
+      "AtkLv": -3,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Blunt",
+          "Color": "indigo",
+          "CoinPower": 9,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 진동 폭발"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1050103,
+      "level": 30,
+      "name": "연격",
+      "desc": "[WhenUse] 다음 턴에 보호 3 얻음",
+      "category": "attack",
+      "color": "blue",
+      "keywords": ["Tremor"],
+      "BasePower": 4,
+      "AtkLv": -3,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Blunt",
+          "Color": "blue",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 진동 1 부여"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        },
+        {
+          "Type": "Blunt",
+          "Color": "blue",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 진동 1 부여"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        },
+        {
+          "Type": "Blunt",
+          "Color": "blue",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 진동 1 부여"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        },
+        {
+          "Type": "Blunt",
+          "Color": "blue",
+          "CoinPower": 2,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 진동 횟수 2 증가"
+            }
+          ],
+          "abilities" :[
+            
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1050104,
+      "level": 40,
+      "name": "가드",
+      "desc": "",
+      "category": "defence",
+      "color": "yellow",
+      "keywords": [],
+      "BasePower": 10,
+      "AtkLv": 3,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "Guard",
+          "Color": "yellow",
+          "CoinPower": 3
+        }
+      ]
+    },
+
+    {
+      "id": 1060101,
+      "level": 10,
+      "name": "내려베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1060102,
+      "level": 4,
+      "name": "이연격",
+      "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +1",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 침잠 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 파열 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1060103,
+      "level": 4,
+      "name": "선풍",
+      "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +2",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 공격 위력 감소 2 부여"
+            },
+            {
+              "desc": "[OnSucceedAttack] 침잠 2 부여"
+            },
+            {
+              "desc": "[OnSucceedAttack] 파열 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1060104,
+      "level": 1,
+      "name": "회피",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+
+    {
+      "id": 1070101,
+      "level": 10,
+      "name": "배트 치기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 진동 3 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1070102,
+      "level": 20,
+      "name": "내려박기",
+      "desc": "[WhenUse] 다음 턴에 공격 위력 증가, 피해량 증가 1 얻음",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 진동 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1070103,
+      "level": 30,
+      "name": "분풀기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 다음 코인 위력 +2"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 진동 폭발"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1070104,
+      "level": 1,
+      "name": "반격",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1080101,
+      "level": 2,
+      "name": "강타",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 진동 횟수 1 증가"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1080102,
+      "level": 1,
+      "name": "슬라이딩",
+      "desc": "[WinDuel] 수비 위력 감소 1 부여",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1080102,
+      "level": 2,
+      "name": "슬라이딩",
+      "desc": "[WinDuel] 수비 위력 감소 3 부여",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1080102,
+      "level": 4,
+      "name": "슬라이딩",
+      "desc": "[WinDuel] 수비 위력 감소 3 부여",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 진동 3 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1080103,
+      "level": 3,
+      "name": "방어",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 진동 폭발. 타격 취약 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1080104,
+      "level": 1,
+      "name": "가드",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1090101,
+      "level": 2,
+      "name": "내려찍기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 출혈 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1090102,
+      "level": 1,
+      "name": "연속 베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 출혈 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 출혈 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1090102,
+      "level": 2,
+      "name": "연속 베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 출혈 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 출혈 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1090102,
+      "level": 4,
+      "name": "연속 베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 출혈 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 출혈 2 부여"
+            },
+            {
+              "desc": "[OnSucceedAttackHead] 출혈 횟수 1 증가"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1090103,
+      "level": 3,
+      "name": "처단",
+      "desc": "자신의 정신력이 0미만이면 스킬 위력 + 1",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 대상의 [Laceration]이 6 이상이면, 피해량 +20%"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1090103,
+      "level": 4,
+      "name": "처단",
+      "desc": "자신의 정신력이 0미만이면 스킬 위력 + 1",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 출혈 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 출혈 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 출혈 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 대상의 [Laceration]이 6 이상이면, 피해량 +20%"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1090104,
+      "level": 1,
+      "name": "반격",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1100101,
+      "level": 2,
+      "name": "내려베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 파열 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1100102,
+      "level": 1,
+      "name": "연속 베기",
+      "desc": "[WinDuel] 피해량 +10%",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1100102,
+      "level": 2,
+      "name": "연속 베기",
+      "desc": "[WinDuel] 피해량 +30%",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1100103,
+      "level": 3,
+      "name": "헤집어 베기",
+      "desc": "[WinDuel] 공격 위력 증가 1 얻음",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1100103,
+      "level": 4,
+      "name": "헤집어 베기",
+      "desc": "[WinDuel] 공격 위력 증가 1 얻음",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 파열 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 파열 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 파열 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1100104,
+      "level": 1,
+      "name": "반격",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1110101,
+      "level": 2,
+      "name": "칼날 빼기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 파열 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1110101,
+      "level": 4,
+      "name": "칼날 빼기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 파열 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 파열 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1110102,
+      "level": 1,
+      "name": "배후 베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "대상보다 속도가 빠르면 피해량 +10%"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "대상보다 속도가 빠르면 피해량 +10%"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1110102,
+      "level": 2,
+      "name": "배후 베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "대상보다 속도가 빠르면 피해량 +20%"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "대상보다 속도가 빠르면 피해량 +20%"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1110103,
+      "level": 3,
+      "name": "뚫어내기",
+      "desc": "대상의 체력이 50% 이상이면, 피해량 +20%",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1110103,
+      "level": 4,
+      "name": "뚫어내기",
+      "desc": "대상의 체력이 50% 이상이면, 피해량 +20%",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 파열 횟수 1 증가"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1110104,
+      "level": 1,
+      "name": "회피",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1120101,
+      "level": 2,
+      "name": "베기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 파열 4 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1120102,
+      "level": 1,
+      "name": "후비기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttackHead] 파열 횟수 1 증가"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1120102,
+      "level": 2,
+      "name": "후비기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 파열 횟수 1 증가 "
+            },
+            {
+              "desc": "[OnSucceedAttackHead] 관통 취약 1 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1120102,
+      "level": 4,
+      "name": "후비기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 파열 횟수 1 증가 "
+            },
+            {
+              "desc": "[OnSucceedAttackHead] 관통 취약 1 부여"
+            },
+            {
+              "desc": "[OnSucceedAttackHead] 파열 2 부여"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1120103,
+      "level": 3,
+      "name": "썰어내기",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 대상에게 [Burst]이 있을 때 피해량 +10%"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 대상에게 [Burst]이 있을 때 피해량 +10%"
+            },
+            {
+              "desc": "[OnSucceedAttackHead] 피해량의 30%만큼 체력 회복"
+            }
+          ],
+          "effectK": [],
+          "effectB": []
+        }
+      ]
+    },
+    {
+      "id": 1120104,
+      "level": 1,
+      "name": "가드",
+      "desc": "",
+      "category": "",
+      "skilltype": "",
+      "keywords": [],
+      "BasePower": 0,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "effectK": [],
+          "effectB": []
         }
       ]
     }
