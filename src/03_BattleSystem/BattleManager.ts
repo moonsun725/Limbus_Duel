@@ -28,7 +28,7 @@ export class BattleManager
 
     constructor(callbacks?: BattleCallbacks) {
         if(callbacks)
-        this.callbacks = callbacks;
+            this.callbacks = callbacks;
         else
             this.callbacks = {
                 onLog: (msg) => {},
