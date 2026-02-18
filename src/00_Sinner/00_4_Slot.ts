@@ -8,24 +8,41 @@ import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
 export class BattleSlot {
     // 읽기 전용으로 설정하여 원본 교체 방지
     readonly owner: Character;
+    public id: number;
     public speed: number; 
-    public deckIndex: number;
-    readySkill?: Readonly<Skill> | null; // 재할당은 가능하지만 내부 속성은 변경 불가하게 함.
+    public deckIndex?: 0|1; // 스킬패널 번호: 0 or 1
+    readySkill?: Readonly<Skill> | null = null; // 재할당은 가능하지만 내부 속성은 변경 불가하게 함.
+    targetSlot: BattleSlot | null = null;
 
-    constructor(owner: Character, skill: Skill, deckIndex: number) {
+    constructor(owner: Character) {
         this.owner = owner;
-        this.readySkill = skill;
         this.speed = owner.speed; // 현재는 캐릭터 속도를 따라감
-        this.deckIndex = deckIndex
+        this.id = Math.random() + owner.id; // 이러면 겹칠리는 없겠지
     }
 
-    targetLock(SelectedSkill: Skill, skillIndex: number)
+    skillSelect(SelectedSkill: Skill, skillIndex: 0|1)
     {
-        this.readySkill = SelectedSkill;
+        this.readySkill = SelectedSkill; // 덮어쓴다
         this.deckIndex = skillIndex; // 0 또는 1이 저장됨
     }
+
+    targetLock(targetSlot: BattleSlot)
+    {
+        this.targetSlot = targetSlot;
+    }
+
     consumeSkill()
     {
+        if(this.readySkill && this.deckIndex)
+        {
+            this.readySkill = null;
+            this.owner.useSkill(this.deckIndex)
+        }
+    }
+
+    updateState()
+    {
+        this.speed = this.owner.speed;
         this.readySkill = null;
     }
 }
