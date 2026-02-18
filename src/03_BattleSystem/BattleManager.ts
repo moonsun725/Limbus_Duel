@@ -26,8 +26,19 @@ export class BattleManager
 
     private callbacks: BattleCallbacks;
 
-    constructor(callbacks: BattleCallbacks) {
+    constructor(callbacks?: BattleCallbacks) {
+        if(callbacks)
         this.callbacks = callbacks;
+        else
+            this.callbacks = {
+                onLog: (msg) => {},
+                onAttackStart: async (attackerId, targetId, skillName) => {}, // 연출 대기
+                onClashStart: async (char1, char2) => {},
+                onCoinToss: async (isHeads) => {},
+                onClashResult: async (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) =>  {},
+                onDamage: (targetId: number, damage: number, newHp: number) => {},
+                onCoinResult: async (isHeads: boolean, power: number) => {}
+            }
     }
     /**
      * 두 슬롯 간의 합(Clash)을 진행합니다.
