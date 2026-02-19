@@ -12,7 +12,7 @@ export class BattleSlot {
     public speed: number; 
     public deckIndex?: 0|1; // 스킬패널 번호: 0 or 1
     readySkill?: Readonly<Skill> | null = null; // 재할당은 가능하지만 내부 속성은 변경 불가하게 함.
-    targetSlot: BattleSlot | null = null;
+    targetSlot?: BattleSlot | null;
 
     constructor(owner: Character) {
         this.owner = owner;
@@ -26,23 +26,22 @@ export class BattleSlot {
         this.deckIndex = skillIndex; // 0 또는 1이 저장됨
     }
 
-    targetLock(targetSlot: BattleSlot)
+    forcedTarget(attacker: BattleSlot)
     {
-        this.targetSlot = targetSlot;
+        this.targetSlot = attacker;
     }
 
     consumeSkill()
     {
-        if(this.readySkill && this.deckIndex)
-        {
-            this.readySkill = null;
+        this.readySkill = null;
+        if (this.deckIndex)
             this.owner.useSkill(this.deckIndex)
-        }
     }
 
     updateState()
     {
         this.speed = this.owner.speed;
         this.readySkill = null;
+        this.targetSlot = null;
     }
 }

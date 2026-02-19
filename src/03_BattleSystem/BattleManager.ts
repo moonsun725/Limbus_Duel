@@ -40,6 +40,7 @@ export class BattleManager
                 onCoinResult: async (isHeads: boolean, power: number) => {}
             }
     }
+
     /**
      * 두 슬롯 간의 합(Clash)을 진행합니다.
      * 승리한 캐릭터가 패배한 캐릭터를 공격하는 로직까지 연결할 수 있습니다.

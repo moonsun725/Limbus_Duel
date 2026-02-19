@@ -93,7 +93,7 @@ export class GameRoom {
 
     // 행동 분할: 공격 and 교체
     handleAction(socketId: string, action: BattleAction, io: Server) {
-
+        
     }
 
     private handleBattleInput(socketId: string, action: BattleAction, io: Server) {

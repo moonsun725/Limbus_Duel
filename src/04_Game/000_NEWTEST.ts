@@ -12,6 +12,8 @@ async function runTest() {
     const yisang : Character = createSinnerFromData(10101);
     const faust : Character = createSinnerFromData(10201);
 
+    let TestManager = new BattleManager()
+
     console.log("--- 캐릭터 스탯 확인 ---");
     yisang.Stats.ShowStats();
     faust.Stats.ShowStats();
@@ -47,7 +49,7 @@ async function runTest() {
     faust.Slots[0].readySkill = faust.Skill(2);
 
     // 합 진행 (비동기)
-    await BattleManager.Clash(yisang.Slots[0], faust.Slots[0]);
+    await TestManager.Clash(yisang.Slots[0], faust.Slots[0]);
 
     console.log("\n[합 종료 후 상태]");
     yisang.Stats.ShowStats();

@@ -2,18 +2,27 @@ import { Server } from 'socket.io';
 import { Player } from './10_Player.js'; // Player 내부엔 Character[]가 있다고 가정
 import { buildParty } from './Utils/buildParty.js';
 import { BattleManager, type BattleCallbacks } from '../03_BattleSystem/BattleManager.js'; // ★ 매니저 추가
-import { Character } from '../00_Sinner/00_0_sinner.js';
-
-// 행동의 종류: 스킬 선택 / 타깃 선택 / 선택 완료 버튼 선택 / 수비 스킬 선택 / 에고 스킬 선택
-export type ActionType = 'skillSelect' | 'targetSelect' | 'BattleStart';
+import { BattleSlot } from '../00_Sinner/00_4_Slot.js';
 
 // 상태 머신: typescript에서는 enum보다 유니온 쓰는 게 낫대!
-type RoomState = 'MOVE_SELECT' | 'BATTLE' | 'RESULT';
+type RoomState = 'MOVE_SELECT' | 'TARGET_SELECT' |'WAITING_OPPONENT' |'BATTLE' | 'RESULT';
 
+type Target =  // room에는 ActorList라는 배열이 있어야 함
+{
+    target: BattleSlot,
+    //몇번째 타깃인지
+    index: number
+}
+
+let lockOrder = 0;
+
+// 행동 종류: 스킬 선택 / 타깃 선택 / 선택 완료 버튼 선택 / 수비 스킬 선택 / 에고 스킬 선택
+export type ActionType = 'skillSelect' | 'targetSelect' | 'BattleStart';
 // 행동 데이터 구조체
 export interface BattleAction {
     type: ActionType;
-    index: number; // 시작 버튼(0), 슬롯 인덱스(0,1) 또는 타깃 인덱스(0~6), 에고(0,1,2,3,4)
+    userIndex: number;
+    actionIndex: number; // 시작 버튼(0), 슬롯 인덱스(0,1) 또는 타깃 인덱스(0~6), 에고(0,1,2,3,4)
 }
 
 // 딜레이 함수
@@ -36,6 +45,7 @@ export class GameRoom {
     public gameState: RoomState = 'MOVE_SELECT'; 
     private battleManager: BattleManager;
     
+    private ActorList: BattleSlot[] = [];
     
     // ★ [New] 누가 교체해야 하는지 기억해둘 변수 (기절한 플레이어 ID)
     public faintPlayerId: string | null = null;
@@ -87,14 +97,12 @@ export class GameRoom {
         // 헬퍼 함수: 플레이어 세팅 (P1, P2 공통 로직)
         const setupPlayer = (pid: 'p1' | 'p2' ): Player => {
             const party = buildParty(teamData);
-            const player = new Player(socketId, party);
+            const player = new Player(socketId, party); // 
 
-            // ★ 중요: for문 대신 배열 전체 복사
-            // party에 있는 모든 캐릭터를 battleEntry로 옮김 (3마리면 3마리, 6마리면 6마리)
-            player.battleEntry = [...party]; 
+            player.battleEntry.forEach(BattleUnit => {
+                this.ActorList.push(BattleUnit.Slots[0])
+            });
             
-            // 스피드 정렬 (게임 규칙에 따라 필요하다면)
-            player.battleEntry.sort((a, b) => b.speed - a.speed); //스피드가 1순위고 편성순서가 2순위인데
             
             this.players[socketId] = pid; // 'p1' or 'p2' 저장
             return player;
@@ -142,19 +150,69 @@ export class GameRoom {
 
         switch (this.gameState) {
             case 'MOVE_SELECT':
-                this.handleBattleInput(socketId, action, io);
+                this.handleMoveSelect(socketId, action, io);
+            case 'TARGET_SELECT':
+                this.handleBattleInput(socketId, action, io); // action이 
+                break;
+            case 'WAITING_OPPONENT': // 전투 시작까지 눌렀으면 낙장불입이제
+                break;
+            case 'BATTLE': // 이때는 씬 전환이 있을 예정이에요
                 break;
 
-            case 'WAITING_OPPONENT': // 얘는 아무것도 못하게 대기
-                break;
-
-            case 'FORCE_SWITCH': // 기절 교체 대기 중
+            case 'RESULT': // 기절 교체 대기 중
                 break;
 
             case 'BATTLE': // 연산 중일 때는 입력 차단
                 return; 
         }
     }
+    // 기술 선택
+    handleMoveSelect(socketId: string, action: BattleAction, io: Server)
+    {
+        // 먼저 플레이어부터 찾고
+        const role = this.players[socketId];
+        if (!role) return;
+
+        // 맵이 일단 있으니까 캐릭터도 찾아야 되겠지
+        if (role === 'p1' && this.p1)
+        {
+            let p1 = this.p1;
+            let user = this.p1.battleEntry[action.userIndex];
+            if (!user) return; // 
+            let readySkill = user.deck[action.actionIndex]
+            if (!readySkill) return;
+
+            
+            let userSlot = new BattleSlot(user, readySkill, action.actionIndex);
+            this.ActorList.set(userSlot, null); // 슬롯을 등록한다
+            io.to(socketId).emit('move_selected');
+            // 씨바 생각해보니까 키에다 클래스를 줘버리면 find(get)을 쓰기가 심히 곤란해진다
+            // 이렇게된거 구조를 Map<Id, {userSlot, targetSlot}>의 형식으로 주든가 해야겠는데
+            
+        }
+        
+        // 중복 선택도 되게 할거니까 if (role === 'p1' && this.p1Action) return; 이거는 고쳐야 됨
+        
+    }
+
+    // 타겟 선택
+    handleTargetSelect(socketId: string, action: BattleAction, io: Server)
+    {
+        const role = this.players[socketId];
+        if (!role) return;
+
+        if (role === 'p1' && this.p1)
+        {
+            let p1 = this.p1;
+            let user = this.p1.battleEntry[action.userIndex];
+            if (!user) return; // 
+            
+            this.ActorList.set(new BattleSlot(user, action.actionIndex), null); // 슬롯을 등록하고
+            io.to(socketId).emit('move_selected');
+        }
+    }
+
+    // 시작 버튼
 
     private handleBattleInput(socketId: string, action: BattleAction, io: Server) {
         const role = this.players[socketId];

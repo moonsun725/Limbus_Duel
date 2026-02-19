@@ -40,7 +40,7 @@ export class Character
     public deck: Skill[];
     public readyDeck: Skill[];
     
-    public Slots: BattleSlot[];
+    public Slots: BattleSlot[] = [];
 
     constructor(name: string, id: number, data: IsinnerData)
     {
@@ -72,7 +72,7 @@ export class Character
 
         this.shuffleDeck(this.deck);
         this.shuffleDeck(this.readyDeck); // 일단은 더미로 남겨놓긴 했음 ㅇㅇ
-        this.Slots = [];
+        this.Slots.push(new BattleSlot(this));
     }
     Skill(i: number) : Skill
     {
@@ -132,6 +132,16 @@ export class Character
         // >< 버프리스트 초기화
     }
     
+    // 슬롯 관리
+    SkillSelect(deckIndex: 0|1, index: number = 0)
+    {
+        if(this.deck[deckIndex])
+        {
+            this.Slots[index]?.skillSelect(this.deck[deckIndex], deckIndex);
+        }
+    }
+
+
     // 이벤트 관리들
 
     CoinToss()

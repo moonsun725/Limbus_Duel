@@ -1,102 +1,212 @@
 import { Character } from "../00_Sinner/00_0_sinner.js";
-import { type Skill, CoinToss } from "../01_Skill/01_0_skill.js";
+import type { BattleSlot } from "../00_Sinner/00_4_Slot.js";
+import { type Skill } from "../01_Skill/01_0_skill.js";
 import type { Coin } from "../02_Coin/02_0_coin.js";
+import { calculateDamage } from '../00_Sinner/00_7_dmgCalc.js';
+import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
+import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
+import { utimes } from "fs";
 
-type Target = {
-    target: Character,
-    //몇번째 타깃인지
-    index: number
-}
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export class ActManager
-{
-    ActorList: Map<Character, Target> = new Map();
-    lockOrder: number = 0;
-    turnOrder: Character[] = [];
+export class ActManager {
+    ActorList: Map<BattleSlot, BattleSlot | undefined> = new Map();
+    turnOrder: BattleSlot[] = [];
 
-    targetLock(user: Character, target: Character, SelectedSkill: Skill, index: number = 0) // 대상 지정하기
-    {
-        this.ActorList.set(user, {target: target, index: this.lockOrder}); // user가 target을 공격할거고 몇번째 타깃인지도 저장
-        user.targetLock(SelectedSkill, index);
-        this.lockOrder++;
+    SkillSelect(user: Character, skillIndex: 0 | 1, slotIndex: number = 0) {
+        user.SkillSelect(skillIndex); // 0번 슬롯에 아래쪽 스킬패널의 스킬 할당
+        if (!user.Slots[slotIndex]) {
+            // try catch를 아직 생각 안해놔서 throw는 당장 못하겠음
+            return;
+        }
+        console.log(user.name, "이", user.Slots[slotIndex].readySkill?.name, "로",);
+        this.ActorList.set(user.Slots[slotIndex], undefined);
     }
 
-    orderSort()
-    {
-       this.turnOrder = Array.from(this.ActorList.keys()).sort((a, b) => b.speed - a.speed);
+    TargetLock(user: Character, target: Character, slotIndex: number = 0, targetIndex: number = 0) {
+        if (!user.Slots[slotIndex] || !target.Slots[targetIndex]) {
+            // try catch를 아직 생각 안해놔서 throw는 당장 못하겠음
+            return;
+        }
+        console.log(target.name, "의", target.Slots[targetIndex].readySkill?.name, "지정");
+        this.ActorList.set(user.Slots[slotIndex], target.Slots[targetIndex]);
+        if (user.speed > target.speed)
+            target.Slots[targetIndex].forcedTarget(user.Slots[slotIndex]);
+
     }
 
-    async StartCombat() // 비동기 함수
+    orderSort(): BattleSlot[] {
+        this.turnOrder = Array.from(this.ActorList.keys()).sort((a, b) => a.speed - b.speed);
+        this.turnOrder.forEach((element, i) => {
+            console.log(i, '번', element.owner.name);
+        });
+        return this.turnOrder;
+    }
+
+    async StartCombat() // 비동기 함수 <- 얘는 나중에 룸에서 처리할 예정임
     {
         for (let user of this.turnOrder) {
             // 1. 이미 행동을 마친 경우(나보다 빠른 대상에 의해 합이 걸려왔다든지) 스킵
-            if (user.readySkill === null) {
+            console.log("************************", user.owner.name, "차례");
+
+            if (!user.readySkill) {
                 console.log("이미 스킬 사용됨");
-                continue; 
-            }
-        
-            let uTargetInfo = this.ActorList.get(user);
-            if (!uTargetInfo) 
-            {
-                console.log("왠진 모르겠는데 타겟이 없대");
                 continue;
             }
-        
-            let target = uTargetInfo.target;
-            if(!target || target.BattleState.GetState() === 'DEAD')
-            {
-                console.log("타겟 사망");
+
+            let uTarget = this.ActorList.get(user);
+            if (!uTarget) {
+                console.log("타겟 없음");
                 continue;
             }
-            let uSkill = user.readySkill;
-            
-            // 타겟이 이미 죽었거나 스킬을 다 썼으면 일방공격도 의미가 달라질 수 있으나, 
-            // 여기서는 타겟의 스킬 유무로 합/일방공격을 나눔
-            let tSkill = target.readySkill; 
-        
-            // --- [수정됨] 내가 합을 할 자격이 있는지 검증 ---
-            let amIPriority = true; // 기본적으로 내가 우선순위라고 가정
-            
-            // 나보다 늦게 지정한(index가 큰) 경쟁자가 있는지 확인
-            for (let [otherUser, oTargetInfo] of this.ActorList) {
-                if (otherUser === user) continue; // 나는 제외
-                if (otherUser.readySkill === null) continue; // 이미 행동한 애는 경쟁자가 아님
-        
-                // 같은 타겟을 노리는 경우
-                if (oTargetInfo.target === target) {
-                    // 상대방이 나보다 나중에 지정했다면(index가 크다면), 나는 합을 할 수 없음
-                    // (림버스 시스템: 나중에 지정한 사람이 합을 가져감)
-                    if (oTargetInfo.index > uTargetInfo.index) {
-                        amIPriority = false;
-                        break; // 나보다 센 놈 한 명만 있어도 나는 탈락이므로 여기서 break는 가능 (나의 패배 확정)
-                    }
-                }
-            }
-        
-            // 2. 합(Clash) 진행 여부 결정
-            // 타겟이 스킬이 있고 && 내가 타겟을 노리는 애들 중 가장 우선순위가 높고 && 합 성립 조건 만족 시
-            if (tSkill && amIPriority && isClashAble(user, target, this.ActorList.get(target)?.target)) {
-                console.log(`[합 발생]: ${user.name} (index: ${uTargetInfo.index}) vs ${target.name}`);
-                Clash(user, target, uSkill, tSkill);
-                
-                // Clash 함수 내부에서 user와 target의 readySkill을 null로 만들어야 함
-            } 
-            // 3. 일방 공격 (우선순위에서 밀렸거나, 타겟이 스킬이 없거나 등)
-            else {
-                let reason = !tSkill ? "상대 스킬 없음" : (!amIPriority ? "합 권한 없음(다른 아군이 채감)" : "합 불가 조건");
-                console.log(`[일방 공격]: ${user.name} -> ${target.name} (${reason})`);
-                
-                user.Attack(target, uSkill, uSkill.coinlist);
-                user.consumeSkill(); // 행동 종료 처리
-            }
+
+            let tTarget = uTarget.targetSlot
+            if (tTarget === user && tTarget.readySkill)
+                await this.Clash(user, uTarget);
+            else
+                await this.Attack(user, uTarget.owner, user.readySkill, user.readySkill?.coinlist);
         }
+    }
+
+    public async Clash(slot1: BattleSlot, slot2: BattleSlot): Promise<void> {
+        const char1 = slot1.owner;
+        const char2 = slot2.owner;
+        const skill1 = slot1.readySkill;
+        const skill2 = slot2.readySkill;
+
+        if (!skill1 || !skill2) return;
+
+        console.log(`[Clash Start] ${char1.name}(${skill1.name}) VS ${char2.name}(${skill2.name})`);
+        // await this.callbacks.onClashStart(char1, char2);
+
+        // 코인 복사 (원본 손상 방지)
+        let coins1 = [...skill1.coinlist];
+        let coins2 = [...skill2.coinlist];
+        let clashCount = 0;
+        const maxClash = 99;
+
+        // 합 진행 루프
+        while (coins1.length > 0 && coins2.length > 0 && clashCount < maxClash) {
+            clashCount++;
+            char1.CoinToss();
+            char2.CoinToss();
+
+            // 코인 토스 및 위력 계산
+            console.log(`[Clash]: 스킬명: ${skill1.name}`);
+            const power1 = await this.CoinToss(char1, skill1, coins1);
+            console.log(`[Clash]: 스킬위력: ${power1}`);
+
+            console.log(`[Clash]: 스킬명: ${skill2.name}`);
+            const power2 = await this.CoinToss(char2, skill2, coins2);
+            console.log(`[Clash]: 스킬위력: ${power2}`);
+            // await this.callbacks.onClashResult(char1, power1, char2, power2, clashCount);
+
+            console.log(`   [Clash ${clashCount}합] ${skill1.name}: ${power1} vs ${skill2.name}: ${power2}`);
+            await wait(1000); // 합 팅! 팅! 하는 연출 시간
+
+            if (power1 > power2) {
+                coins2.shift(); // 패배한 쪽 코인 하나 제거 (앞에서부터)
+            } else if (power2 > power1) {
+                coins1.shift();
+            }
+            console.log(`[Clash]: ${clashCount}합`);
+
+            // 합 횟수에 따른 정신력/상태 업데이트 등은 여기서
+        }
+
+        // 승자 판별 및 공격 이행
+        if (coins1.length > 0) {
+            this.ApplyClashResult(char1, char2, "WIN", clashCount);
+            slot2.consumeSkill(); // 패배한 스킬 소멸
+            await this.Attack(slot1, char2, skill1, coins1); // 남은 코인으로 공격
+        } else {
+            this.ApplyClashResult(char2, char1, "WIN", clashCount);
+            slot1.consumeSkill();
+            await this.Attack(slot2, char1, skill2, coins2);
+        }
+    }
+
+    // 합 위력 계산 헬퍼
+    private async CoinToss(char: Character, skill: Skill, coins: Coin[]): Promise<number> {
+        let power = skill.BasePower;
+        let headsCount = 0;
+
+        for (const coin of coins) {
+            // 정신력 기반 코인 토스
+            const isHeads = Math.random() * 100 < (char.Stats.sp + 50)
+            if (isHeads) {
+                console.log(`[CoinToss]: 앞면: + ${coin.CoinPower}`);
+                // await this.callbacks.onCoinToss(isHeads);
+                power += coin.CoinPower;
+                headsCount++;
+            }
+            else
+                console.log(`[CoinToss]: 뒷면: + 0`);
+            await wait(300);
+        }
+        return power;
+    }
+
+    private ApplyClashResult(winner: Character, loser: Character, state: string, clashCount: number) {
+        console.log(`[Clash Result] 승자: ${winner.name}`);
+        winner.ClashWin(clashCount);
+        loser.ClashLose();
+        // 필요하다면 BattleState 변경 로직 추가
+    }
+
+    /**
+     * 일방 공격 또는 합 승리 후 공격을 수행합니다.
+     */
+    public async Attack(attackSlot: BattleSlot, target: Character, skill: Skill, activeCoins: Coin[]) {
+
+        const attacker = attackSlot.owner;
+        console.log(`[Attack Start] ${attacker.name} -> ${target.name} (스킬: ${skill.name})`);
+        // await this.callbacks.onAttackStart(attacker.id, target.id, skill.name);
+
+        // 일방공격이라면 공격 시작 시 효과 (OnUse) 이때 발동
+        if (attacker.BattleState.GetState() === "NORMAL") {
+            ProcessMoveEffects(skill, target, attacker, "OnUse");
+        }
+
+        let currentPower = skill.BasePower; // 누적 위력 방식이라면 여기서 초기화
+
+        for (const coin of activeCoins) {
+            // 연출을 위한 딜레이 (코인 하나하나 때리는 느낌)
+            await wait(2000);
+
+            attacker.bufList.OnCoinToss();
+            const isHeads = Math.random() * 100 < (attacker.Stats.sp + 50);
+
+            if (isHeads) {
+                currentPower += coin.CoinPower; // 앞면이면 위력 증가
+                console.log(`   [Coin] 앞면! 현재 위력: ${currentPower}`);
+                // await this.callbacks.onCoinResult(isHeads, currentPower);
+            } else {
+                console.log(`   [Coin] 뒷면! 현재 위력: ${currentPower}`);
+            }
+
+            // 데미지 계산 및 적용
+            const damage = calculateDamage(attacker, target, skill, coin, currentPower);
+            target.takeDamage(damage);
+            // this.callbacks.onDamage(target.id, damage, target.Stats.hp); // UI 처리
+
+            // 적중 시 효과 처리
+            target.bufList.OnHit(attacker, Math.floor(damage));
+
+            // const effectType = isHeads ? "OnHeadsHit" : "OnTailsHit";
+            // ProcessCoinEffects(coin, target, attacker, effectType);
+            ProcessCoinEffects(coin, target, attacker, "OnHit");
+
+            // 만약 대상이 죽거나 흐트러지면 중단할지 여부 체크 로직 추가 가능
+        }
+        attackSlot.consumeSkill();
+        console.log(`[Attack End] 공격 종료`);
     }
 
 }
 
 // 합 가능성 따지는 거는 클래스랑 독립된 행위니까 밖으로 빼는 게 나은 것 같아
-function isClashAble(user: Character, target: Character, targetTarget?: Character) : boolean 
-{
+function isClashAble(user: BattleSlot, target: BattleSlot, targetTarget?: BattleSlot): boolean {
     // 성립 조건
     // 1. user가 target보다 속도가 높다
     // 2. user가 target보다 속도가 낮지만, target의 공격대상이 user이다 // 하지만 이건 쌍방 블라인드 지정이라...도 존재할 수 있네?
@@ -104,55 +214,4 @@ function isClashAble(user: Character, target: Character, targetTarget?: Characte
     if (user.speed > target.speed) return true;
     if (targetTarget && targetTarget === user) return true;
     return false;
-}
-
-// 합 치는 것도 마찬가지고
-export async function Clash(ch1: Character, ch2: Character, sk1: Skill, sk2: Skill) // 비동기 함수
-{
-    let sk1cpy = [...sk1.coinlist]; // 얕복이라 sk1cpy.xxx 수정하면 sk1이 바뀌어버린다
-    let sk2cpy = [...sk2.coinlist]; // 물론 내용물을 sk2cpy에서 넣고 빼는 거는 sk1에 영향이 없다
-    let clashLimit = 99;
-
-    do
-    {
-        console.log(`[Clash]: 스킬명: ${sk1.name}`);
-        let resP1 = CoinToss(sk1cpy, ch1.Stats.sp) + sk1.BasePower;
-        console.log(`[Clash]: 스킬위력: ${resP1}`);
-        
-        console.log(`[Clash]: 스킬명: ${sk2.name}`);
-        let resP2 = CoinToss(sk2cpy, ch2.Stats.sp) + sk2.BasePower;
-        console.log(`[Clash]: 스킬위력: ${resP2}`);
-
-        // 동률이면 다시 굴릴거니까 ㅇㅇ
-        ch1.parrycnt++;
-        ch2.parrycnt++;
-        
-        ch1.bufList.OnCoinToss();
-        ch2.bufList.OnCoinToss();
-
-        console.log(`[Clash]: ${ch1.parrycnt}합`); 
-        console.log(`[Clash]: ${ch2.parrycnt}합`);
-
-        if (resP1 === resP2) continue; // 동률이면 아래 생략하고 다음 루프
-
-        const loserCoins = resP1 > resP2 ? sk2cpy : sk1cpy;
-        loserCoins.shift();
-    }
-    while(sk1cpy.length > 0 && sk2cpy.length > 0 && --clashLimit > 0) // 혹시 모르니까 무한루프 방지용 안전장치
-
-    if (clashLimit <= 0) {
-        console.log(`[Clash]: 무한 루프 방지 장치 발동! 강제 종료.`);
-        return;
-    }
-    
-    // 객체로 짜는 게 나은가
-    const [winner, target, winnerSkill, remainingCoins] = sk1cpy.length > 0 ? [ch1, ch2, sk1, sk1cpy] : [ch2, ch1, sk2, sk2cpy];
-
-    console.log(`[합 결과]: ${winner.name} 승리, ${target.name} 패배`);
-    winner.BattleState.ChangeState('CLASHWIN');
-    target.BattleState.ChangeState('CLASHLOSE');
-    winner.Attack(target, winnerSkill, remainingCoins);
-    
-    // 임시 코드
-    target.consumeSkill();
 }
