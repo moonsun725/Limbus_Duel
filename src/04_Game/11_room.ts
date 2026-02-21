@@ -2,18 +2,11 @@ import { Server } from 'socket.io';
 import { Player } from './10_Player.js'; // Player 내부엔 Character[]가 있다고 가정
 import { buildParty } from './Utils/buildParty.js';
 import { BattleManager, type BattleCallbacks } from '../03_BattleSystem/BattleManager.js'; // ★ 매니저 추가
+import { ActManager } from '../03_BattleSystem/ActManager.js';
 import { BattleSlot } from '../00_Sinner/00_4_Slot.js';
 
 // 상태 머신: typescript에서는 enum보다 유니온 쓰는 게 낫대!
-type RoomState = 'MOVE_SELECT' | 'TARGET_SELECT' |'WAITING_OPPONENT' |'BATTLE' | 'RESULT';
-
-type Target =  // room에는 ActorList라는 배열이 있어야 함
-{
-    target: BattleSlot,
-    //몇번째 타깃인지
-    index: number
-}
-
+type RoomState = 'MOVE_SELECT' | 'TARGET_SELECT' | 'WAITING_OPPONENT' |'BATTLE' | 'RESULT';
 let lockOrder = 0;
 
 // 행동 종류: 스킬 선택 / 타깃 선택 / 선택 완료 버튼 선택 / 수비 스킬 선택 / 에고 스킬 선택
@@ -44,8 +37,9 @@ export class GameRoom {
     // ★ [New] 현재 방의 상태 (기본값: 전투 중)
     public gameState: RoomState = 'MOVE_SELECT'; 
     private battleManager: BattleManager;
-    
+    private actManager: ActManager;
     private ActorList: BattleSlot[] = [];
+
     
     // ★ [New] 누가 교체해야 하는지 기억해둘 변수 (기절한 플레이어 ID)
     public faintPlayerId: string | null = null;
@@ -86,10 +80,9 @@ export class GameRoom {
                 io.to(this.roomId).emit('update_hp', { targetId, dmg, newHp });
             }
         });
+        this.actManager = new ActManager();
     }
     private sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-    // entry : Pokemon[] = [createPokemon("피카츄"), createPokemon("이상해씨")]; // 당장은 더미로 만들어
-    // >< 이렇게 만들면 레퍼런스 복사라 플레이어별로 따로 만들어줘야 함
 
     // 유저 입장 처리
     join(socketId: string, teamData?: any[]): 'p1' | 'p2' | 'spectator' {
@@ -98,11 +91,6 @@ export class GameRoom {
         const setupPlayer = (pid: 'p1' | 'p2' ): Player => {
             const party = buildParty(teamData);
             const player = new Player(socketId, party); // 
-
-            player.battleEntry.forEach(BattleUnit => {
-                this.ActorList.push(BattleUnit.Slots[0])
-            });
-            
             
             this.players[socketId] = pid; // 'p1' or 'p2' 저장
             return player;
@@ -152,7 +140,7 @@ export class GameRoom {
             case 'MOVE_SELECT':
                 this.handleMoveSelect(socketId, action, io);
             case 'TARGET_SELECT':
-                this.handleBattleInput(socketId, action, io); // action이 
+                this.handleTargetSelect(socketId, action, io); // action이 
                 break;
             case 'WAITING_OPPONENT': // 전투 시작까지 눌렀으면 낙장불입이제
                 break;
@@ -166,54 +154,61 @@ export class GameRoom {
                 return; 
         }
     }
-    // 기술 선택
-    handleMoveSelect(socketId: string, action: BattleAction, io: Server)
-    {
-        // 먼저 플레이어부터 찾고
+    handleMoveSelect(socketId: string, action: BattleAction, io: Server) {
         const role = this.players[socketId];
         if (!role) return;
 
-        // 맵이 일단 있으니까 캐릭터도 찾아야 되겠지
-        if (role === 'p1' && this.p1)
-        {
-            let p1 = this.p1;
-            let user = this.p1.battleEntry[action.userIndex];
-            if (!user) return; // 
-            let readySkill = user.deck[action.actionIndex]
-            if (!readySkill) return;
+        const player = (role === 'p1') ? this.p1 : this.p2;
+        if (!player) return;
 
-            
-            let userSlot = new BattleSlot(user, readySkill, action.actionIndex);
-            this.ActorList.set(userSlot, null); // 슬롯을 등록한다
-            io.to(socketId).emit('move_selected');
-            // 씨바 생각해보니까 키에다 클래스를 줘버리면 find(get)을 쓰기가 심히 곤란해진다
-            // 이렇게된거 구조를 Map<Id, {userSlot, targetSlot}>의 형식으로 주든가 해야겠는데
-            
-        }
+        // action.userIndex: 캐릭터 슬롯 번호 (0~5)
+        // action.actionIndex: 스킬 슬롯 번호 (0: 위, 1: 아래)
+        const userChar = player.battleEntry[action.userIndex];
+        if (!userChar) return;
+
+        // [Source 5] room의 actManager에 의해 맵에 할당 (스킬 장착)
+        this.actManager.SkillSelect(userChar, action.actionIndex as 0 | 1);
+
+        // [UI Sync] 해당 유저에게만 "선택됨" 신호 전송 (하이라이트 표시용)
+        io.to(socketId).emit('ui_move_selected', {
+            userIndex: action.userIndex,
+            skillSlot: action.actionIndex
+        });
         
-        // 중복 선택도 되게 할거니까 if (role === 'p1' && this.p1Action) return; 이거는 고쳐야 됨
-        
+        console.log(`[Room] ${role}: Skill Selected: Unit ${action.userIndex}, Skill ${action.actionIndex}`);
     }
 
-    // 타겟 선택
-    handleTargetSelect(socketId: string, action: BattleAction, io: Server)
-    {
+    // 2. 타겟 선택 핸들러
+    handleTargetSelect(socketId: string, action: BattleAction, io: Server) {
         const role = this.players[socketId];
         if (!role) return;
 
-        if (role === 'p1' && this.p1)
-        {
-            let p1 = this.p1;
-            let user = this.p1.battleEntry[action.userIndex];
-            if (!user) return; // 
-            
-            this.ActorList.set(new BattleSlot(user, action.actionIndex), null); // 슬롯을 등록하고
-            io.to(socketId).emit('move_selected');
-        }
+        // 아군(Attacker)과 적군(Target) 구분
+        const me = (role === 'p1') ? this.p1 : this.p2;
+        const opp = (role === 'p1') ? this.p2 : this.p1;
+        if (!me || !opp) return;
+
+        const userChar = me.battleEntry[action.userIndex];      // 공격자
+        const targetChar = opp.battleEntry[action.actionIndex]; // 방어자 (actionIndex를 타겟 유닛 인덱스로 사용)
+
+        if (!userChar || !targetChar) return;
+
+        // [Source 5] ActManager에 타겟 매핑
+        // (주의: SkillSelect가 선행되어야 함)
+        this.actManager.TargetLock(userChar, targetChar);
+
+        // [UI Sync] 방 전체에 "타겟 지정됨" 신호 전송 (화살표 그리기용)
+        io.to(this.roomId).emit('ui_target_locked', {
+            srcPlayer: role,        // 누가 (p1 or p2)
+            srcIndex: action.userIndex,  // 몇 번 유닛이
+            targetIndex: action.actionIndex // 몇 번 유닛을
+        });
+
+        console.log(`[Room] Target Locked: ${role}: Unit ${action.userIndex}(${userChar.name}) -> Enemy Unit ${action.actionIndex}(${targetChar.name})`);
     }
 
     // 시작 버튼
-
+    /*
     private handleBattleInput(socketId: string, action: BattleAction, io: Server) {
         const role = this.players[socketId];
         if (!role) return;
@@ -354,7 +349,7 @@ export class GameRoom {
         // 3️⃣ 턴 종료 페이즈 (날씨, 상태이상 데미지 등)
         this.endTurn(io);
     }
-
+    */
     // 턴 종료 시 공통 처리 (함수로 분리 추천)
     private endTurn(io: Server) {
         console.log("=== 턴 종료 ===");
@@ -398,13 +393,14 @@ export class GameRoom {
     // UI 업데이트 헬퍼
     broadcastState(io: Server) {
         // 1. 데이터 안전하게 준비 (없으면 null)
+        /*
         const poke1Data = this.p1 ? this.p1.activePokemon.toData() : null;
         const poke2Data = this.p2 ? this.p2.activePokemon.toData() : null;
         
         // 파티 정보도 안전하게 매핑
         const p1PartyData = this.p1 ? this.p1.party.map(p => p.toData()) : null;
-        const p2PartyData = this.p2 ? this.p2.party.map(p => p.toData()) : null;
-
+        const p2PartyData = this.p2 ? this.p2.party.map(p => p.toData()) : null; */
+        /*
         io.to(this.roomId).emit('update_ui', {
             p1: { 
                 active: poke1Data, // 변환된 데이터 전송
@@ -419,8 +415,9 @@ export class GameRoom {
             gameState: this.gameState,
             faintPlayerId: this.faintPlayerId
         });
+        */
     }
-
+    /*
     resetGame(io: Server) {
         // 1. 공통 초기화 로직 (함수로 분리하여 중복 제거)
         const resetPlayerTeam = (player: Player | null) => {
@@ -456,5 +453,6 @@ export class GameRoom {
         // 턴 시작 신호
         io.to(this.roomId).emit('turn_start');
     }
+        */
 }
 

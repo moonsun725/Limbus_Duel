@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Client - 6vs6 Battle</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <div id="game-container">
@@ -18,8 +20,8 @@
             <div class="box type-gray player-info-box">Player 2 Info</div>
         </div>
 
-        <div class="main-layer"> 
-            
+        <div class="main-layer">
+
             <div class="sidebar left">
                 <div class="stack-group">
                     <div class="box type-pink mini" data-has-info="true"></div>
@@ -39,7 +41,7 @@
             </div>
 
             <div class="battle-field">
-                
+
                 <div class="team-container left-team">
                     <div class="unit-column down">
                         <div class="box type-blue" data-has-info="true"></div>
@@ -119,7 +121,7 @@
                     <button class="circle type-red" data-has-info="true"></button>
                     <button class="circle type-red" data-has-info="true"></button>
                     <button class="circle type-red" data-has-info="true"></button>
-                    
+
                     <button class="circle type-red" data-has-info="true"></button>
                     <button class="circle type-red" data-has-info="true"></button>
                     <button class="circle type-red" data-has-info="true"></button>
@@ -127,7 +129,8 @@
                     <button class="circle type-red" data-has-info="true"></button>
                     <button class="circle type-red" data-has-info="true"></button>
                 </div>
-                <div class="green-row">
+
+                <div class="green-grid">
                     <button class="circle type-green" data-has-info="true"></button>
                     <button class="circle type-green" data-has-info="true"></button>
                     <button class="circle type-green" data-has-info="true"></button>
@@ -138,11 +141,13 @@
             </div>
 
             <div class="big-button-area">
-                <button class="circle type-yellow large" data-has-info="true"></button>
+                <button class="circle type-yellow large" data-has-info="true">GO</button>
             </div>
         </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script src="client.js"></script>
 </body>
+
 </html>

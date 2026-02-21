@@ -1,3 +1,4 @@
+const socket = io();
 /**
  * Game Client Logic
  */
@@ -120,6 +121,121 @@ function init() {
     buttons.forEach(btn => {
         btn.addEventListener('click', handleClick);
     });
+}
+
+// 상태 관리 변수
+let myRole = null;       // 'p1' or 'p2'
+let selectedUnitIndex = null; // 현재 스킬을 선택한 내 유닛 인덱스
+let selectedSkillSlot = null; // 현재 선택한 스킬 슬롯 (0 or 1)
+
+// DOM 요소 가져오기
+const skillButtons = document.querySelectorAll('.type-red'); // 하단 붉은 버튼 (스킬)
+const targetButtons = document.querySelectorAll('.right-team .circle'); // 우측 상대 유닛 (타겟)
+
+// --------------------------------------------------------
+// 1. 초기화 및 역할 할당
+// --------------------------------------------------------
+// 게임 참가 요청 (임시로 room1 고정)
+socket.emit('join_game', 'room1');
+
+socket.on('role_assigned', (data) => {
+    myRole = data.role;
+    console.log(`Role Assigned: ${myRole}`);
+    // 내 역할에 따라 UI 배치 반전 등의 로직이 필요할 수 있음
+});
+
+// --------------------------------------------------------
+// [핵심 변경] 2. 스킬 선택 로직 (세로 매핑)
+// --------------------------------------------------------
+skillButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+        if (!myRole) return;
+
+        // [Rule Update] 인덱스를 (유닛 번호, 스킬 번호)로 변환
+        
+        // 유닛 인덱스: 0~5 (열 번호)
+        const uIndex = index % 6; 
+
+        // 스킬 슬롯: 위쪽(0~5)이면 1번, 아래쪽(6~11)이면 0번
+        // (이미지 기준 Top: 1번, Bottom: 0번)
+        const sIndex = (index < 6) ? 1 : 0;
+
+        // 서버 전송
+        socket.emit('action_select', {
+            type: 'skillSelect',
+            userIndex: uIndex,
+            actionIndex: sIndex
+        });
+
+        // 로컬 상태 저장
+        selectedUnitIndex = uIndex;
+        selectedSkillSlot = sIndex;
+        
+        console.log(`[Click] Unit ${uIndex}, Skill ${sIndex} (Button Idx: ${index})`);
+    });
+});
+
+// [서버 응답] 스킬 선택 하이라이트 동기화
+socket.on('ui_move_selected', (data) => {
+    // data: { userIndex, skillSlot }
+
+    // 기존 하이라이트 제거
+    skillButtons.forEach(b => b.classList.remove('selected-skill'));
+
+    // [Rule Update] (유닛, 스킬) -> 버튼 인덱스 역계산
+    // 스킬 1번(Top)이면: userIndex 그대로
+    // 스킬 0번(Bottom)이면: userIndex + 6 (아랫줄)
+    const targetBtnIndex = (data.skillSlot === 1) 
+        ? data.userIndex 
+        : data.userIndex + 6;
+
+    // 해당 버튼 강조
+    if (skillButtons[targetBtnIndex]) {
+        skillButtons[targetBtnIndex].classList.add('selected-skill');
+    }
+});
+
+// --------------------------------------------------------
+// 3. 타겟 선택 로직 (회색 버튼) [Source 6]
+// --------------------------------------------------------
+targetButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+        // 스킬이 먼저 선택되어 있어야 함
+        if (selectedUnitIndex === null) {
+            alert("먼저 스킬을 선택해주세요!");
+            return;
+        }
+
+        // 서버로 전송 (누가 -> 누구를)
+        socket.emit('target_select', {
+            type: 'targetSelect',
+            userIndex: selectedUnitIndex, // 공격자 (내 유닛)
+            actionIndex: index            // 방어자 (클릭한 상대 유닛)
+        });
+        
+        console.log(`Request Target Select: MyUnit ${selectedUnitIndex} -> EnemyUnit ${index}`);
+    });
+});
+
+// [서버 응답] 타겟 매핑 확인 (화살표/연결선 표시)
+socket.on('ui_target_locked', (data) => {
+    // data: { srcPlayer, srcIndex, targetIndex }
+    console.log(`Target Locked: ${data.srcPlayer} Unit ${data.srcIndex} -> Unit ${data.targetIndex}`);
+
+    if (data.srcPlayer === myRole) {
+        // 내가 지정한 타겟 표시 (예: 상대 유닛 테두리 빨갛게)
+        // 실제로는 여기서 Canvas나 SVG로 화살표를 그리는 함수 호출
+        drawArrow(data.srcIndex, data.targetIndex); 
+    }
+});
+
+// (임시) 화살표 대신 로그 출력 및 스타일 변경 함수
+function drawArrow(uIdx, tIdx) {
+    // 일단 타겟 버튼에 스타일 표시로 대체
+    targetButtons.forEach(b => b.classList.remove('targeted'));
+    targetButtons[tIdx].classList.add('targeted');
+    
+    alert(`[매핑 성공] 내 ${uIdx}번 유닛이 적 ${tIdx}번 유닛을 조준했습니다.`);
 }
 
 // 실행

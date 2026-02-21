@@ -122,61 +122,69 @@ body {
 .unit-column.up { transform: translateY(-40px); }
 .unit-column.down { transform: translateY(40px); }
 
-/* === 하단 (Bottom Layer) 수정 === */
 .bottom-layer {
-    /* [핵심] Flex 흐름에서 빼내어 바닥에 강제 고정 */
     position: absolute; 
     bottom: 0;
     left: 0;
     width: 100%;
-    
-    height: 220px; /* 패널의 높이 고정 */
+    height: 300px; /* 높이를 넉넉하게 확보 (버튼이 많아졌으므로) */
     
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* 내용물을 아래쪽으로 정렬 */
-    gap: 50px;
+    align-items: flex-end; /* 바닥 정렬 */
+    padding-bottom: 20px;
+    gap: 40px; /* 스킬 패널과 왕버튼 사이 간격 */
     
-    /*background-color: #f1f1f1;
-    border-top: 2px solid #ccc;*/
-    
-    /* 버튼들을 바닥에서 얼마나 띄울지 결정 (일정한 거리 유지) */
-    padding-bottom: 40px; 
-    box-sizing: border-box;
-    z-index: 10; /* 유닛보다 위에 보이도록 설정 */
+    pointer-events: none; /* 배경 클릭 시 유닛 클릭 방해 안 되게 (버튼엔 pointer-events: auto 필요) */
+    z-index: 10;
 }
 
+/* 실제 컨트롤 패널 (버튼들 들어가는 곳) */
 .control-panel {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 10px; /* 붉은 버튼 뭉치와 초록 버튼 뭉치 사이 간격 */
+    pointer-events: auto; /* 버튼 클릭 가능하게 복구 */
 }
 
+/* 붉은색 그리드 (2줄 x 6칸) */
 .red-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 5px;
+    grid-template-columns: repeat(6, 1fr); /* 6개의 같은 너비 기둥 */
+    column-gap: 15px; /* ★ 캐릭터 간격 (초록색과 일치해야 함) */
+    row-gap: 5px;     /* 같은 캐릭터의 스킬 1, 0 사이 간격 (좁게) */
 }
 
-.green-row {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    gap: 5px;
+/* 초록색 그리드 (1줄 x 6칸) */
+.green-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 붉은색과 동일한 구조 */
+    column-gap: 15px; /* ★ 붉은색의 column-gap과 반드시 일치해야 줄이 맞음 */
 }
+
+/* 버튼 스타일 미세 조정 */
+.bottom-layer .circle {
+    width: 50px;  /* 버튼 크기 조정 */
+    height: 50px;
+    border-width: 2px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3); /* 입체감 */
+}
+
 
 .big-button-area {
     display: flex;
     align-items: center;
 }
 
+/* 왕버튼 스타일 */
 .circle.large {
-    width: 130px; height: 130px; /* 왕버튼 더 크게 */
-    border: 4px solid #333;
-    font-size: 20px;
-    font-weight: bold;
+    width: 100px;
+    height: 100px;
+    font-size: 24px;
+    pointer-events: auto;
 }
+
 
 /* === 툴팁 === */
 #info-tooltip {
@@ -191,6 +199,21 @@ body {
     box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
 }
 .hidden { display: none; }
+
+/* 스킬 선택 시 강조 효과 (노란 테두리 & 밝아짐) */
+.selected-skill {
+    border: 3px solid #FFD700 !important; /* Gold */
+    box-shadow: 0 0 10px #FFD700;
+    transform: scale(1.1);
+    z-index: 100;
+}
+
+/* 타겟 지정 시 강조 효과 (붉은 테두리) */
+.targeted {
+    border: 3px solid #FF0000 !important;
+    box-shadow: 0 0 15px #FF0000;
+    background-color: #ffcccc; /* 살짝 붉은 배경 */
+}
 
 /* ========================================= */
 /* 반응형 (Responsive Design) 설정       */
@@ -258,4 +281,34 @@ body {
     .main-layer {
         padding-bottom: 180px;
     }
+}
+
+/* [Rule Update] 이미 스킬 선택을 마친 버튼 (어둡게 처리) */
+.type-red.used {
+    filter: brightness(0.5); /* 밝기를 낮춰서 '사용됨' 표시 */
+    border-color: #550000;
+    transform: scale(0.95);  /* 살짝 눌린 듯한 느낌 */
+}
+
+/* [Rule Update] 현재 선택 중인 버튼 (강조 - 기존 selected-skill 대체 가능) */
+.type-red.selected {
+    border: 3px solid #FFD700 !important; /* 금색 테두리 */
+    box-shadow: 0 0 15px #FFD700;
+    transform: scale(1.1);
+    z-index: 100;
+    filter: brightness(1.2);
+}
+
+/* [Rule Update] 타겟으로 지정된 적 유닛 (노랗게/붉게 표시) */
+.type-white.locked {
+    background-color: #fff9c4 !important; /* 약간 노란빛 */
+    border: 3px solid #ff9800 !important; /* 주황색 테두리 */
+    box-shadow: 0 0 10px #ff9800;
+    animation: pulse 1.5s infinite; /* 깜빡이는 효과 */
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
 }

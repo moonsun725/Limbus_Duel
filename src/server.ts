@@ -4,8 +4,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GameRoom } from './04_Game/포켓몬 기준 룸.js'; 
-import type { BattleAction } from './04_Game/포켓몬 기준 룸.js';
+import { GameRoom } from './04_Game/11_room.js'; 
+import type { BattleAction } from './04_Game/11_room.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,7 +14,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // 방 관리자 (Map)
 const rooms: { [roomId: string]: GameRoom } = {};
@@ -26,24 +26,43 @@ io.on('connection', (socket) => {
     console.log(`[Lobby] 접속: ${socket.id}`);
 
     // 1. 방 입장 요청 처리 (클라이언트가 'join_game' 이벤트를 보내면 실행)
-    socket.on('join_game', (roomId) => {
-        // 이미 방에 들어가 있다면 무시하거나 기존 방 나가기 처리 (여기선 생략)
-        if (socketToRoom[socket.id]) return;
+    socket.on('join_game', (data) => {
+        // 1. 초기값 선언
+        let roomId = "";
+        let teamData = null;
 
+        // 2. 타입에 따른 분기 (심플 이즈 베스트)
+        if (typeof data === 'string') {
+            // 예전 방식: 방 제목만 보냈을 때
+            roomId = data;
+            console.log(`[Server] 단순 입장: ${roomId}`);
+        } else {
+            // 새 방식: 객체({ roomId, team })로 보냈을 때
+            roomId = data.roomId;
+            teamData = data.team;
+            console.log(`[Server] 팀 데이터 입장: ${roomId} (팀원: ${teamData?.length || 0}명)`);
+        }
+
+        if (socketToRoom[socket.id]) return;
         console.log(`[System] ${socket.id} 님이 [${roomId}] 방 입장을 요청했습니다.`);
 
         // Socket.io 룸 입장
         socket.join(roomId);
         socketToRoom[socket.id] = roomId; // 매핑 기록
 
-        // 방 인스턴스 없으면 생성 (Lazy Init)
-        if (!rooms[roomId]) {
+        // 1. 일단 가져와봄
+        let room = rooms[roomId];
+
+        // 2. 없으면 만들어서 넣고, 변수에도 할당
+        if (!room) {
             console.log(`[System] 새로운 방 생성: ${roomId}`);
-            rooms[roomId] = new GameRoom(roomId);
+            room = new GameRoom(roomId, io);
+            rooms[roomId] = room;
         }
 
-        const room = rooms[roomId];
-        const myRole = room.join(socket.id);
+        console.log(`[server]/join_game: 파티 데이터 확인 ${teamData}`);
+        // 3. 이제 room은 무조건 GameRoom 타입임 (undefined 아님)
+        const myRole = room.join(socket.id, teamData);
 
         // 결과 전송
         socket.emit('role_assigned', { role: myRole, roomId: roomId });
@@ -74,18 +93,22 @@ io.on('connection', (socket) => {
     }
     });
 
-    // 스킬 선택
-    socket.on('action_select',(actionData: BattleAction) => {
+    // [Source 4] 붉은색 버튼을 눌렀을 때 handleMoveSelect() 발생
+    socket.on('action_select', (actionData: BattleAction) => {
         const roomId = socketToRoom[socket.id];
+        if (roomId && rooms[roomId]) {
+            // 스킬 선택 처리
+            rooms[roomId].handleMoveSelect(socket.id, actionData, io);
+        }
     });
 
-    // 타겟 선택
-    socket.on('action_select',(actionData: BattleAction) => {
+    // [Source 6] 회색 버튼을 눌렀을 때 handleTargetSelect() 발생
+    socket.on('target_select', (actionData: BattleAction) => {
         const roomId = socketToRoom[socket.id];
-    });
-
-    socket.on('target_select',(actionData: BattleAction) => {
-        const roomId = socketToRoom[socket.id];
+        if (roomId && rooms[roomId]) {
+            // 타겟 지정 처리
+            rooms[roomId].handleTargetSelect(socket.id, actionData, io);
+        }
     });
 
     // 전투 시작 버튼
