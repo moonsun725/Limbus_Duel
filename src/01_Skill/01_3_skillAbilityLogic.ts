@@ -4,7 +4,7 @@ import { AbilityRegistry } from "../05_Ability/03_Abilities.js";
 
 
 // 트리거 타입 정의: 언제 호출되었는가?
-export type EffectTrigger = 'OnUse' | 'OnHit' | 'OnBasePower';
+export type EffectTrigger = 'OnUse' | 'OnHit' | 'OnBasePower' | 'OnHeadsHit' | 'OnTailsHit' | 'OnParryWin';
 
 interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음

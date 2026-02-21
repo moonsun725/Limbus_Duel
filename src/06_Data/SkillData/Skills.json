@@ -6,8 +6,8 @@
       "name": "쳐내기",
       "desc": "",
       "abilities": [],
-      "category" : "attack",
-      "color" : "blue",
+      "category": "attack",
+      "color": "blue",
       "keywords": [
         "Sinking"
       ],
@@ -29,8 +29,7 @@
               "Type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
-              "data": 
-              {
+              "data": {
                 "KeywordBuf": "Sinking",
                 "stack": 2
               }
@@ -72,8 +71,7 @@
               "Type": "AddKeywordBuf",
               "timing": "OnSucceedAttack",
               "target": "opponent",
-              "data": 
-              {
+              "data": {
                 "KeywordBuf": "Sinking",
                 "stack": 2,
                 "count": 1
@@ -111,8 +109,7 @@
               "Type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
-              "data": 
-              {
+              "data": {
                 "KeywordBuf": "Sinking",
                 "stack": 2
               }
@@ -133,8 +130,7 @@
               "Type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
-              "data": 
-              {
+              "data": {
                 "KeywordBuf": "Sinking",
                 "stack": 1
               }
@@ -155,8 +151,7 @@
               "Type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
-              "data": 
-              {
+              "data": {
                 "BattleUnitBuf": "Fragile",
                 "stack": 1
               }
@@ -175,13 +170,12 @@
       "BasePower": 7,
       "coinlist": [
         {
-          "Type" : "Guard",
+          "Type": "Guard",
           "CoinPower": 3,
           "Color": "blue"
         }
       ]
     },
-
     {
       "id": 1020101,
       "level": 10,
@@ -208,8 +202,7 @@
               "Type": "AddBuf",
               "timing": "OnHit",
               "target": "opponent",
-              "data": 
-              {
+              "data": {
                 "BattleUnitBuf": "Paralyze",
                 "stack": 1
               }
@@ -249,8 +242,7 @@
               "Type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
-              "data": 
-              {
+              "data": {
                 "BattleUnitBuf": "AtkLvDown",
                 "stack": 3
               }
@@ -282,11 +274,13 @@
           ],
           "abilities": [
             {
+              "Type": "AddBufNextTurn",
               "timing": "OnHeadsHit",
               "target": "opponent",
-              "BattleUnitBuf": "AttackDown",
-              "amount": 3,
-              "nextTurn": true 
+              "data": {
+                "BattleUnitBuf": "AtkDown",
+                "stack": 1
+              }
             }
           ]
         },
@@ -301,11 +295,13 @@
           ],
           "abilities": [
             {
+              "Type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
-              "BattleUnitBuf": "AttackDown",
-              "amount": 3,
-              "nextTurn": true 
+              "data": {
+                "BattleUnitBuf": "AtkDown",
+                "stack": 1
+              }
             }
           ]
         }
@@ -329,12 +325,22 @@
         }
       ]
     },
-
     {
       "id": 1030101,
       "level": 10,
       "name": "찌르기",
       "desc": "[WinDuel] 다음 턴에 신속 2 얻음",
+      "abilities": [
+        {
+          "Type": "AddBufNextTurn",
+          "timing": "OnParryWin",
+          "target": "self",
+          "data": {
+            "BattleUnitBuf": "Agility",
+            "stack": 2
+          }
+        }
+      ],
       "category": "attack",
       "color": "orange",
       "keywords": [],
@@ -355,9 +361,22 @@
       "level": 20,
       "name": "모아 찌르기",
       "desc": "[WinDuel] 다음 턴에 공격 위력 증가 2 얻음",
+      "abilities": [
+        {
+          "Type": "AddBufNextTurn",
+          "timing": "OnParryWin",
+          "target": "self",
+          "data": {
+            "BattleUnitBuf": "AtkUp",
+            "stack": 2
+          }
+        }
+      ],
       "category": "attack",
       "color": "violet",
-      "keywords": ["Bleeding"],
+      "keywords": [
+        "Bleeding"
+      ],
       "BasePower": 4,
       "AtkLv": 2,
       "Weight": 1,
@@ -371,9 +390,7 @@
               "desc": "[OnSucceedAttackHead] 출혈 2 부여"
             }
           ],
-          "abilities" :[
-
-          ]
+          "abilities": []
         }
       ]
     },
@@ -382,9 +399,22 @@
       "level": 30,
       "name": "정의를 위해!",
       "desc": "속도가 10 이상이면, 코인 위력 +2",
+      "abilities": [
+        {
+          "Type": "AddBufNextTurn",
+          "timing": "OnParryWin",
+          "target": "self",
+          "data": {
+            "BattleUnitBuf": "Agility",
+            "stack": 2
+          }
+        }
+      ],
       "category": "attack",
       "color": "green",
-      "keywords": ["Bleeding"],
+      "keywords": [
+        "Bleeding"
+      ],
       "BasePower": 3,
       "AtkLv": 2,
       "Weight": 1,
@@ -398,9 +428,7 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "abilities" :[
-
-          ]
+          "abilities": []
         },
         {
           "Type": "Penetrate",
@@ -411,9 +439,7 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "abilities" :[
-
-          ]
+          "abilities": []
         },
         {
           "Type": "Penetrate",
@@ -424,9 +450,7 @@
               "desc": "[OnSucceedAttack] 출혈 횟수 2 부여"
             }
           ],
-          "abilities" :[
-
-          ]
+          "abilities": []
         }
       ]
     },
@@ -446,13 +470,10 @@
           "Type": "Evade",
           "Color": "orange",
           "CoinPower": 10,
-          "abilities" :[
-
-          ]
+          "abilities": []
         }
       ]
     },
-
     {
       "id": 1040101,
       "level": 10,
@@ -460,7 +481,9 @@
       "desc": "",
       "category": "attack",
       "color": "green",
-      "keywords": ["Poise"],
+      "keywords": [
+        "Poise"
+      ],
       "BasePower": 4,
       "AtkLv": 2,
       "Weight": 1,
@@ -474,9 +497,7 @@
               "desc": "[OnSucceedAttack] 다음 턴에 호흡 2 얻음"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -501,9 +522,7 @@
               "desc": "대상이 이번 턴에 피해를 받은 상태면 피해량 +30%"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "Slash",
@@ -514,9 +533,7 @@
               "desc": "대상이 이번 턴에 피해를 받은 상태면 피해량 +30%"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -527,7 +544,9 @@
       "desc": "[StartBattle] 참격 피해량 증가 2를 얻음",
       "category": "attack",
       "color": "indigo",
-      "keywords": ["Poise"],
+      "keywords": [
+        "Poise"
+      ],
       "BasePower": 5,
       "AtkLv": 2,
       "Weight": 1,
@@ -546,9 +565,7 @@
               "desc": "[OnSucceedAttack] 다음 턴에 호흡 2 얻음"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "Slash",
@@ -576,7 +593,6 @@
         }
       ]
     },
-
     {
       "id": 1050101,
       "level": 10,
@@ -584,7 +600,9 @@
       "desc": "",
       "category": "attack",
       "color": "yellow",
-      "keywords": ["Tremor"],
+      "keywords": [
+        "Tremor"
+      ],
       "BasePower": 3,
       "AtkLv": -3,
       "Weight": 1,
@@ -598,9 +616,7 @@
               "desc": "[OnSucceedAttackHead] 진동 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "Blunt",
@@ -611,9 +627,7 @@
               "desc": "[OnSucceedAttackHead] 진동 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -624,7 +638,9 @@
       "desc": "[WhenUse] 다음 턴에 수비 위력 증가 3 얻음",
       "category": "attack",
       "color": "indigo",
-      "keywords": ["Tremor"],
+      "keywords": [
+        "Tremor"
+      ],
       "BasePower": 6,
       "AtkLv": -3,
       "Weight": 1,
@@ -638,9 +654,7 @@
               "desc": "[OnSucceedAttack] 진동 폭발"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -651,7 +665,9 @@
       "desc": "[WhenUse] 다음 턴에 보호 3 얻음",
       "category": "attack",
       "color": "blue",
-      "keywords": ["Tremor"],
+      "keywords": [
+        "Tremor"
+      ],
       "BasePower": 4,
       "AtkLv": -3,
       "Weight": 1,
@@ -665,9 +681,7 @@
               "desc": "[OnSucceedAttackHead] 진동 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "Blunt",
@@ -678,9 +692,7 @@
               "desc": "[OnSucceedAttackHead] 진동 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "Blunt",
@@ -691,9 +703,7 @@
               "desc": "[OnSucceedAttackHead] 진동 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "Blunt",
@@ -704,9 +714,7 @@
               "desc": "[OnSucceedAttack] 진동 횟수 2 증가"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -729,7 +737,6 @@
         }
       ]
     },
-
     {
       "id": 1060101,
       "level": 10,
@@ -738,21 +745,21 @@
       "category": "",
       "color": "indigo",
       "keywords": [],
-      "BasePower": 0,
-      "AtkLv": 0,
+      "BasePower": 4,
+      "AtkLv": 2,
       "Weight": 1,
       "coinlist": [
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Blunt",
+          "Color": "indigo",
+          "CoinPower": 7,
           "coindescs": [
             {
               "desc": "[OnSucceedAttack] 침잠 2 부여"
             }
           ],
           "abilities": [
-
+            {}
           ]
         }
       ]
@@ -778,9 +785,7 @@
               "desc": "[OnSucceedAttack] 침잠 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -791,9 +796,7 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -831,9 +834,7 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -856,7 +857,6 @@
         }
       ]
     },
-
     {
       "id": 1070101,
       "level": 10,
@@ -878,9 +878,7 @@
               "desc": "[OnSucceedAttack] 진동 3 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -905,9 +903,7 @@
               "desc": "[OnSucceedAttackHead] 진동 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -932,9 +928,7 @@
               "desc": "[OnSucceedAttackHead] 다음 코인 위력 +2"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -945,9 +939,7 @@
               "desc": "[OnSucceedAttack] 진동 폭발"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -970,7 +962,6 @@
         }
       ]
     },
-
     {
       "id": 1080101,
       "level": 10,
@@ -992,9 +983,7 @@
               "desc": "[OnSucceedAttack] 진동 횟수 1 증가"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1019,9 +1008,7 @@
               "desc": "[OnSucceedAttack] 진동 3 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1046,9 +1033,7 @@
               "desc": "[OnSucceedAttack] 진동 폭발. 타격 취약 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1071,7 +1056,6 @@
         }
       ]
     },
-
     {
       "id": 1090101,
       "level": 2,
@@ -1093,9 +1077,7 @@
               "desc": "[OnSucceedAttack] 출혈 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1120,9 +1102,7 @@
               "desc": "[OnSucceedAttack] 출혈 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1136,9 +1116,7 @@
               "desc": "[OnSucceedAttackHead] 출혈 횟수 1 증가"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1163,9 +1141,7 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1176,9 +1152,7 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1189,9 +1163,7 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1202,9 +1174,7 @@
               "desc": "[OnSucceedAttack] 대상의 [Laceration]이 6 이상이면, 피해량 +20%"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1224,13 +1194,10 @@
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
-
     {
       "id": 1100101,
       "level": 2,
@@ -1252,9 +1219,7 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1274,25 +1239,19 @@
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
           "Color": "",
           "CoinPower": 0,
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1317,9 +1276,7 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-            "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1330,9 +1287,7 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1343,9 +1298,7 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1368,7 +1321,6 @@
         }
       ]
     },
-
     {
       "id": 1110101,
       "level": 10,
@@ -1395,9 +1347,7 @@
               "desc": "[OnSucceedAttack] 파열 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1408,9 +1358,7 @@
               "desc": "[OnSucceedAttackHead] 파열 1 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1435,9 +1383,7 @@
               "desc": "대상보다 속도가 빠르면 피해량 +20%"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1448,9 +1394,7 @@
               "desc": "대상보다 속도가 빠르면 피해량 +20%"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1475,9 +1419,7 @@
               "desc": "[OnSucceedAttack] 파열 횟수 1 증가"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1500,7 +1442,6 @@
         }
       ]
     },
-
     {
       "id": 1120101,
       "level": 2,
@@ -1522,9 +1463,7 @@
               "desc": "[OnSucceedAttackHead] 파열 4 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1555,9 +1494,7 @@
               "desc": "[OnSucceedAttackHead] 파열 2 부여"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },
@@ -1582,9 +1519,7 @@
               "desc": "[OnSucceedAttack] 대상에게 [Burst]이 있을 때 피해량 +10%"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         },
         {
           "Type": "",
@@ -1598,9 +1533,7 @@
               "desc": "[OnSucceedAttackHead] 피해량의 30%만큼 체력 회복"
             }
           ],
-          "abilities" :[
-            
-          ]
+          "abilities": []
         }
       ]
     },

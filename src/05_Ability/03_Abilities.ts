@@ -46,5 +46,20 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
             };
             target.bufList.AddBufNextTurn(status.typeId, status);
         }
-    }
+    },
+
+    "PowerMultiplier": {
+        Execute: () => {}
+    },
+    "CoinPowerMultiplier": {
+        Execute: () => {}
+    },
+    "ClashPowerMultiplier": {
+        Execute: () => {}
+    },
+    
+    "DamageMultiplier": {
+        Execute: () => {}
+    },
+    
 }

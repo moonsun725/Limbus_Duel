@@ -4,13 +4,6 @@ import { BattleSlot } from "../00_Sinner/00_4_Slot.js";
 import { Character, createSinnerFromData } from "../00_Sinner/00_0_sinner.js";
 import { LoadSkillData } from "../01_Skill/01_2_ skillLoader.js";
 
-type Target = {
-    target: BattleSlot,
-    //몇번째 타깃인지
-    index: number
-}
-
-
 // npx tsx src/04_Game/001_ACT2.ts
 LoadSkillData();
 console.log("ACTLIST TEST");
@@ -19,7 +12,6 @@ const actor1 : Character = createSinnerFromData(10101);
 const actor2 : Character = createSinnerFromData(10201);
 const actor3: Character = createSinnerFromData(10301);
 
-let ActorList: Map<BattleSlot, Target | undefined> = new Map();
 let lockOrder: number = 0;
 let turnOrder: BattleSlot[] = [];
 
