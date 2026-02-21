@@ -204,7 +204,7 @@ export class GameRoom {
             targetIndex: action.actionIndex // 몇 번 유닛을
         });
 
-        console.log(`[Room] Target Locked: ${role}: Unit ${action.userIndex}(${userChar.name}) -> Enemy Unit ${action.actionIndex}(${targetChar.name})`);
+        console.log(`[Room] Target Locked: ${role}: Unit ${action.userIndex+1}(${userChar.name}) -> Enemy Unit ${action.actionIndex+1}(${targetChar.name})`);
     }
 
     // 시작 버튼
@@ -392,30 +392,44 @@ export class GameRoom {
 
     // UI 업데이트 헬퍼
     broadcastState(io: Server) {
-        // 1. 데이터 안전하게 준비 (없으면 null)
-        /*
-        const poke1Data = this.p1 ? this.p1.activePokemon.toData() : null;
-        const poke2Data = this.p2 ? this.p2.activePokemon.toData() : null;
+        // [Helper] 플레이어의 battleEntry(출전 캐릭터들)를 UI 데이터로 변환하는 함수
+        // toData() 메서드가 없다면 여기서 직접 객체를 만들어줍니다.
+        const getEntryData = (player: Player | null) => {
+            if (!player || !player.battleEntry) return [];
+
+            return player.battleEntry.map(char => {
+                // 빈 슬롯이거나 없는 경우 처리
+                if (!char) return null; 
+
+                // ★ [수정] 직접 매핑하지 말고, Character 클래스의 toData()를 사용하세요.
+                // toData() 내부에서 순환 참조를 피해 안전한 데이터만 뽑아주도록 구현되어 있습니다.
+                return char.toData(); 
+            });
+        };
+
+        // 1. 데이터 안전하게 준비 (activePokemon -> battleEntry로 변경)
+        const entry1Data = getEntryData(this.p1);
+        const entry2Data = getEntryData(this.p2);
         
-        // 파티 정보도 안전하게 매핑
-        const p1PartyData = this.p1 ? this.p1.party.map(p => p.toData()) : null;
-        const p2PartyData = this.p2 ? this.p2.party.map(p => p.toData()) : null; */
-        /*
+        // (파티 정보는 대기열 멤버를 보여줄 때 필요하므로 유지)
+        const p1PartyData = this.p1 ? this.p1.party.map(p => p.toData ? p.toData() : p) : null;
+        const p2PartyData = this.p2 ? this.p2.party.map(p => p.toData ? p.toData() : p) : null;
+
+        // 2. 클라이언트로 전송
         io.to(this.roomId).emit('update_ui', {
             p1: { 
-                active: poke1Data, // 변환된 데이터 전송
+                active: entry1Data, // 이제 배열([])이 전송됩니다.
                 party: p1PartyData
              },
 
             p2: { 
-                active: poke2Data, // 변환된 데이터 전송
+                active: entry2Data, 
                 party: p2PartyData 
             },
             
             gameState: this.gameState,
             faintPlayerId: this.faintPlayerId
         });
-        */
     }
     /*
     resetGame(io: Server) {

@@ -1,7 +1,7 @@
 import data from '../06_Data/IdentityData/10_personalities_LCB.json' with {type: 'json'};
 import { GetMoves } from '../01_Skill/01_2_ skillLoader.js';
 // skill.ts 상속
-import type { Skill } from '../01_Skill/01_0_skill.js'; 
+import type { Skill } from '../01_Skill/01_0_skill.js';
 import { type Coin } from '../02_Coin/02_0_coin.js';
 
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
@@ -15,14 +15,12 @@ import { BattleSlot } from './00_4_Slot.js';
 
 
 // "키는 DamageType 중 하나여야 하고, 값은 number다"
-type color =  'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'indigo' | 'violet';
+type color = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'indigo' | 'violet';
 type skilltype = 'atk' | 'def';
 
-export class Character
-{
+export class Character {
     public name: string; // 인격 이름
     public id: number;
-    public lv: number = 1; // 레벨
     public minSpeed;
     public maxSpeed;
     public speed: number;
@@ -39,11 +37,10 @@ export class Character
     // public Spassive: Passive; // 비전투 패시브
     public deck: Skill[];
     public readyDeck: Skill[];
-    
+
     public Slots: BattleSlot[] = [];
 
-    constructor(name: string, id: number, data: IsinnerData)
-    {
+    constructor(name: string, id: number, data: IsinnerData) {
         this.name = name;
         this.id = id;
         // 기본 능력치
@@ -60,7 +57,7 @@ export class Character
         this.speed = data.minSpeed;
         this.minSpeed = data.minSpeed;
         this.maxSpeed = data.maxSpeed;
-        
+
         this.deck = [];
         this.deck.push(this.Skill(0)); // 참조 복사라 여러 개 넣어도 괜찮아요
         this.deck.push(this.Skill(0));
@@ -74,38 +71,31 @@ export class Character
         this.shuffleDeck(this.readyDeck); // 일단은 더미로 남겨놓긴 했음 ㅇㅇ
         this.Slots.push(new BattleSlot(this));
     }
-    Skill(i: number) : Skill
-    {
+    Skill(i: number): Skill {
         return this.Skills.GetSkill(i);
     }
-    loseHP(amount: number)
-    {
+    loseHP(amount: number) {
         this.Stats.LoseHP(amount);
     }
-    loseSP(amount: number)
-    {
+    loseSP(amount: number) {
         this.Stats.LoseSP(amount);
     }
-    recoverSP(amount: number)
-    {
+    recoverSP(amount: number) {
         this.Stats.recoverSp(amount);
     }
-    takeDamage(damage: number)
-    {
+    takeDamage(damage: number) {
         const result = this.Stats.takeDamage(damage);
         let staggerResult = result.StaggerState;
-        switch(this.BattleState.GetState())
-        {
+        switch (this.BattleState.GetState()) {
             case "STAGGERED+": // 얘는 두번 증가시켜야되고
-                staggerResult++; 
+                staggerResult++;
             case "STAGGERED":
                 staggerResult++; // 얘는 한번 증가시키면 되니까 ㅇㅇ
         }
         if (staggerResult > 3)
             staggerResult = 3;
-        
-        switch(staggerResult)
-        {
+
+        switch (staggerResult) {
             case 1:
                 this.BattleState.ChangeState("STAGGERED");
                 console.log(`[takeDamage]: 흐트러짐!`);
@@ -114,7 +104,7 @@ export class Character
                 this.BattleState.ChangeState("STAGGERED+");
                 console.log(`[takeDamage]: 흐트러짐+!!`);
                 break;
-            case 3: 
+            case 3:
                 this.BattleState.ChangeState("STAGGERED++");
                 console.log(`[takeDamage]: 흐트러짐++!!!`);
                 break;
@@ -131,51 +121,41 @@ export class Character
         this.BattleState.ChangeState("NORMAL");
         // >< 버프리스트 초기화
     }
-    
+
     // 슬롯 관리
-    SkillSelect(deckIndex: 0|1, index: number = 0)
-    {
-        if(this.deck[deckIndex])
-        {
+    SkillSelect(deckIndex: 0 | 1, index: number = 0) {
+        if (this.deck[deckIndex]) {
             this.Slots[index]?.skillSelect(this.deck[deckIndex], deckIndex);
         }
     }
-    AddSlot() : number
-    {
+    AddSlot(): number {
         this.Slots.push(new BattleSlot(this));
-        const newLen = this.Slots.length; 
+        const newLen = this.Slots.length;
         return newLen - 1; // 인덱스 접근할 거니까 이게 맞아 ㅇㅇ
     }
 
 
     // 이벤트 관리들
 
-    CoinToss()
-    {
+    CoinToss() {
         this.bufList.OnCoinToss();
     }
-    ClashWin(clashCount: number)
-    {
-        this.recoverSP(10 + (clashCount*2)); // 초상마냥 정신력조건 뒤집힌 애도 있고 필싱처럼 회복량 다른 경우도 있어서 나중에는 stat으로 보내야함...
+    ClashWin(clashCount: number) {
+        this.recoverSP(10 + (clashCount * 2)); // 초상마냥 정신력조건 뒤집힌 애도 있고 필싱처럼 회복량 다른 경우도 있어서 나중에는 stat으로 보내야함...
         this.BattleState.ChangeState('CLASHWIN');
     }
-    ClashLose()
-    {
+    ClashLose() {
         // 나중에 추가   
         this.BattleState.ChangeState('CLASHLOSE');
     }
 
-    shuffleDeck(deck: Skill[])
-    {
+    shuffleDeck(deck: Skill[]) {
         deck.sort(() => Math.random() - 0.5);
     }
 
-    useSkill(choice: 0 | 1) : Skill | void
-    {
-        if(this.deck[choice])
-        {
-            if(choice === 0)
-            {
+    useSkill(choice: 0 | 1): Skill | void {
+        if (this.deck[choice]) {
+            if (choice === 0) {
                 this.deck.push(this.deck[choice]); // 맨 뒤로 보내고
                 this.deck.shift(); // 1칸 민다
             }
@@ -190,11 +170,50 @@ export class Character
             return this.deck[choice];
         }
     }
-    
+
+    public toData() {
+        return {
+            // 1. 기본 스탯 정보
+            id: this.id, // (선택) 클라에서 유닛 구분할 때 ID가 있으면 편함
+            lv: this.Stats.lv,
+            name: this.name,
+            hp: this.Stats.hp,
+            maxHp: this.Stats.maxHp, // (주의: Stats 내부 변수명이 maxhp인지 maxHp인지 확인 필요)
+            sp: this.Stats.sp,
+            speed: this.speed,
+
+            // [핵심] 객체 배열은 반드시 .map()을 통해 새로 만들어야 함
+            skills: this.deck.map(skill => {
+                if (!skill) return null; // 빈 슬롯 방어
+
+                return {
+                    // skill 객체 자체를 넣지 말고, skill.name 처럼 값을 꺼내 넣으세요.
+                    name: skill.name,
+                    color: skill.color, // (만약 color가 객체라면 skill.color.code 처럼 문자열로 변환 필요)
+                    desc: skill.desc,
+                    basePower: skill.BasePower,
+
+                    // 코인 정보도 마찬가지로 필요한 값만 추출
+                    coinPower: skill.coinlist[0]?.CoinPower || 0,
+                    coinNum: skill.coinlist.length,
+
+                    // [수정] 코인 설명 추출 로직
+                    // 데이터 구조: coindescs: [ { "desc": "진동 1 부여" } ]
+                    coinDescs: skill.coinlist.map(coin => {
+                        // 1. coindescs가 있는지 확인
+                        if (coin.coindescs && Array.isArray(coin.coindescs)) {
+                            // 2. 내부 객체들을 순회하며 'desc' 텍스트만 추출해서 합침
+                            return coin.coindescs.map((d: any) => d.desc).join(', ');
+                        }
+                        return ""; // 없으면 빈 문자열
+                    })
+                };
+            })
+        };
+    }
 }
 
-export function createSinnerFromData(id: number): Character 
-{
+export function createSinnerFromData(id: number): Character {
     // 데이터에서 해당 수감자 정보 찾기
     const sinnerData = data.Identities.find(sinner => sinner.id === id);
     if (!sinnerData) {

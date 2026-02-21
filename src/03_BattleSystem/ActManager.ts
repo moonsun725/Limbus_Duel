@@ -19,7 +19,7 @@ export class ActManager {
             // try catch를 아직 생각 안해놔서 throw는 당장 못하겠음
             return;
         }
-        console.log(user.name, "이", user.Slots[slotIndex].readySkill?.name, "로",);
+        console.log("[ActManager]: ",user.name, "이/가", user.Slots[slotIndex].readySkill?.name, "로",);
         this.ActorList.set(user.Slots[slotIndex], undefined);
     }
 

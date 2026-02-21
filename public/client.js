@@ -3,15 +3,8 @@ const socket = io();
  * Game Client Logic
  */
 
-// --------------------------------------------------------
-// [Rule 0] 전역 변수 공간 (State Management)
-// --------------------------------------------------------
-const gameState = {
-    // TODO: 턴 정보, 플레이어 HP 등 게임 상태 변수 선언
-    turn: 0,
-    playerHp: 100
-};
-
+// [New] 서버에서 받은 스킬 정보를 저장할 공간
+let skillDataCache = [];
 // --------------------------------------------------------
 // DOM 요소 참조
 // --------------------------------------------------------
@@ -29,7 +22,7 @@ const buttons = document.querySelectorAll('button');
  */
 function handleClick(event) {
     const target = event.currentTarget;
-    
+
     // TODO: 클릭된 요소에 따른 로직 구현
     console.log('Clicked:', target);
 }
@@ -39,38 +32,79 @@ function handleClick(event) {
  */
 function handleMouseEnter(event) {
     const target = event.currentTarget;
-    const type = getElementType(target); // 색상/클래스 기반 타입 판별
+    const type = getElementType(target);
 
-    // 툴팁 표시 로직
     tooltip.classList.remove('hidden');
-    
-    // [Rule 4] 같은 색 = 같은 종류 데이터
     let infoMessage = "";
-    
-    switch(type) {
-        case 'pink':
-            infoMessage = "스킬/상태 정보";
-            break;
-        case 'blue':
-            infoMessage = "아군 스탯 정보";
-            break;
-        case 'orange':
-            infoMessage = "유닛 본체 정보";
-            break;
-        case 'red':
-            infoMessage = "공격 액션";
-            break;
-        case 'green':
-            infoMessage = "지원/회복 액션";
-            break;
-        case 'yellow':
-            infoMessage = "필살기/메인 액션";
-            break;
-        default:
-            infoMessage = "정보 없음";
+
+    // 붉은 버튼(스킬)일 경우, 캐시된 데이터에서 정보를 찾음
+    if (type === 'red') {
+        // 현재 버튼이 몇 번째 버튼인지 찾기 (0~11)
+        const allRedButtons = document.querySelectorAll('.type-red');
+        const btnIndex = Array.from(allRedButtons).indexOf(target);
+
+        if (btnIndex >= 0 && skillDataCache.length > 0) {
+            const uIndex = btnIndex % 6;
+            const sIndex = (btnIndex < 6) ? 1 : 0;
+
+            // [🔍 디버그 1] 내가 마우스를 올린 버튼이 몇 번째 버튼인지 확인
+            console.group(`Button Hover Debug [Index: ${btnIndex}]`);
+
+            if (btnIndex >= 0 && skillDataCache.length > 0) {
+                // 유닛 인덱스(0~5), 스킬 슬롯(0 or 1) 계산
+                const uIndex = btnIndex % 6;
+                const sIndex = (btnIndex < 6) ? 1 : 0;
+
+                // [🔍 디버그 2] 계산된 유닛 번호와 스킬 슬롯 번호가 맞는지 확인
+                console.log(`Mapping Target -> Unit: ${uIndex}, Slot: ${sIndex}`);
+
+                // [🔍 디버그 3] 해당 유닛의 데이터가 제대로 들어있는지 확인
+                // (만약 여기서 모든 유닛의 이름이 똑같이 나온다면 -> 서버 데이터 문제)
+                const charData = skillDataCache[uIndex];
+                console.log(`Cached Data for Unit ${uIndex}:`, charData);
+
+                if (charData && charData.skills && charData.skills[sIndex]) {
+                    const skill = charData.skills[sIndex];
+
+                    // [🔍 디버그 4] 최종적으로 표시하려는 스킬 정보
+                    console.log(`Selected Skill: ${skill.name}`);
+
+                    infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
+                    if (skill.coinPower) infoMessage += ` (+${skill.coinPower} x ${skill.coinNum})`;
+                    infoMessage += `\n\n${skill.desc || ''}`;
+
+                    if (skill.coinDescs) {
+                        skill.coinDescs.forEach((desc, idx) => {
+                            if (desc) infoMessage += `\n🪙${idx + 1}: ${desc}`;
+                        });
+                    }
+                } else {
+                    console.warn("Skill data is missing for this slot!");
+                    infoMessage = "스킬 정보 없음 (데이터 누락)";
+                }
+            } else {
+                console.warn("SkillCache is empty or Button Index Invalid");
+                infoMessage = "데이터 로딩 중...";
+            }
+            console.groupEnd(); // 로그 그룹 닫기
+        } else {
+            infoMessage = "데이터 로딩 중...";
+        }
+    }
+    // 기존 로직 유지
+    else {
+        switch (type) {
+            case 'pink': infoMessage = "패시브 정보"; break;
+            case 'blue': infoMessage = "아군 상태"; break;
+            case 'orange': infoMessage = "캐릭터 상세"; break;
+            case 'green': infoMessage = "수비 스킬"; break;
+            case 'white': infoMessage = "적군 유닛"; break; // 적군 추가
+            default: infoMessage = "정보";
+        }
     }
 
-    tooltipText.textContent = infoMessage;
+    // 줄바꿈 처리를 위해 textContent 대신 innerText 혹은 HTML 사용
+    tooltipText.innerText = infoMessage;
 }
 
 /**
@@ -145,6 +179,20 @@ socket.on('role_assigned', (data) => {
 });
 
 // --------------------------------------------------------
+// [New] 서버로부터 게임 데이터(스킬 정보 등) 수신
+// --------------------------------------------------------
+socket.on('update_ui', (data) => {
+    // data 구조 예시: { p1: { active: [CharacterData...], ... }, p2: ... }
+
+    // 내 역할(p1/p2)에 맞는 캐릭터들의 스킬 정보를 캐싱합니다.
+    const myData = (myRole === 'p1') ? data.p1 : data.p2;
+    if (myData && myData.active) {
+        skillDataCache = myData.active; // 캐릭터 배열 저장
+        console.log("Skill Data Updated:", skillDataCache);
+    }
+});
+
+// --------------------------------------------------------
 // [핵심 변경] 2. 스킬 선택 로직 (세로 매핑)
 // --------------------------------------------------------
 skillButtons.forEach((btn, index) => {
@@ -152,9 +200,9 @@ skillButtons.forEach((btn, index) => {
         if (!myRole) return;
 
         // [Rule Update] 인덱스를 (유닛 번호, 스킬 번호)로 변환
-        
+
         // 유닛 인덱스: 0~5 (열 번호)
-        const uIndex = index % 6; 
+        const uIndex = index % 6;
 
         // 스킬 슬롯: 위쪽(0~5)이면 1번, 아래쪽(6~11)이면 0번
         // (이미지 기준 Top: 1번, Bottom: 0번)
@@ -170,7 +218,7 @@ skillButtons.forEach((btn, index) => {
         // 로컬 상태 저장
         selectedUnitIndex = uIndex;
         selectedSkillSlot = sIndex;
-        
+
         console.log(`[Click] Unit ${uIndex}, Skill ${sIndex} (Button Idx: ${index})`);
     });
 });
@@ -178,20 +226,12 @@ skillButtons.forEach((btn, index) => {
 // [서버 응답] 스킬 선택 하이라이트 동기화
 socket.on('ui_move_selected', (data) => {
     // data: { userIndex, skillSlot }
+    // 모든 버튼에서 'selected' 제거 (하나만 선택 가능하므로)
+    skillButtons.forEach(b => b.classList.remove('selected'));
 
-    // 기존 하이라이트 제거
-    skillButtons.forEach(b => b.classList.remove('selected-skill'));
-
-    // [Rule Update] (유닛, 스킬) -> 버튼 인덱스 역계산
-    // 스킬 1번(Top)이면: userIndex 그대로
-    // 스킬 0번(Bottom)이면: userIndex + 6 (아랫줄)
-    const targetBtnIndex = (data.skillSlot === 1) 
-        ? data.userIndex 
-        : data.userIndex + 6;
-
-    // 해당 버튼 강조
+    const targetBtnIndex = (data.skillSlot === 1) ? data.userIndex : data.userIndex + 6;
     if (skillButtons[targetBtnIndex]) {
-        skillButtons[targetBtnIndex].classList.add('selected-skill');
+        skillButtons[targetBtnIndex].classList.add('selected'); // [cite: 13]
     }
 });
 
@@ -212,20 +252,35 @@ targetButtons.forEach((btn, index) => {
             userIndex: selectedUnitIndex, // 공격자 (내 유닛)
             actionIndex: index            // 방어자 (클릭한 상대 유닛)
         });
-        
+
         console.log(`Request Target Select: MyUnit ${selectedUnitIndex} -> EnemyUnit ${index}`);
     });
 });
 
 // [서버 응답] 타겟 매핑 확인 (화살표/연결선 표시)
 socket.on('ui_target_locked', (data) => {
-    // data: { srcPlayer, srcIndex, targetIndex }
-    console.log(`Target Locked: ${data.srcPlayer} Unit ${data.srcIndex} -> Unit ${data.targetIndex}`);
+    // data: { srcPlayer, srcIndex, targetIndex, skillSlot }
 
     if (data.srcPlayer === myRole) {
-        // 내가 지정한 타겟 표시 (예: 상대 유닛 테두리 빨갛게)
-        // 실제로는 여기서 Canvas나 SVG로 화살표를 그리는 함수 호출
-        drawArrow(data.srcIndex, data.targetIndex); 
+        // A. 내가 사용한 스킬 버튼을 'Used'(어둡게) 상태로 변경 [cite: 16]
+        // (주의: 서버에서 skillSlot 정보도 보내줘야 정확히 찾음. 안 보내주면 추정해야 함)
+        const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0; // 임시
+        const btnIdx = (sSlot === 1) ? data.srcIndex : data.srcIndex + 6;
+
+        if (skillButtons[btnIdx]) {
+            skillButtons[btnIdx].classList.remove('selected'); // 선택 해제
+            skillButtons[btnIdx].classList.add('used');        // 사용됨 처리
+        }
+
+        // B. 타겟이 된 적 유닛 표시 [cite: 16]
+        const enemyUnits = document.querySelectorAll('.right-team .circle'); // 흰색 버튼들
+        if (enemyUnits[data.targetIndex]) {
+            enemyUnits[data.targetIndex].classList.add('locked');
+        }
+
+        // 선택 상태 초기화
+        selectedUnitIndex = null;
+        selectedSkillSlot = null;
     }
 });
 
@@ -234,7 +289,7 @@ function drawArrow(uIdx, tIdx) {
     // 일단 타겟 버튼에 스타일 표시로 대체
     targetButtons.forEach(b => b.classList.remove('targeted'));
     targetButtons[tIdx].classList.add('targeted');
-    
+
     alert(`[매핑 성공] 내 ${uIdx}번 유닛이 적 ${tIdx}번 유닛을 조준했습니다.`);
 }
 

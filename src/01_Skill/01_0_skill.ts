@@ -4,7 +4,7 @@ export interface Skill {
   id: number;
   level: number;
   name: string;
-  desc: string;
+  desc?: string;
   abilities: SkillAbility[];
   category: string;  
   color: string; 

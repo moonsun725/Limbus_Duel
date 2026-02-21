@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GameRoom } from './04_Game/11_room.js'; 
 import type { BattleAction } from './04_Game/11_room.js';
+import { LoadSkillData } from './01_Skill/01_2_ skillLoader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,9 @@ const rooms: { [roomId: string]: GameRoom } = {};
 
 // ★ 소켓 ID가 어느 방에 있는지 추적하는 맵 (SocketID -> RoomID)
 const socketToRoom: { [socketId: string]: string } = {};
+
+// 기술 데이터 로드
+LoadSkillData();
 
 io.on('connection', (socket) => {
     console.log(`[Lobby] 접속: ${socket.id}`);
