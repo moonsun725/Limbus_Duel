@@ -26,6 +26,8 @@ actor2.Skills.ShowSkillList();
 actor3.Stats.ShowStats();  
 actor3.Skills.ShowSkillList();
 
+console.log(actor1.deck[0]!.name, actor1.deck[1]!.name);
+
 TestManager.SkillSelect(actor1, 0);
 TestManager.TargetLock(actor1,actor2);
 
@@ -35,6 +37,9 @@ TestManager.TargetLock(actor2, actor1);
 
 TestManager.SkillSelect(actor3, 0);
 TestManager.TargetLock(actor3, actor1);
+
+TestManager.SkillSelect(actor1, 1);
+TestManager.TargetLock(actor1, actor2);
 
 TestManager.orderSort();
 await TestManager.StartCombat();
