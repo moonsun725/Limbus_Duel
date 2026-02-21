@@ -7,9 +7,6 @@ import { type Coin } from '../02_Coin/02_0_coin.js';
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
 import { BattleStateManager } from './00_2_BattleStateManager.js';
 import { BattleUnitBufList } from './00_3_BufList.js';
-import { calculateDamage } from './00_7_dmgCalc.js';
-import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
-import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
 import { SkillManager } from '../01_Skill/01_1_SkillManager.js';
 import { BattleSlot } from './00_4_Slot.js';
 
@@ -171,6 +168,7 @@ export class Character {
         }
     }
 
+    // 클라이언트 전달용 데이터 변환 함수
     public toData() {
         return {
             // 1. 기본 스탯 정보
