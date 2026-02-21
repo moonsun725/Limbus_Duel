@@ -62,7 +62,7 @@ export class Character
         this.maxSpeed = data.maxSpeed;
         
         this.deck = [];
-        this.deck.push(this.Skill(0)); // 참조 복사라 괜찮아요
+        this.deck.push(this.Skill(0)); // 참조 복사라 여러 개 넣어도 괜찮아요
         this.deck.push(this.Skill(0));
         this.deck.push(this.Skill(0));
         this.deck.push(this.Skill(1));
@@ -139,6 +139,12 @@ export class Character
         {
             this.Slots[index]?.skillSelect(this.deck[deckIndex], deckIndex);
         }
+    }
+    AddSlot() : number
+    {
+        this.Slots.push(new BattleSlot(this));
+        const newLen = this.Slots.length; 
+        return newLen - 1; // 인덱스 접근할 거니까 이게 맞아 ㅇㅇ
     }
 
 
