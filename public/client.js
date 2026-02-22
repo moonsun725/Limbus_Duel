@@ -8,6 +8,7 @@ let skillDataCache = [];
 // --------------------------------------------------------
 // DOM 요소 참조
 // --------------------------------------------------------
+// 스킬 버튼 툴팁
 const tooltip = document.getElementById('info-tooltip');
 const tooltipText = document.getElementById('tooltip-text');
 const interactableElements = document.querySelectorAll('[data-has-info="true"]');
@@ -47,27 +48,15 @@ function handleMouseEnter(event) {
             const uIndex = btnIndex % 6;
             const sIndex = (btnIndex < 6) ? 1 : 0;
 
-            // [🔍 디버그 1] 내가 마우스를 올린 버튼이 몇 번째 버튼인지 확인
-            console.group(`Button Hover Debug [Index: ${btnIndex}]`);
-
             if (btnIndex >= 0 && skillDataCache.length > 0) {
                 // 유닛 인덱스(0~5), 스킬 슬롯(0 or 1) 계산
                 const uIndex = btnIndex % 6;
                 const sIndex = (btnIndex < 6) ? 1 : 0;
 
-                // [🔍 디버그 2] 계산된 유닛 번호와 스킬 슬롯 번호가 맞는지 확인
-                console.log(`Mapping Target -> Unit: ${uIndex}, Slot: ${sIndex}`);
-
-                // [🔍 디버그 3] 해당 유닛의 데이터가 제대로 들어있는지 확인
-                // (만약 여기서 모든 유닛의 이름이 똑같이 나온다면 -> 서버 데이터 문제)
                 const charData = skillDataCache[uIndex];
-                console.log(`Cached Data for Unit ${uIndex}:`, charData);
 
                 if (charData && charData.skills && charData.skills[sIndex]) {
                     const skill = charData.skills[sIndex];
-
-                    // [🔍 디버그 4] 최종적으로 표시하려는 스킬 정보
-                    console.log(`Selected Skill: ${skill.name}`);
 
                     infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
                     if (skill.coinPower) infoMessage += ` (+${skill.coinPower} x ${skill.coinNum})`;
@@ -282,6 +271,41 @@ socket.on('ui_target_locked', (data) => {
         selectedUnitIndex = null;
         selectedSkillSlot = null;
     }
+});
+
+// --------------------------------------------------------
+// 페이즈/화면 전환 
+// --------------------------------------------------------
+// 1. DOM 요소 가져오기
+const phaseSelect = document.getElementById('phase-select');
+const phaseBattle = document.getElementById('phase-battle');
+const goButton = document.querySelector('.circle.large'); // GO 버튼
+
+// 2. GO 버튼 클릭 시 (서버에 요청)
+if (goButton) {
+    goButton.addEventListener('click', () => {
+        if (goButton.classList.contains('disabled')) return;
+
+        console.log("서버에 전투 시작 요청 보냄...");
+        
+        // 버튼 잠금 (중복 클릭 방지)
+        goButton.innerText = "WAIT";
+        goButton.classList.add('disabled');
+
+        // 서버로 '나 준비됐어!' 전송
+        socket.emit('start_battle', { type: 'BattleStart' });
+    });
+}
+
+// 3. [핵심] 화면 전환 리스너 (서버 응답)
+socket.on('battle_start_confirmed', () => {
+    console.log("🔥 전투 페이즈 진입! 화면을 전환합니다.");
+
+    // 선택 화면 숨기기
+    if (phaseSelect) phaseSelect.classList.add('hidden');
+    
+    // 전투(빈) 화면 보여주기
+    if (phaseBattle) phaseBattle.classList.remove('hidden');
 });
 
 // (임시) 화살표 대신 로그 출력 및 스타일 변경 함수

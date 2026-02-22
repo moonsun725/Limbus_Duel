@@ -6,7 +6,7 @@ import { ActManager } from '../03_BattleSystem/ActManager.js';
 import { BattleSlot } from '../00_Sinner/00_4_Slot.js';
 
 // 상태 머신: typescript에서는 enum보다 유니온 쓰는 게 낫대!
-type RoomState = 'MOVE_SELECT' | 'TARGET_SELECT' | 'WAITING_OPPONENT' |'BATTLE' | 'RESULT';
+type RoomState = 'MOVE_SELECT' | 'TARGET_SELECT' | 'WAITING_OPPONENT' | 'BATTLE' | 'RESULT';
 let lockOrder = 0;
 
 // 행동 종류: 스킬 선택 / 타깃 선택 / 선택 완료 버튼 선택 / 수비 스킬 선택 / 에고 스킬 선택
@@ -23,24 +23,27 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export class GameRoom {
     public roomId: string;
-    
+
     // 게임 상태 변수들 (server.ts의 전역 변수들이 멤버 변수가 됨)
-    
+
     // 플레이어 객체 
-    p1: Player | null = null; 
+    p1: Player | null = null;
     p2: Player | null = null;
     public players: { [socketId: string]: 'p1' | 'p2' } = {}; // 소켓ID -> 역할 매핑
-    
+
     private p1Action: BattleAction[] | null = null; // 여러 슬롯을 지정할 수 있으므로 배열
     private p2Action: BattleAction[] | null = null;
 
     // ★ [New] 현재 방의 상태 (기본값: 전투 중)
-    public gameState: RoomState = 'MOVE_SELECT'; 
+    public gameState: RoomState = 'MOVE_SELECT';
     private battleManager: BattleManager;
     private actManager: ActManager;
     private ActorList: BattleSlot[] = [];
 
-    
+    // 준비 상태 체크 변수 (둘 다 준비해야 전투 시작 가능)
+    private p1Ready: boolean = false;
+    private p2Ready: boolean = false;
+
     // ★ [New] 누가 교체해야 하는지 기억해둘 변수 (기절한 플레이어 ID)
     public faintPlayerId: string | null = null;
 
@@ -61,11 +64,11 @@ export class GameRoom {
                 await this.sleep(800);
             },
             onCoinToss: async (isHeads) => {
-                io.to(this.roomId).emit('indiviual_coin_result', {isHead: isHeads})
+                io.to(this.roomId).emit('indiviual_coin_result', { isHead: isHeads })
             },
             onClashResult: async (c1, p1, c2, p2, clashCount) => {
                 // 합 도중 팅! 팅! 하는 연출 데이터 전송
-                io.to(this.roomId).emit('anim_clash_coin', { 
+                io.to(this.roomId).emit('anim_clash_coin', {
                     c1: { id: c1.id, power: p1 },
                     c2: { id: c2.id, power: p2 },
                     clashCount: clashCount
@@ -86,12 +89,12 @@ export class GameRoom {
 
     // 유저 입장 처리
     join(socketId: string, teamData?: any[]): 'p1' | 'p2' | 'spectator' {
-        
+
         // 헬퍼 함수: 플레이어 세팅 (P1, P2 공통 로직)
-        const setupPlayer = (pid: 'p1' | 'p2' ): Player => {
+        const setupPlayer = (pid: 'p1' | 'p2'): Player => {
             const party = buildParty(teamData);
             const player = new Player(socketId, party); // 
-            
+
             this.players[socketId] = pid; // 'p1' or 'p2' 저장
             return player;
         };
@@ -100,7 +103,7 @@ export class GameRoom {
             this.p1 = setupPlayer('p1');
             console.log(`[Room] Player 1 입장 (ID: ${socketId})`);
             return 'p1';
-        } 
+        }
         else if (!this.p2) {
             this.p2 = setupPlayer('p2');
             console.log(`[Room] Player 2 입장 (ID: ${socketId})`);
@@ -109,11 +112,11 @@ export class GameRoom {
 
         return 'spectator';
     }
-    
+
     // 유저 퇴장 처리
     leave(socketId: string) {
         const role = this.players[socketId];
-        
+
         // socketId 매핑 정보 삭제
         delete this.players[socketId];
 
@@ -143,6 +146,7 @@ export class GameRoom {
                 this.handleTargetSelect(socketId, action, io); // action이 
                 break;
             case 'WAITING_OPPONENT': // 전투 시작까지 눌렀으면 낙장불입이제
+                this.handleBattleStart(socketId, io);
                 break;
             case 'BATTLE': // 이때는 씬 전환이 있을 예정이에요
                 break;
@@ -151,7 +155,7 @@ export class GameRoom {
                 break;
 
             case 'BATTLE': // 연산 중일 때는 입력 차단
-                return; 
+                return;
         }
     }
     handleMoveSelect(socketId: string, action: BattleAction, io: Server) {
@@ -174,7 +178,7 @@ export class GameRoom {
             userIndex: action.userIndex,
             skillSlot: action.actionIndex
         });
-        
+
         console.log(`[Room] ${role}: Skill Selected: Unit ${action.userIndex}, Skill ${action.actionIndex}`);
     }
 
@@ -204,10 +208,31 @@ export class GameRoom {
             targetIndex: action.actionIndex // 몇 번 유닛을
         });
 
-        console.log(`[Room] Target Locked: ${role}: Unit ${action.userIndex+1}(${userChar.name}) -> Enemy Unit ${action.actionIndex+1}(${targetChar.name})`);
+        console.log(`[Room] Target Locked: ${role}: Unit ${action.userIndex + 1}(${userChar.name}) -> Enemy Unit ${action.actionIndex + 1}(${targetChar.name})`);
     }
 
     // 시작 버튼
+    handleBattleStart(socketId: string, io: Server) {
+        // ... (준비 체크 로직 기존과 동일) ...
+        const role = this.players[socketId];
+        if (!role) return;
+
+        console.log(`[Room] ${role} Ready!`);
+
+        // UI 잠금 (해당 유저에게만)
+        io.to(socketId).emit('input_locked');
+        if (role === 'p1') this.p1Ready = true;
+        if (role === 'p2') this.p2Ready = true;
+        // 양쪽 플레이어가 모두 준비되었다면?
+        if (this.p1Ready && this.p2Ready) {
+            console.log("All Ready! Switching to Battle Screen.");
+
+            // ★ [이거 추가] 양쪽 클라이언트에게 "화면 바꿔라" 신호 전송
+            io.to(this.roomId).emit('battle_start_confirmed');
+
+            // (나중에 여기에 ActManager.StartCombat() 들어감)
+        }
+    }
     /*
     private handleBattleInput(socketId: string, action: BattleAction, io: Server) {
         const role = this.players[socketId];
@@ -353,24 +378,23 @@ export class GameRoom {
     // 턴 종료 시 공통 처리 (함수로 분리 추천)
     private endTurn(io: Server) {
         console.log("=== 턴 종료 ===");
-        
+
         // 버프/상태이상 업데이트
         // p1.activePokemon.bufList.UpdateTurn()... 
-        
-        this.p1Action = null;
-        this.p2Action = null;
+
+        this.p1Ready = false;
+        this.p2Ready = false;
         this.gameState = 'MOVE_SELECT';
 
         // UI 전체 갱신 (혹시 모를 싱크 맞추기)
         this.broadcastState(io);
-        
+
         // 다음 턴 입력 시작 신호
         io.to(this.roomId).emit('turn_start_input');
     }
 
     // 행동 취소 반영 함수
-    cancelAction(socketId: string, io: Server)
-    {
+    cancelAction(socketId: string, io: Server) {
         if (this.gameState !== 'WAITING_OPPONENT') return; // 아마 이 상황을 볼 일은 없을겁니다(왜냐하면 button.disabled에서 처리를 해주고 있으니 최소한의 안전장치라 생각)
 
         const role = this.players[socketId];
@@ -399,34 +423,34 @@ export class GameRoom {
 
             return player.battleEntry.map(char => {
                 // 빈 슬롯이거나 없는 경우 처리
-                if (!char) return null; 
+                if (!char) return null;
 
                 // ★ [수정] 직접 매핑하지 말고, Character 클래스의 toData()를 사용하세요.
                 // toData() 내부에서 순환 참조를 피해 안전한 데이터만 뽑아주도록 구현되어 있습니다.
-                return char.toData(); 
+                return char.toData();
             });
         };
 
         // 1. 데이터 안전하게 준비 (activePokemon -> battleEntry로 변경)
         const entry1Data = getEntryData(this.p1);
         const entry2Data = getEntryData(this.p2);
-        
+
         // (파티 정보는 대기열 멤버를 보여줄 때 필요하므로 유지)
         const p1PartyData = this.p1 ? this.p1.party.map(p => p.toData ? p.toData() : p) : null;
         const p2PartyData = this.p2 ? this.p2.party.map(p => p.toData ? p.toData() : p) : null;
 
         // 2. 클라이언트로 전송
         io.to(this.roomId).emit('update_ui', {
-            p1: { 
+            p1: {
                 active: entry1Data, // 이제 배열([])이 전송됩니다.
                 party: p1PartyData
-             },
-
-            p2: { 
-                active: entry2Data, 
-                party: p2PartyData 
             },
-            
+
+            p2: {
+                active: entry2Data,
+                party: p2PartyData
+            },
+
             gameState: this.gameState,
             faintPlayerId: this.faintPlayerId
         });
