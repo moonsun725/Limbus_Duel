@@ -299,6 +299,16 @@ body {
     filter: brightness(1.2);
 }
 
+/* [New] 스킬 버튼에 마우스 올렸을 때, 타겟팅된 적이 누구인지 보여주는 효과 */
+/* 기존 .locked (노란색) 보다 더 눈에 띄게 (예: 붉은 점선이나 확대) */
+.type-white.hover-targeted {
+    border: 3px dashed #ff0000 !important; /* 붉은 점선 */
+    background-color: #ffebee !important;   /* 연한 붉은 배경 */
+    transform: scale(1.15);                 /* 크기 확대 */
+    z-index: 200;                           /* 최상단 표시 */
+    transition: all 0.2s ease;
+}
+
 /* [Rule Update] 타겟으로 지정된 적 유닛 (노랗게/붉게 표시) */
 .type-white.locked {
     background-color: #fff9c4 !important; /* 약간 노란빛 */

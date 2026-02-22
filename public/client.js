@@ -18,6 +18,9 @@ const buttons = document.querySelectorAll('button');
 // [Rule 0] 이벤트 핸들러 함수 정의 (Logic Placeholders)
 // --------------------------------------------------------
 
+// [New] 타겟팅 현황을 저장할 맵 (Key: 내 유닛 인덱스, Value: 적 유닛 인덱스)
+let targetingData = {};
+
 /**
  * 객체 클릭 시 실행되는 함수 (버튼 등)
  */
@@ -79,6 +82,20 @@ function handleMouseEnter(event) {
         } else {
             infoMessage = "데이터 로딩 중...";
         }
+
+        // 이 버튼이 'used'(확정된 스킬) 상태라면, 누구를 때리는지 적에게 표시
+        if (target.classList.contains('used')) {
+            const uIndex = btnIndex % 6;
+            const targetEnemyIdx = targetingData[uIndex];
+            
+            if (targetEnemyIdx !== undefined) {
+                const enemyUnits = document.querySelectorAll('.right-team .circle'); // .unit-column button
+                // 적 유닛에게 'hover-targeted' 효과 부여
+                if (enemyUnits[targetEnemyIdx]) {
+                    enemyUnits[targetEnemyIdx].classList.add('hover-targeted');
+                }
+            }
+        }
     }
     // 기존 로직 유지
     else {
@@ -101,6 +118,11 @@ function handleMouseEnter(event) {
  */
 function handleMouseLeave(event) {
     tooltip.classList.add('hidden');
+
+    // [New] 호버 효과 제거
+    document.querySelectorAll('.hover-targeted').forEach(el => {
+        el.classList.remove('hover-targeted');
+    });
 }
 
 /**
@@ -182,33 +204,32 @@ socket.on('update_ui', (data) => {
 });
 
 // --------------------------------------------------------
-// [핵심 변경] 2. 스킬 선택 로직 (세로 매핑)
+// [핵심 변경] 2. 스킬 선택 로직 : (가로 매핑) -> (세로 매핑) -> 중복 선택 시 초기화 
 // --------------------------------------------------------
 skillButtons.forEach((btn, index) => {
     btn.addEventListener('click', () => {
         if (!myRole) return;
 
-        // [Rule Update] 인덱스를 (유닛 번호, 스킬 번호)로 변환
-
-        // 유닛 인덱스: 0~5 (열 번호)
-        const uIndex = index % 6;
-
-        // 스킬 슬롯: 위쪽(0~5)이면 1번, 아래쪽(6~11)이면 0번
-        // (이미지 기준 Top: 1번, Bottom: 0번)
+        const uIndex = index % 6; 
         const sIndex = (index < 6) ? 1 : 0;
 
-        // 서버 전송
+        // [New] 같은 열(같은 유닛)의 다른 버튼들의 'used' 상태 초기화
+        // 이유: 스킬을 다시 고르려 한다는 건, 이전 행동을 취소하거나 덮어쓰겠다는 뜻임
+        const colStart = uIndex;      // 윗줄 (0~5 사이)
+        const colEnd = uIndex + 6;    // 아랫줄 (6~11 사이)
+        
+        if (skillButtons[colStart]) skillButtons[colStart].classList.remove('used');
+        if (skillButtons[colEnd]) skillButtons[colEnd].classList.remove('used');
+
+        // 서버 전송 등 기존 로직...
         socket.emit('action_select', {
             type: 'skillSelect',
             userIndex: uIndex,
             actionIndex: sIndex
         });
 
-        // 로컬 상태 저장
         selectedUnitIndex = uIndex;
         selectedSkillSlot = sIndex;
-
-        console.log(`[Click] Unit ${uIndex}, Skill ${sIndex} (Button Idx: ${index})`);
     });
 });
 
@@ -248,26 +269,36 @@ targetButtons.forEach((btn, index) => {
 
 // [서버 응답] 타겟 매핑 확인 (화살표/연결선 표시)
 socket.on('ui_target_locked', (data) => {
-    // data: { srcPlayer, srcIndex, targetIndex, skillSlot }
+    // data: { srcPlayer, srcIndex, targetIndex }
 
     if (data.srcPlayer === myRole) {
-        // A. 내가 사용한 스킬 버튼을 'Used'(어둡게) 상태로 변경 [cite: 16]
-        // (주의: 서버에서 skillSlot 정보도 보내줘야 정확히 찾음. 안 보내주면 추정해야 함)
-        const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0; // 임시
+        // 1. 데이터 갱신 (내 유닛 srcIndex가 targetIndex를 찜함)
+        targetingData[data.srcIndex] = data.targetIndex;
+
+        // 2. 스킬 버튼 스타일 업데이트 (Used 처리)
+        const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0; 
         const btnIdx = (sSlot === 1) ? data.srcIndex : data.srcIndex + 6;
+        
+        // 같은 유닛의 다른 버튼 선택 해제
+        const siblingIdx = (sSlot === 1) ? data.srcIndex + 6 : data.srcIndex;
+        if(skillButtons[siblingIdx]) skillButtons[siblingIdx].classList.remove('used', 'selected');
 
         if (skillButtons[btnIdx]) {
-            skillButtons[btnIdx].classList.remove('selected'); // 선택 해제
-            skillButtons[btnIdx].classList.add('used');        // 사용됨 처리
+            skillButtons[btnIdx].classList.remove('selected');
+            skillButtons[btnIdx].classList.add('used');
         }
 
-        // B. 타겟이 된 적 유닛 표시 [cite: 16]
-        const enemyUnits = document.querySelectorAll('.right-team .circle'); // 흰색 버튼들
-        if (enemyUnits[data.targetIndex]) {
-            enemyUnits[data.targetIndex].classList.add('locked');
-        }
+        // 3. 적 유닛 'Locked' 상태 전면 재계산 (요구사항 22: 매핑 해제 시 초기화)
+        // 모든 적의 locked를 지우고, targetingData에 있는 애들만 다시 칠함
+        const enemyUnits = document.querySelectorAll('.right-team .circle');
+        enemyUnits.forEach(el => el.classList.remove('locked'));
 
-        // 선택 상태 초기화
+        // 현재 targetingData에 등록된 모든 타겟들에게 locked 부여
+        Object.values(targetingData).forEach(tIdx => {
+            if (enemyUnits[tIdx]) enemyUnits[tIdx].classList.add('locked');
+        });
+        
+        // 변수 초기화
         selectedUnitIndex = null;
         selectedSkillSlot = null;
     }
