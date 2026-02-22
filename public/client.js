@@ -330,15 +330,42 @@ if (goButton) {
 
 // 3. [핵심] 화면 전환 리스너 (서버 응답)
 socket.on('battle_start_confirmed', () => {
-    console.log("🔥 전투 페이즈 진입! 화면을 전환합니다.");
-
-    // 선택 화면 숨기기
-    if (phaseSelect) phaseSelect.classList.add('hidden');
-    
-    // 전투(빈) 화면 보여주기
-    if (phaseBattle) phaseBattle.classList.remove('hidden');
+    // ... 화면 전환 로직 ...
+    if (phaseBattle) {
+        phaseBattle.classList.remove('hidden');
+        renderBattleScene(); // 렌더링 호출
+    }
 });
 
+function renderBattleScene() {
+    // 1. 스킬 이름
+    document.getElementById('p1-skill-name').innerText = "신속한 제압";
+    document.getElementById('p2-skill-name').innerText = "공간 절단";
+
+    // 2. 메인 위력
+    document.getElementById('p1-power').innerText = "0";
+    document.getElementById('p2-power').innerText = "0";
+
+    // 3. 코인 위력 배지 (+n)
+    document.getElementById('p1-coin-power').innerText = "+6";
+    document.getElementById('p2-coin-power').innerText = "+4";
+
+    // 4. 코인 생성 (P1: 3개, P2: 4개)
+    createCoins('p1-coins', 3);
+    createCoins('p2-coins', 4);
+}
+
+function createCoins(containerId, count) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    
+    for (let i = 0; i < count; i++) {
+        const coin = document.createElement('div');
+        coin.className = 'coin';
+        container.appendChild(coin);
+    }
+}
 // (임시) 화살표 대신 로그 출력 및 스타일 변경 함수
 function drawArrow(uIdx, tIdx) {
     // 일단 타겟 버튼에 스타일 표시로 대체

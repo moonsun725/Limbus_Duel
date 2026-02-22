@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Client - Battle UI</title>
+    <link rel="stylesheet" href="tst.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="info-tooltip" class="hidden">
+            <span id="tooltip-text">정보</span>
+        </div>
+
+        <div class="top-layer">
+            <div class="box type-gray player-info-box">Player 1 Info</div>
+            <div class="box type-gray player-info-box">Player 2 Info</div>
+        </div>
+
+        <div class="main-layer">
+            
+            <div class="sidebar left">
+                <div class="stack-group">
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                </div>
+                <div class="spacer"></div>
+                <div class="stack-group">
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                    <div class="box type-pink mini" data-has-info="true"></div>
+                </div>
+            </div>
+
+            <div class="battle-field">
+                
+                <div class="team-container left-team">
+                    
+                    <div class="unit-column down">
+                        
+                        <div class="battle-info-overlay left-side-ui">
+                            <div class="info-content">
+                                <div class="coin-row">
+                                    <div class="coin"></div>
+                                    <div class="coin"></div>
+                                    <div class="coin empty"></div> </div>
+                                <div class="skill-text">강한 일격</div>
+                                <div class="skill-bar"></div>
+                            </div>
+                            <div class="number-circle">15</div>
+                        </div>
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+
+                    <div class="unit-column up">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column down">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column up">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column down">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column up">
+                        <div class="box type-blue" data-has-info="true"></div>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                </div>
+
+                <div class="team-container right-team">
+                    
+                    <div class="unit-column up">
+                        
+                        <div class="battle-info-overlay right-side-ui">
+                            <div class="info-content">
+                                <div class="coin-row">
+                                    <div class="coin"></div>
+                                    <div class="coin"></div>
+                                    <div class="coin"></div>
+                                </div>
+                                <div class="skill-text">방어 태세</div>
+                                <div class="skill-bar"></div>
+                            </div>
+                            <div class="number-circle">8</div>
+                        </div>
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+
+                    <div class="unit-column down">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column up">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column down">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column up">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                    <div class="unit-column down">
+                        <button class="circle type-white"></button>
+                        <div class="box type-orange" data-has-info="true"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="sidebar right">
+                <div class="stack-group border-box">
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                    <div class="box type-gray-light mini"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-layer">
+            <div class="control-panel">
+                <div class="red-grid">
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                    <button class="circle type-red" data-has-info="true"></button>
+                </div>
+                <div class="green-row">
+                    <button class="circle type-green" data-has-info="true"></button>
+                    <button class="circle type-green" data-has-info="true"></button>
+                    <button class="circle type-green" data-has-info="true"></button>
+                    <button class="circle type-green" data-has-info="true"></button>
+                    <button class="circle type-green" data-has-info="true"></button>
+                    <button class="circle type-green" data-has-info="true"></button>
+                </div>
+            </div>
+            <div class="big-button-area">
+                <button class="circle type-yellow large" data-has-info="true"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="client.js"></script>
+</body>
+</html>

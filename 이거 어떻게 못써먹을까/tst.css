@@ -1,0 +1,141 @@
+/* ... 기존 CSS 유지 ... */
+
+/* ========================================= */
+/* NEW: 전투 정보 오버레이 (Battle Info UI) */
+/* ========================================= */
+
+/* 유닛 기둥을 기준으로 위치를 잡기 위해 relative 설정 */
+.unit-column {
+    position: relative; 
+    /* 기존 스타일 유지 */
+    display: flex;
+    flex-direction: column;
+    width: 60px;
+}
+
+/* UI 컨테이너 (유닛 머리 위에 둥둥 뜨게 설정) */
+.battle-info-overlay {
+    position: absolute;
+    bottom: 100%; /* 유닛 바로 위 */
+    left: 50%;
+    transform: translateX(-50%); /* 가로 중앙 정렬 */
+    
+    display: flex;
+    align-items: flex-end; /* 바닥 기준 정렬 */
+    gap: 5px;
+    margin-bottom: 10px; /* 유닛과의 간격 */
+    
+    width: 180px; /* 전체 너비 (충분히 넓게) */
+    z-index: 50; /* 다른 요소보다 위에 표시 */
+    pointer-events: none; /* 클릭 통과 (게임 플레이 방해 X) */
+}
+
+/* 상황에 따라 안 보일 때 사용하는 클래스 */
+.battle-info-overlay.hidden-ui {
+    display: none;
+}
+
+/* === 공통 구성 요소 === */
+
+/* 숫자 원 (버튼 아님) */
+.number-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #eee; /* 연한 회색 */
+    border: 2px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+    flex-shrink: 0; /* 크기 줄어듦 방지 */
+}
+
+/* 정보 영역 (텍스트 + 코인 + 바) */
+.info-content {
+    flex: 1; /* 남은 공간 차지 */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* 스킬 이름 텍스트 */
+.skill-text {
+    font-size: 12px;
+    color: #333;
+    background-color: rgba(255,255,255,0.8); /* 잘 보이게 배경 살짝 */
+    padding: 0 4px;
+    border-radius: 3px;
+    width: fit-content;
+}
+
+/* 노란색 코인 영역 */
+.coin-row {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 2px;
+}
+
+.coin {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ffeb3b; /* 노란색 */
+    border: 1px solid #555;
+}
+
+.coin.empty {
+    background-color: #ddd; /* 비어있는 코인 (회색) */
+}
+
+/* 회색 막대 바 */
+.skill-bar {
+    height: 15px;
+    background-color: #e0e0e0;
+    border: 1px solid #999;
+    width: 100%;
+}
+
+
+/* === 좌/우 대칭 처리 (핵심) === */
+
+/* [왼쪽 팀 UI] : 바가 왼쪽, 원이 오른쪽 (중앙을 바라봄) */
+.left-side-ui {
+    flex-direction: row; /* 기본 방향 */
+}
+.left-side-ui .info-content {
+    align-items: flex-end; /* 텍스트 오른쪽 정렬 */
+}
+.left-side-ui .coin-row {
+    justify-content: flex-end;
+}
+
+/* [오른쪽 팀 UI] : 원이 왼쪽, 바가 오른쪽 (중앙을 바라봄) */
+.right-side-ui {
+    flex-direction: row-reverse; /* 반대 방향 */
+}
+.right-side-ui .info-content {
+    align-items: flex-start; /* 텍스트 왼쪽 정렬 */
+}
+.right-side-ui .coin-row {
+    justify-content: flex-start;
+}
+
+/* ========================================= */
+/* 반응형 미디어 쿼리 업데이트 (작은 화면용) */
+/* ========================================= */
+@media screen and (max-width: 1400px) {
+    /* 오버레이 크기도 작아져야 함 */
+    .battle-info-overlay {
+        width: 140px;
+        margin-bottom: 5px;
+    }
+    .number-circle {
+        width: 30px; height: 30px; font-size: 12px;
+    }
+    .skill-bar { height: 10px; }
+    .coin { width: 10px; height: 10px; }
+    .skill-text { font-size: 10px; }
+}

@@ -328,13 +328,160 @@ body {
     display: none !important;
 }
 
-/* 전투 화면 스타일 (임시: 검은 배경) */
+/*
+// ==========================================================================================
+// 전투 화면
+// ==========================================================================================
+*/
+/* 전투 화면 배경 */
 #phase-battle {
     width: 100%;
-    height: 100vh; /* 전체 화면 높이 */
-    background-color: #000000;
+    height: 100vh;
+    background-color: #1a1a1a; /* 어두운 배경 */
     display: flex;
     justify-content: center;
     align-items: center;
-    color: white;
+}
+
+.battle-stage {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* 수직 중앙 정렬 */
+    width: 100%;
+    gap: 100px; /* P1과 P2 사이 거리 */
+}
+
+/* === 유닛 번들 공통 === */
+.unit-bundle {
+    display: flex;
+    align-items: center; /* 요소들을 수직 중앙 정렬 */
+    position: relative;
+}
+
+/* 1. 캐릭터 박스 (회색 직사각형) */
+.char-box {
+    width: 100px;
+    height: 220px;
+    background-color: #d0d0d0;
+    border: 2px solid #888;
+    z-index: 1; /* 가장 뒤 */
+}
+
+/* 2. 스킬 그룹 (코인 + 스킬바) */
+.skill-group {
+    display: flex;
+    flex-direction: column; /* 위: 코인, 아래: 바 */
+    justify-content: center;
+    z-index: 2; /* 캐릭터보다 위 */
+    margin-top: 20px; /* 약간 아래로 내려서 중앙 맞춤 */
+}
+
+/* 스킬바 */
+.skill-bar {
+    width: 220px;
+    height: 50px;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* 코인 줄 */
+.coin-row {
+    display: flex;
+    gap: 4px;
+    height: 30px;
+    margin-bottom: 5px; /* 바와의 간격 */
+    padding: 0 10px;
+}
+
+.coin {
+    width: 24px;
+    height: 24px;
+    background-color: #ffff00; /* 쨍한 노란색 */
+    border: 1px solid #c7c700;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 3. 위력 원 & 배지 */
+.circle-wrapper {
+    position: relative;
+    z-index: 3; /* 가장 위 */
+}
+
+.main-circle {
+    width: 110px;
+    height: 110px;
+    background-color: #dcdcdc;
+    border: 3px solid #666;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    font-weight: bold;
+    color: #333;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+/* +n 배지 (작은 사각형) */
+.power-badge {
+    position: absolute;
+    top: -10px; /* 원 위에 걸침 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ccc;
+    padding: 2px 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #888;
+    border-radius: 4px;
+    color: #333;
+}
+
+
+/* === [P1 Left Side] 배치 디테일 === */
+.unit-bundle.p1 {
+    flex-direction: row; /* 캐릭터 -> 스킬 -> 원 */
+}
+
+/* 연결 부위 겹치게 만들기 (음수 마진) */
+.unit-bundle.p1 .skill-bar {
+    margin-left: -10px; /* 캐릭터 박스 안으로 살짝 들어감 */
+    padding-right: 30px; /* 글자가 원에 가리지 않게 */
+    justify-content: flex-end; /* 텍스트 오른쪽 정렬 */
+    border-radius: 0; /* 각진 형태 */
+}
+
+.unit-bundle.p1 .circle-wrapper {
+    margin-left: -40px; /* 스킬바 끝부분을 덮음 */
+}
+
+.unit-bundle.p1 .coin-row {
+    justify-content: flex-end; /* 코인을 원 쪽(오른쪽)으로 붙임 */
+}
+
+
+/* === [P2 Right Side] 배치 디테일 (반전) === */
+.unit-bundle.p2 {
+    flex-direction: row-reverse; /* 원 <- 스킬 <- 캐릭터 */
+}
+
+.unit-bundle.p2 .skill-bar {
+    margin-right: -10px; /* 캐릭터 박스 안으로 */
+    padding-left: 30px;
+    justify-content: flex-start; /* 텍스트 왼쪽 정렬 */
+    border-radius: 0;
+}
+
+.unit-bundle.p2 .circle-wrapper {
+    margin-right: -40px; /* 스킬바 끝부분을 덮음 */
+}
+
+.unit-bundle.p2 .coin-row {
+    justify-content: flex-start; /* 코인을 원 쪽(왼쪽)으로 붙임 */
 }
