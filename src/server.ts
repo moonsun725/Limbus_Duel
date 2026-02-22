@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
     });
 
     
-    // 2. 행동 요청 처리(공격/교체))
+    // 2. 행동 요청 처리(공격/교체)) 일단은 레거시 코드임
     socket.on('action', (actionData: BattleAction) => {
         // ★ 소켓 맵을 통해 이 유저가 어느 방 소속인지 찾음
         const roomId = socketToRoom[socket.id];
@@ -88,6 +88,11 @@ io.on('connection', (socket) => {
             rooms[roomId].handleAction(socket.id, actionData, io); // 차피 필터링은 handleAction에서 하니까 그냥 넘겨주기만 하면 돼
         }
     });
+    // 인지하고 있어야 할 점: 
+    /*
+        현재 니가 action_selcect, target_select, start_battle 이벤트를 따로 만들어서 처리하는 방향으로 가고 있음
+        그래서 그냥 action 이벤트(지금 위에 있는거)는 안 쓰고 있으니까 방향성 정해서 나중에 해봐
+    */
 
     // 행동 취소 처리
     socket.on('cancel_action', () => {
@@ -116,8 +121,11 @@ io.on('connection', (socket) => {
     });
 
     // 전투 시작 버튼
-    socket.on('start_battle',(actionData: BattleAction) => {
+    socket.on('start_battle', (actionData: BattleAction) => {
         const roomId = socketToRoom[socket.id];
+        if (roomId && rooms[roomId]) {
+            rooms[roomId].handleBattleStart(socket.id, io);
+        }
     });
 
     // 3. 퇴장 처리

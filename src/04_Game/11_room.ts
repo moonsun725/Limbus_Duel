@@ -143,8 +143,7 @@ export class GameRoom {
             case 'MOVE_SELECT':
                 this.handleMoveSelect(socketId, action, io);
             case 'TARGET_SELECT':
-                this.handleTargetSelect(socketId, action, io); // action이 
-                break;
+                this.handleTargetSelect(socketId, action, io);  
             case 'WAITING_OPPONENT': // 전투 시작까지 눌렀으면 낙장불입이제
                 this.handleBattleStart(socketId, io);
                 break;
