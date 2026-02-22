@@ -19,16 +19,24 @@ export class ActManager {
             // try catch를 아직 생각 안해놔서 throw는 당장 못하겠음
             return;
         }
-        console.log("[ActManager]: ",user.name, "이/가", user.Slots[slotIndex].readySkill?.name, "로",);
+        console.log("[ActManager]: ",user.name, "이/가", slotIndex+1,"번째 슬롯에", user.Slots[slotIndex].readySkill?.name, "선택");
         this.ActorList.set(user.Slots[slotIndex], undefined);
     }
 
+    /**
+     * 
+     * @param user : 스킬을 실행한 객체가 
+     * @param target : 공격 대상 
+     * @param slotIndex : user의 슬롯 인덱스 (0 또는 1) - 기본값은 0
+     * @param targetIndex : target의 슬롯 인덱스 (0 또는 1) - 기본값은 0
+     * @returns 
+     */
     TargetLock(user: Character, target: Character, slotIndex: number = 0, targetIndex: number = 0) {
         if (!user.Slots[slotIndex] || !target.Slots[targetIndex]) {
             // try catch를 아직 생각 안해놔서 throw는 당장 못하겠음
             return;
         }
-        console.log(target.name, "의", target.Slots[targetIndex].readySkill?.name, "지정");
+        console.log(target.name, "의", targetIndex+1,"번째 슬롯 지정");
         this.ActorList.set(user.Slots[slotIndex], target.Slots[targetIndex]);
         if (user.speed > target.speed)
             target.Slots[targetIndex].forcedTarget(user.Slots[slotIndex]);
