@@ -470,26 +470,29 @@ body {
     background-color: #d0d0d0;
     border: 2px solid #888;
     
-    /* [설정] 원이랑 안 겹치게 아래로 내림 */
-    margin-top: 10px; 
+    /* [중요] 원이랑 자연스럽게 연결되도록 살짝 위로 올림 (-10px) */
+    /* 만약 떼어놓고 싶으시면 10px로 하셔도 됩니다 */
+    margin-top: -10px; 
     
     z-index: 1; /* 스킬 뒤로 보냄 */
+
+    /* [추가] 교체 연출을 위한 투명도 애니메이션 장착 */
+    transition: opacity 0.2s ease;
+    opacity: 1; /* 기본적으로 보임 */
+    
+    /* (나중에 배경 이미지 넣을 때를 대비한 설정) */
+    background-size: cover;
+    background-position: center;
 }
 
-/* 트랜지션 끄기 (수치 교체 시 애니메이션 방지용) */
-.no-transition {
-    transition: none !important;
-}
-
-/* 페이드 아웃용 (내용 교체 중 안 보이게) */
+/* [추가] 페이드 아웃 (교체 중일 때 이 클래스를 붙여서 숨김) */
 .fade-out {
     opacity: 0;
-    transition: opacity 0.2s ease;
 }
 
-.char-box {
-    /* 기본적으로 투명도 애니메이션 장착 */
-    transition: opacity 0.2s ease;
+/* [추가] 트랜지션 끄기 (HP바 수치만 딱! 바꿀 때 사용) */
+.no-transition {
+    transition: none !important;
 }
 
 

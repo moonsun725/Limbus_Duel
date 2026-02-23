@@ -59,9 +59,49 @@ export class GameRoom {
                 io.to(this.roomId).emit('anim_attack_start', { atkId, targetId, skillName });
                 await this.sleep(1000); // 클라이언트 애니메이션 대기
             },
-            onClashStart: async (c1, c2) => {
-                io.to(this.roomId).emit('anim_clash_start', { c1Id: c1.id, c2Id: c2.id });
-                await this.sleep(800);
+            onClashStart: async (slot1: BattleSlot, slot2: BattleSlot) => {
+                // Slot이 있으니까 owner와 readySkill에 바로 접근 가능!
+                const char1 = slot1.owner;
+                const skill1 = slot1.readySkill; // 이제 굳이 char1.GetReadySkill() 안 해도 됨
+
+                const char2 = slot2.owner;
+                const skill2 = slot2.readySkill;
+
+                // 클라이언트로 보낼 데이터 가공 (DTO)
+                const clashData = {
+                    p1: {
+                        char: {
+                            id: char1.id,
+                            name: char1.name,
+                            hp: char1.Stats.hp,
+                            maxHp: char1.Stats.maxHp
+                        },
+                        // ★ 여기가 핵심: Slot에 있는 스킬 정보를 바로 사용
+                        skill: {
+                            name: skill1?.name || "스킬 없음",
+                            coinCount: skill1?.coinlist.length || 0
+                        },
+                        power: skill1?.BasePower || 0,
+                        coinPower: skill1?.coinlist[0]?.CoinPower || 0
+                    },
+                    p2: {
+                        char: {
+                            id: char2.id,
+                            name: char2.name,
+                            hp: char2.Stats.hp,
+                            maxHp: char2.Stats.maxHp
+                        },
+                        skill: {
+                            name: skill2?.name || "스킬 없음",
+                            coinCount: skill2?.coinlist.length || 0
+                        },
+                        power: skill2?.BasePower || 0,
+                        coinPower: skill2?.coinlist[0]?.CoinPower || 0
+                    }
+                };
+
+                io.to(this.roomId).emit('anim_clash_start', clashData);
+                await sleep(2000);
             },
             onCoinToss: async (isHeads) => {
                 io.to(this.roomId).emit('indiviual_coin_result', { isHead: isHeads })
@@ -143,7 +183,7 @@ export class GameRoom {
             case 'MOVE_SELECT':
                 this.handleMoveSelect(socketId, action, io);
             case 'TARGET_SELECT':
-                this.handleTargetSelect(socketId, action, io);  
+                this.handleTargetSelect(socketId, action, io);
             case 'WAITING_OPPONENT': // 전투 시작까지 눌렀으면 낙장불입이제
                 this.handleBattleStart(socketId, io);
                 break;

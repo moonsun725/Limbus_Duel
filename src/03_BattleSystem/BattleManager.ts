@@ -14,7 +14,7 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export interface BattleCallbacks {
     onLog: (msg: string) => void;
     onAttackStart: (attackerId: number, targetId: number, skillName: string) => Promise<void>; // 연출 대기
-    onClashStart: (char1: Character, char2: Character) => Promise<void>;
+    onClashStart: (slot1: BattleSlot, slot2: BattleSlot) => Promise<void>;
     onCoinToss: (isHeads: boolean) => Promise<void>;
     onClashResult: (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) => Promise<void>;
     onDamage: (targetId: number, damage: number, newHp: number) => void;
@@ -32,7 +32,7 @@ export class BattleManager
             this.callbacks = {
                 onLog: (msg) => {},
                 onAttackStart: async (attackerId, targetId, skillName) => {}, // 연출 대기
-                onClashStart: async (char1, char2) => {},
+                onClashStart: async (slot1, slot2) => {},
                 onCoinToss: async (isHeads) => {},
                 onClashResult: async (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) =>  {},
                 onDamage: (targetId: number, damage: number, newHp: number) => {},
@@ -53,7 +53,7 @@ export class BattleManager
         if (!skill1 || !skill2) return;
 
         console.log(`[Clash Start] ${char1.name}(${skill1.name}) VS ${char2.name}(${skill2.name})`);
-        await this.callbacks.onClashStart(char1, char2);
+        await this.callbacks.onClashStart(slot1, slot2);
 
         // 코인 복사 (원본 손상 방지)
         let coins1 = [...skill1.coinlist];
