@@ -367,7 +367,18 @@ body {
     align-items: center; /* 수직 중앙 정렬 */
     
     /* [설정] 스킬 덩어리가 캐릭터보다 위에 오도록 z-index 설정 */
-    z-index: 50;
+    z-index: 10;
+
+    /* [추가] 투명도 및 애니메이션 설정 */
+    opacity: 0; 
+    transition: opacity 0.5s ease; /* 0.5초 동안 부드럽게 변함 */
+    pointer-events: none; /* 투명할 때 클릭 방지 */
+}
+
+/* [추가] 이 클래스가 붙으면 나타남 */
+.skill-container.visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 /* --- 1-1. 스킬 그룹 (바 + 코인) --- */

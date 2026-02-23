@@ -328,17 +328,38 @@ if (goButton) {
     });
 }
 
-// 3. [핵심] 화면 전환 리스너 (서버 응답)
 socket.on('battle_start_confirmed', () => {
-    // 선택 화면 숨기기
-    if (phaseSelect) phaseSelect.classList.add('hidden');
+    // 1. 일단 전투 화면으로 전환 (배경, 캐릭터 박스는 보임)
+    // 선택 페이즈 레이어에는 hidden 속성을 추가하고
+    phaseSelect.classList.add('hidden');
+    // 전투 페이즈 레이어에서는 hidden 속성을 뺀다
+    phaseBattle.classList.remove('hidden');
 
-    // 전투 화면 보여주기
-    if (phaseBattle) {
-        phaseBattle.classList.remove('hidden');
-        renderBattleScene(); // 렌더링 호출
-    }
+    // 2. 처음에는 스킬 UI를 숨겨둠 (캐릭터만 보이게)
+    hideSkillUI(); 
+
+    // 3. 1초 뒤에 스킬 정보가 스르륵 나타나게 연출!
+    setTimeout(() => {
+        renderBattleScene(); // 데이터 채우기
+        showSkillUI();       // 보여주기
+    }, 100);
 });
+
+// UI 요소 가져오기
+const p1SkillUI = document.getElementById('p1-skill-ui');
+const p2SkillUI = document.getElementById('p2-skill-ui');
+
+// 1. 스킬 UI 보여주기 함수
+function showSkillUI() {
+    if (p1SkillUI) p1SkillUI.classList.add('visible');
+    if (p2SkillUI) p2SkillUI.classList.add('visible');
+}
+
+// 2. 스킬 UI 숨기기 함수
+function hideSkillUI() {
+    if (p1SkillUI) p1SkillUI.classList.remove('visible');
+    if (p2SkillUI) p2SkillUI.classList.remove('visible');
+}
 
 function renderBattleScene() {
     // 1. 스킬 이름
