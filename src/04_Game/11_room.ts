@@ -374,6 +374,34 @@ export class GameRoom {
         this.endTurn(io);
     }
     */
+
+    async StartCombat() // 비동기 함수
+    {
+        for (let user of this.actManager.turnOrder) {
+            // 1. 이미 행동을 마친 경우(나보다 빠른 대상에 의해 합이 걸려왔다든지) 스킵
+            console.log("************************", user.owner.name, "차례");
+
+            if (!user.readySkill) {
+                console.log("이미 스킬 사용됨");
+                continue;
+            }
+
+            // 나중에는 수비 스킬 여부도 체크
+
+            // 2. 타겟이 없는 경우 스킵
+            let uTarget = this.actManager.ActorList.get(user);
+            if (!uTarget) {
+                console.log("타겟 없음");
+                continue;
+            }
+
+            let tTarget = uTarget.targetSlot
+            if (tTarget && tTarget === user && tTarget.readySkill)
+                await this.battleManager.Clash(user, uTarget); // await this.battleManager.handleskillActions() 나중에는 스킬의 종류에 따라 합이 가능한지 따지는 로직 
+            else
+                await this.battleManager.Attack(user.owner, uTarget.owner, user.readySkill, user.readySkill?.coinlist);
+        }
+    }
     // 턴 종료 시 공통 처리 (함수로 분리 추천)
     private endTurn(io: Server) {
         console.log("=== 턴 종료 ===");

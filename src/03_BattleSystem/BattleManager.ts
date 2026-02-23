@@ -23,7 +23,6 @@ export interface BattleCallbacks {
 
 export class BattleManager 
 {
-
     private callbacks: BattleCallbacks;
 
     constructor(callbacks?: BattleCallbacks) {
