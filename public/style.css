@@ -330,6 +330,7 @@ body {
 /* ========================================= */
 /* [전투 화면] Phase Battle Layout Settings   */
 /* ========================================= */
+/* style.css - 뭉친 구조(Wrapper) 적용 버전 */
 
 #phase-battle {
     width: 100%;
@@ -340,142 +341,106 @@ body {
     align-items: center;
 }
 
-/* 1. 전체 무대 설정 */
 .battle-stage {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     
-    /* [설정] P1과 P2 사이의 거리 */
-    /* 이 값을 늘리면 두 진영이 멀어지고, 줄이면 가까워집니다. */
-    gap: 20px; 
+    /* [설정] P1과 P2 사이 거리 */
+    gap: 100px; 
 }
 
-/* === 유닛 번들 (Grid 레이아웃) === */
+/* === 유닛 번들 (전체 틀) === */
 .unit-bundle {
-    display: grid;
+    display: flex;
+    flex-direction: column; /* 위(스킬) -> 아래(캐릭터) 배치 */
     position: relative;
-    /* [설정] 그리드 구조 정의 (중요!)
-       - columns: [스킬바 영역(auto)] [원 영역(110px)] 
-       - rows:    [상단부(원+스킬) 높이(120px)] [하단부(캐릭터) 높이(auto)]
-       * 원의 크기를 바꾸면 여기 '110px', '120px'도 같이 조절해야 안 깨집니다.
-    */
+    
+    /* [설정] 전체 번들의 최소 너비 (레이아웃 깨짐 방지) */
+    min-width: 300px;
 }
 
-/* Grid 영역 이름표 (수정 X) */
-.char-box      { grid-area: char; }
-.skill-group   { grid-area: skill; }
-.circle-wrapper{ grid-area: circle; }
-
-/* --- 2. 캐릭터 박스 설정 --- */
-.char-box {
-    /* [설정] 캐릭터 박스 크기 */
-    width: 100px;
-    height: 220px;
+/* === 1. 스킬 컨테이너 (새로 만든 Wrapper) === */
+.skill-container {
+    display: flex;
+    align-items: center; /* 수직 중앙 정렬 */
     
-    background-color: #d0d0d0;
-    border: 2px solid #888;
-    z-index: 1;
-    justify-self: center; /* 그리드 칸 안에서 중앙 정렬 */
-    
-    /* [설정] 상단 여백 (위치 미세 조정) */
-    /* 원이랑 얼마나 겹칠지, 혹은 떨어뜨릴지 결정합니다. */
-    margin-top: -10px; 
+    /* [설정] 스킬 덩어리가 캐릭터보다 위에 오도록 z-index 설정 */
+    z-index: 50;
 }
 
-/* --- 3. 스킬 그룹 (스킬바 + 코인) --- */
+/* --- 1-1. 스킬 그룹 (바 + 코인) --- */
 .skill-group {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    z-index: 2;
-    
-    /* [설정] 스킬바의 최소 길이 */
-    /* 텍스트가 짧아도 이만큼의 길이는 확보합니다. */
     min-width: 250px;
+
+    /* [수정] 그룹 전체를 위로 20px만큼 들어 올립니다. */
+    /* 숫자를 조절하여 원하는 높이를 맞추세요 (-30px: 더 위로, -10px: 조금만 위로) */
+    transform: translateY(-21px);
 }
 
-/* 3-1. 스킬바 (막대) */
 .skill-bar {
-    width: 100%; 
-    
-    /* [설정] 스킬바 두께 */
-    height: 50px;
-    
+    width: 100%;
+    height: 30px; /* [설정] 바 두께 */
     background-color: #e0e0e0;
     display: flex;
     align-items: center;
-    
-    /* [설정] 텍스트 스타일 */
     font-size: 18px;
     font-weight: bold;
     color: #000;
-    
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* 3-2. 코인 줄 (노란 동그라미들) */
 .coin-row {
     display: flex;
-    gap: 4px; /* 코인 사이 간격 */
+    gap: 4px;
     height: 30px;
-    
-    /* [설정] 스킬바와의 간격 */
-    margin-bottom: 5px; 
+    margin-bottom: 5px; /* [설정] 바와의 거리 */
     padding: 0 10px;
 }
 
 .coin {
-    /* [설정] 코인 크기 */
-    width: 24px;
+    width: 24px;  /* [설정] 코인 크기 */
     height: 24px;
-    
     background-color: #ffff00;
     border: 1px solid #c7c700;
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* --- 4. 위력 원 & 배지 --- */
+/* --- 1-2. 원 & 배지 --- */
 .circle-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    z-index: 3;
+    /* Wrapper가 생겼으므로 z-index는 부모(.skill-container)를 따라감 */
 }
 
 .main-circle {
-    /* [설정] 메인 원 크기 */
-    /* 주의: 여기를 바꾸면 .unit-bundle의 grid-template-columns도 수정해야 함 */
-    width: 110px;
+    width: 110px;  /* [설정] 원 크기 */
     height: 110px;
-    
     background-color: #dcdcdc;
     border: 3px solid #666;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    /* [설정] 위력 숫자 크기 */
     font-size: 40px;
     font-weight: bold;
     color: #333;
-    
     box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
 
 .power-badge {
     position: absolute;
-    
-    /* [설정] 배지 위치 (원 위쪽) */
-    top: -5px; 
-    
+    top: -5px;    /* [설정] 배지 높이 */
     left: 50%;
     transform: translateX(-50%);
     background-color: #ccc;
@@ -485,79 +450,88 @@ body {
     border: 1px solid #888;
     border-radius: 4px;
     color: #333;
-    z-index: 4;
+}
+
+/* === 2. 캐릭터 박스 === */
+.char-box {
+    width: 100px;  /* [설정] 캐릭터 폭 */
+    height: 220px; /* [설정] 캐릭터 높이 */
+    background-color: #d0d0d0;
+    border: 2px solid #888;
+    
+    /* [설정] 원이랑 안 겹치게 아래로 내림 */
+    margin-top: 10px; 
+    
+    z-index: 1; /* 스킬 뒤로 보냄 */
 }
 
 
 /* ================================================= */
-/* [P1 - 왼쪽 진영] 배치 설정 (Skill -> Circle)      */
+/* [P1 - 왼쪽 진영] 배치 설정                         */
 /* ================================================= */
 .unit-bundle.p1 {
-    /* 그리드 구조: [긴 스킬바] [원(110px)] */
-    grid-template-columns: auto 110px; 
-    grid-template-rows: 120px auto;
-    
-    /* 배치도 (수정 X) */
-    grid-template-areas: 
-        "skill circle"
-        "char  char";
+    /* [설정] 캐릭터를 오른쪽(원 아래)에 맞춤 */
+    align-items: flex-end; 
 }
 
-.unit-bundle.p1 .skill-group {
-    align-items: flex-end; /* 코인 오른쪽 정렬 */
+/* 스킬 덩어리 내부 순서: [스킬바] -> [원] */
+.unit-bundle.p1 .skill-container {
+    flex-direction: row; 
 }
 
 .unit-bundle.p1 .skill-bar {
-    border-radius: 4px 0 0 4px; /* 왼쪽 둥글게 */
-    justify-content: flex-end;  /* 텍스트 오른쪽 정렬 */
+    border-radius: 4px 0 0 4px;
+    justify-content: flex-end;
+
+    /* [수정] 원이 덮는 만큼 글자를 왼쪽으로 밀어냅니다. */
+    padding-right: 50px;  /* 기존 20px -> 70px로 변경 */
     
-    /* [설정] 텍스트 안전 여백 (원이 글자 가리지 않게) */
-    padding-right: 20px;
-    
-    /* [설정] 원과 겹치는 정도 (음수값 = 더 많이 겹침) */
+    /* [설정] 연결 부위 (오른쪽으로 밀어넣기) */
     margin-right: -20px; 
-    
-    /* 겹친 만큼 길이 보정 (건들지 마세요) */
     width: calc(100% + 20px);
 }
 
 .unit-bundle.p1 .coin-row {
-    justify-content: flex-end; /* 코인 오른쪽 정렬 */
+    justify-content: flex-end;
+}
+
+.unit-bundle.p1 .char-box {
+    /* [설정] 원(110px)과 캐릭터(100px) 중앙 정렬 미세 보정 */
+    /* 오른쪽 끝에서 5px 떨어트리면 110px의 중앙에 옴 */
+    margin-right: 5px; 
 }
 
 
 /* ================================================= */
-/* [P2 - 오른쪽 진영] 배치 설정 (Circle <- Skill)    */
+/* [P2 - 오른쪽 진영] 배치 설정                       */
 /* ================================================= */
 .unit-bundle.p2 {
-    /* 그리드 구조: [원(110px)] [긴 스킬바] */
-    grid-template-columns: 110px auto; 
-    grid-template-rows: 120px auto;
-    
-    /* 배치도 (수정 X) */
-    grid-template-areas: 
-        "circle skill"
-        "char   char";
+    /* [설정] 캐릭터를 왼쪽(원 아래)에 맞춤 */
+    align-items: flex-start; 
 }
 
-.unit-bundle.p2 .skill-group {
-    align-items: flex-start; /* 코인 왼쪽 정렬 */
+/* 스킬 덩어리 내부 순서: [원] <- [스킬바] */
+.unit-bundle.p2 .skill-container {
+    flex-direction: row-reverse; 
 }
 
 .unit-bundle.p2 .skill-bar {
-    border-radius: 0 4px 4px 0; /* 오른쪽 둥글게 */
-    justify-content: flex-start; /* 텍스트 왼쪽 정렬 */
+    border-radius: 0 4px 4px 0;
+    justify-content: flex-start;
+
+    /* [수정] 원이 덮는 만큼 글자를 왼쪽으로 밀어냅니다. */
+    padding-left: 50px;  /* 기존 20px -> 70px로 변경 */
     
-    /* [설정] 텍스트 안전 여백 */
-    padding-left: 20px;
-    
-    /* [설정] 원과 겹치는 정도 (음수값) */
+    /* [설정] 연결 부위 (왼쪽으로 밀어넣기) */
     margin-left: -20px; 
-    
-    /* 겹친 만큼 길이 보정 */
     width: calc(100% + 20px);
 }
 
 .unit-bundle.p2 .coin-row {
-    justify-content: flex-start; /* 코인 왼쪽 정렬 */
+    justify-content: flex-start;
+}
+
+.unit-bundle.p2 .char-box {
+    /* [설정] 원과 캐릭터 중앙 정렬 미세 보정 */
+    margin-left: 5px;
 }

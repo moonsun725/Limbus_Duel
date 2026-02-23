@@ -25,7 +25,7 @@ export class ActManager {
 
     /**
      * 
-     * @param user : 스킬을 실행한 객체가 
+     * @param user : 스킬 실행 객체
      * @param target : 공격 대상 
      * @param slotIndex : user의 슬롯 인덱스 (0 또는 1) - 기본값은 0
      * @param targetIndex : target의 슬롯 인덱스 (0 또는 1) - 기본값은 0
@@ -62,6 +62,9 @@ export class ActManager {
                 continue;
             }
 
+            // 나중에는 수비 스킬 여부도 체크
+
+            // 2. 타겟이 없는 경우 스킵
             let uTarget = this.ActorList.get(user);
             if (!uTarget) {
                 console.log("타겟 없음");
@@ -70,7 +73,7 @@ export class ActManager {
 
             let tTarget = uTarget.targetSlot
             if (tTarget === user && tTarget.readySkill)
-                await this.Clash(user, uTarget);
+                await this.Clash(user, uTarget); // await this.battleManager.handleskillActions() 나중에는 스킬의 종류에 따라 합이 가능한지 따지는 로직 
             else
                 await this.Attack(user, uTarget.owner, user.readySkill, user.readySkill?.coinlist);
         }
