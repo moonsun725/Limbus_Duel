@@ -330,7 +330,10 @@ if (goButton) {
 
 // 3. [핵심] 화면 전환 리스너 (서버 응답)
 socket.on('battle_start_confirmed', () => {
-    // ... 화면 전환 로직 ...
+    // 선택 화면 숨기기
+    if (phaseSelect) phaseSelect.classList.add('hidden');
+
+    // 전투 화면 보여주기
     if (phaseBattle) {
         phaseBattle.classList.remove('hidden');
         renderBattleScene(); // 렌더링 호출
@@ -366,6 +369,7 @@ function createCoins(containerId, count) {
         container.appendChild(coin);
     }
 }
+
 // (임시) 화살표 대신 로그 출력 및 스타일 변경 함수
 function drawArrow(uIdx, tIdx) {
     // 일단 타겟 버튼에 스타일 표시로 대체
