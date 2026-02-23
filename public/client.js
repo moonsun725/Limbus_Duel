@@ -1,26 +1,56 @@
 const socket = io();
-/**
- * Game Client Logic
- */
+console.log("Game Client Initialized");
 
-// [New] 서버에서 받은 스킬 정보를 저장할 공간
-let skillDataCache = [];
 // --------------------------------------------------------
 // DOM 요소 참조
 // --------------------------------------------------------
-// 스킬 버튼 툴팁
 const tooltip = document.getElementById('info-tooltip');
 const tooltipText = document.getElementById('tooltip-text');
 const interactableElements = document.querySelectorAll('[data-has-info="true"]');
 const buttons = document.querySelectorAll('button');
 
-// --------------------------------------------------------
-// [Rule 0] 이벤트 핸들러 함수 정의 (Logic Placeholders)
-// --------------------------------------------------------
+const phaseSelect = document.getElementById('phase-select');
+const phaseBattle = document.getElementById('phase-battle');
+const goButton = document.querySelector('.circle.large');
 
-// [New] 타겟팅 현황을 저장할 맵 (Key: 내 유닛 인덱스, Value: 적 유닛 인덱스)
+const skillButtons = document.querySelectorAll('.type-red'); 
+const targetButtons = document.querySelectorAll('.right-team .circle');
+
+// 상태 변수
+let myRole = null;
+let selectedUnitIndex = null;
+let selectedSkillSlot = null;
+let skillDataCache = [];
 let targetingData = {};
 
+// [New] 현재 슬롯 캐릭터 ID 기억 (교체 판단용)
+let currentP1CharId = null;
+let currentP2CharId = null;
+
+
+// --------------------------------------------------------
+// 초기화 및 공통 이벤트
+// --------------------------------------------------------
+function init() {
+    interactableElements.forEach(el => {
+        el.addEventListener('mouseenter', handleMouseEnter);
+        el.addEventListener('mouseleave', handleMouseLeave);
+        el.addEventListener('mousemove', handleMouseMove);
+    });
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', handleClick);
+    });
+}
+
+function handleClick(event) {
+    // console.log('Clicked:', event.currentTarget);
+}
+
+// --------------------------------------------------------
+// 툴팁 관련 함수들 (MouseEnter, MouseLeave, MouseMove)
+// ... (기존 툴팁 코드 그대로 유지 - 내용이 길어서 생략) ...
+// --------------------------------------------------------
 /**
  * 객체 클릭 시 실행되는 함수 (버튼 등)
  */
@@ -150,124 +180,70 @@ function getElementType(element) {
 }
 
 // --------------------------------------------------------
-// 초기화 및 이벤트 리스너 등록
+// 소켓 통신: 게임 진행 (Join, Action, Battle Start)
 // --------------------------------------------------------
-function init() {
-    console.log("Game Client Initialized");
 
-    // [Rule 3] 정보가 있는 모든 객체에 호버 이벤트 연결
-    interactableElements.forEach(el => {
-        el.addEventListener('mouseenter', handleMouseEnter);
-        el.addEventListener('mouseleave', handleMouseLeave);
-        el.addEventListener('mousemove', handleMouseMove);
-    });
-
-    // [Rule 2] 모든 버튼 객체에 클릭 이벤트 연결
-    buttons.forEach(btn => {
-        btn.addEventListener('click', handleClick);
-    });
-}
-
-// 상태 관리 변수
-let myRole = null;       // 'p1' or 'p2'
-let selectedUnitIndex = null; // 현재 스킬을 선택한 내 유닛 인덱스
-let selectedSkillSlot = null; // 현재 선택한 스킬 슬롯 (0 or 1)
-
-// DOM 요소 가져오기
-const skillButtons = document.querySelectorAll('.type-red'); // 하단 붉은 버튼 (스킬)
-const targetButtons = document.querySelectorAll('.right-team .circle'); // 우측 상대 유닛 (타겟)
-
-// --------------------------------------------------------
-// 1. 초기화 및 역할 할당
-// --------------------------------------------------------
-// 게임 참가 요청 (임시로 room1 고정)
 socket.emit('join_game', 'room1');
 
 socket.on('role_assigned', (data) => {
     myRole = data.role;
     console.log(`Role Assigned: ${myRole}`);
-    // 내 역할에 따라 UI 배치 반전 등의 로직이 필요할 수 있음
 });
 
-// --------------------------------------------------------
-// [New] 서버로부터 게임 데이터(스킬 정보 등) 수신
-// --------------------------------------------------------
 socket.on('update_ui', (data) => {
-    // data 구조 예시: { p1: { active: [CharacterData...], ... }, p2: ... }
-
-    // 내 역할(p1/p2)에 맞는 캐릭터들의 스킬 정보를 캐싱합니다.
     const myData = (myRole === 'p1') ? data.p1 : data.p2;
     if (myData && myData.active) {
-        skillDataCache = myData.active; // 캐릭터 배열 저장
-        console.log("Skill Data Updated:", skillDataCache);
+        skillDataCache = myData.active;
     }
 });
 
-// --------------------------------------------------------
-// [핵심 변경] 2. 스킬 선택 로직 : (가로 매핑) -> (세로 매핑) -> 중복 선택 시 초기화 
-// --------------------------------------------------------
+// 스킬 선택
 skillButtons.forEach((btn, index) => {
     btn.addEventListener('click', () => {
         if (!myRole) return;
-
         const uIndex = index % 6; 
         const sIndex = (index < 6) ? 1 : 0;
 
-        // [New] 같은 열(같은 유닛)의 다른 버튼들의 'used' 상태 초기화
-        // 이유: 스킬을 다시 고르려 한다는 건, 이전 행동을 취소하거나 덮어쓰겠다는 뜻임
-        const colStart = uIndex;      // 윗줄 (0~5 사이)
-        const colEnd = uIndex + 6;    // 아랫줄 (6~11 사이)
-        
+        // UI 초기화
+        const colStart = uIndex;      
+        const colEnd = uIndex + 6;    
         if (skillButtons[colStart]) skillButtons[colStart].classList.remove('used');
         if (skillButtons[colEnd]) skillButtons[colEnd].classList.remove('used');
 
-        // 서버 전송 등 기존 로직...
+        // 서버 전송
         socket.emit('action_select', {
             type: 'skillSelect',
             userIndex: uIndex,
             actionIndex: sIndex
         });
-
         selectedUnitIndex = uIndex;
         selectedSkillSlot = sIndex;
     });
 });
 
-// [서버 응답] 스킬 선택 하이라이트 동기화
+// 스킬 선택 하이라이트 동기화
 socket.on('ui_move_selected', (data) => {
-    // data: { userIndex, skillSlot }
-    // 모든 버튼에서 'selected' 제거 (하나만 선택 가능하므로)
     skillButtons.forEach(b => b.classList.remove('selected'));
-
     const targetBtnIndex = (data.skillSlot === 1) ? data.userIndex : data.userIndex + 6;
-    if (skillButtons[targetBtnIndex]) {
-        skillButtons[targetBtnIndex].classList.add('selected'); // [cite: 13]
-    }
+    if (skillButtons[targetBtnIndex]) skillButtons[targetBtnIndex].classList.add('selected');
 });
 
-// --------------------------------------------------------
-// 3. 타겟 선택 로직 (회색 버튼) [Source 6]
-// --------------------------------------------------------
+// 타겟 선택
 targetButtons.forEach((btn, index) => {
     btn.addEventListener('click', () => {
-        // 스킬이 먼저 선택되어 있어야 함
         if (selectedUnitIndex === null) {
             alert("먼저 스킬을 선택해주세요!");
             return;
         }
-
-        // 서버로 전송 (누가 -> 누구를)
         socket.emit('target_select', {
             type: 'targetSelect',
-            userIndex: selectedUnitIndex, // 공격자 (내 유닛)
-            actionIndex: index            // 방어자 (클릭한 상대 유닛)
+            userIndex: selectedUnitIndex,
+            actionIndex: index
         });
-
-        console.log(`Request Target Select: MyUnit ${selectedUnitIndex} -> EnemyUnit ${index}`);
     });
 });
 
-// [서버 응답] 타겟 매핑 확인 (화살표/연결선 표시)
+// 타겟 매핑 확인
 socket.on('ui_target_locked', (data) => {
     // data: { srcPlayer, srcIndex, targetIndex }
 
@@ -304,197 +280,188 @@ socket.on('ui_target_locked', (data) => {
     }
 });
 
-// (임시) 화살표 대신 로그 출력 및 스타일 변경 함수
-function drawArrow(uIdx, tIdx) {
-    // 일단 타겟 버튼에 스타일 표시로 대체
-    targetButtons.forEach(b => b.classList.remove('targeted'));
-    targetButtons[tIdx].classList.add('targeted');
-
-    alert(`[매핑 성공] 내 ${uIdx}번 유닛이 적 ${tIdx}번 유닛을 조준했습니다.`);
-}
-
-// --------------------------------------------------------
-// 페이즈/화면 전환 
-// --------------------------------------------------------
-// 1. DOM 요소 가져오기
-const phaseSelect = document.getElementById('phase-select');
-const phaseBattle = document.getElementById('phase-battle');
-const goButton = document.querySelector('.circle.large'); // GO 버튼
-
-// 2. GO 버튼 클릭 시 (서버에 요청)
+// 전투 시작 요청 (GO 버튼)
 if (goButton) {
     goButton.addEventListener('click', () => {
         if (goButton.classList.contains('disabled')) return;
-
-        console.log("서버에 전투 시작 요청 보냄...");
-        
-        // 버튼 잠금 (중복 클릭 방지)
         goButton.innerText = "WAIT";
         goButton.classList.add('disabled');
-
-        // 서버로 '나 준비됐어!' 전송
         socket.emit('start_battle', { type: 'BattleStart' });
     });
 }
 
+
+// --------------------------------------------------------
+// [핵심] 전투 화면(Battle Phase) 연출 로직
+// --------------------------------------------------------
+
+// 1. 전투 시작 확정 (화면 전환) -> ★ 여기서는 전환만 하고 데이터는 안 기다림
 socket.on('battle_start_confirmed', () => {
-    // 1. 일단 전투 화면으로 전환 (배경, 캐릭터 박스는 보임)
-    // 선택 페이즈 레이어에는 hidden 속성을 추가하고
+    // 선택 페이즈 레이어는 숨기기
     phaseSelect.classList.add('hidden');
-    // 전투 페이즈 레이어에서는 hidden 속성을 뺀다
+    // 전투 페이즈 레이어는 드러내기
+    phaseBattle.classList.remove('hidden');
+    
+    // 혹시 남아있을 스킬 UI 제거 (초기화)
+    const p1Bundle = document.getElementById('p1-bundle');
+    const p2Bundle = document.getElementById('p2-bundle');
+    if(p1Bundle) {
+         const existing = p1Bundle.querySelector('.skill-container');
+         if(existing) existing.remove();
+    }
+    if(p2Bundle) {
+         const existing = p2Bundle.querySelector('.skill-container');
+         if(existing) existing.remove();
+    }
+});
+
+
+// 2. 합(Clash) 시작 신호 (데이터 수신)
+socket.on('anim_clash_start', (data) => {
+    console.log("🔥 합 연출 시작!", data);
+
+    // 혹시 화면 전환 안됐을까봐 안전장치
+    phaseSelect.classList.add('hidden');
     phaseBattle.classList.remove('hidden');
 
-    // 2. 처음에는 스킬 UI를 숨겨둠 (캐릭터만 보이게)
-    hideSkillUI(); 
+    // [왼쪽 P1] 갱신
+    updateCharacterUI('p1-bundle', data.p1.char);
+    rebuildSkillUI('p1-bundle', data.p1.skill, data.p1.power, data.p1.coinPower);
 
-    // 3. 1초 뒤에 스킬 정보가 스르륵 나타나게 연출!
-    setTimeout(() => {
-        renderBattleScene(); // 데이터 채우기
-        showSkillUI();       // 보여주기
-    }, 100);
+    // [오른쪽 P2] 갱신
+    updateCharacterUI('p2-bundle', data.p2.char);
+    rebuildSkillUI('p2-bundle', data.p2.skill, data.p2.power, data.p2.coinPower);
 });
 
-// UI 요소 가져오기
-const p1SkillUI = document.getElementById('p1-skill-ui');
-const p2SkillUI = document.getElementById('p2-skill-ui');
 
-// 1. 스킬 UI 보여주기 함수
-function showSkillUI() {
-    if (p1SkillUI) p1SkillUI.classList.add('visible');
-    if (p2SkillUI) p2SkillUI.classList.add('visible');
-}
-
-// 2. 스킬 UI 숨기기 함수
-function hideSkillUI() {
-    if (p1SkillUI) p1SkillUI.classList.remove('visible');
-    if (p2SkillUI) p2SkillUI.classList.remove('visible');
-}
-
-function renderBattleScene() {
-    // 1. 스킬 이름
-    document.getElementById('p1-skill-name').innerText = "신속한 제압";
-    document.getElementById('p2-skill-name').innerText = "공간 절단";
-
-    // 2. 메인 위력
-    document.getElementById('p1-power').innerText = "0";
-    document.getElementById('p2-power').innerText = "0";
-
-    // 3. 코인 위력 배지 (+n)
-    document.getElementById('p1-coin-power').innerText = "+6";
-    document.getElementById('p2-coin-power').innerText = "+4";
-
-    // 4. 코인 생성 (P1: 3개, P2: 4개)
-    createCoins('p1-coins', 3);
-    createCoins('p2-coins', 4);
-}
-
-function createCoins(containerId, count) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = '';
+// 3. 일방 공격(Attack) 시작 신호
+socket.on('anim_attack_start', (data) => {
+    // data: { atkId, targetId, skillName ... } 인데,
+    // 서버(11_room.ts)에서는 { atkId, targetId, skillName }만 보내고 있어서
+    // 캐릭터 전체 정보를 보내도록 서버 코드를 살짝 보완해야 완벽하게 작동합니다.
+    // 일단 구조만 잡아둡니다.
     
-    for (let i = 0; i < count; i++) {
-        const coin = document.createElement('div');
-        coin.className = 'coin';
-        container.appendChild(coin);
+    console.log("⚔️ 공격 시작!", data);
+    
+    // (임시) 스킬창만 지우기
+    const p1Bundle = document.getElementById('p1-bundle');
+    const p2Bundle = document.getElementById('p2-bundle');
+    if(p1Bundle && p1Bundle.querySelector('.skill-container')) p1Bundle.querySelector('.skill-container').remove();
+    if(p2Bundle && p2Bundle.querySelector('.skill-container')) p2Bundle.querySelector('.skill-container').remove();
+});
+
+
+// --------------------------------------------------------
+// [UI Update Functions] 캐릭터 및 스킬 UI 갱신 구현부
+// --------------------------------------------------------
+
+/**
+ * 캐릭터 UI 업데이트 (Update & Swap)
+ * @param {string} bundleId - 'p1-bundle' 또는 'p2-bundle'
+ * @param {object} charData - 서버에서 받은 캐릭터 데이터 (이름, HP, 이미지 등)
+ */
+function updateCharacterUI(bundleId, charData) {
+    const bundle = document.getElementById(bundleId);
+    if (!bundle || !charData) return;
+
+    let charBox = bundle.querySelector('.char-box');
+    
+    // [보완] charBox가 아예 비어있으면(첫 실행) 내부 구조를 만들어줌
+    if (!charBox.querySelector('.name-tag')) {
+        charBox.innerHTML = `
+            <div class="char-info-overlay" style="position: absolute; bottom: 0; width: 100%; text-align: center;">
+                <div class="name-tag" style="background: rgba(0,0,0,0.5); color: #fff; font-size: 14px;"></div>
+                <div class="hp-bar-container" style="width: 100%; height: 10px; background: #555;">
+                    <div class="hp-bar-fill" style="width: 100%; height: 100%; background: #4caf50; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        `;
     }
-}
 
-// 서버에서 전투 진행 중 특정 슬롯의 정보가 올 때
-socket.on('update_battle_slot', (data) => {
-    // data 안에 "isNewCharacter: true" 같은 플래그를 주거나,
-    // 클라이언트가 "어? 아까랑 ID가 다르네?" 라고 판단해도 됨.
-    
-    // P1 처리
-    if (isDifferentCharacter(currentP1, data.p1Slot.owner)) {
-        // 1. 캐릭터가 바뀌었으면 -> Swap (페이드 아웃/인)
-        swapCharacter('p1-bundle', data.p1Slot.owner);
+    // 현재 표시 중인 캐릭터인지 확인
+    const isNewCharacter = (bundleId === 'p1-bundle') 
+        ? (currentP1CharId !== charData.id) 
+        : (currentP2CharId !== charData.id);
+
+    if (isNewCharacter) {
+        // [Swap] 교체 연출
+        charBox.classList.add('fade-out');
+        setTimeout(() => {
+            applyCharData(charBox, charData, false); 
+            
+            if (bundleId === 'p1-bundle') currentP1CharId = charData.id;
+            else currentP2CharId = charData.id;
+
+            charBox.classList.remove('fade-out');
+        }, 300); 
+
     } else {
-        // 2. 같은 캐릭터면 -> Update (그냥 HP만 깎기)
-        updateCharacterHP('p1-bundle', data.p1Slot.owner);
+        // [Update] 수치 갱신
+        applyCharData(charBox, charData, true);
     }
+}
 
-    // 스킬은 무조건 재생성
-    rebuildSkillUI('p1-bundle', data.p1Slot.readySkill);
+// 내부 헬퍼: 실제 DOM 값 변경
+function applyCharData(charBox, data, animate) {
+    const nameTag = charBox.querySelector('.name-tag');
+    const hpBar = charBox.querySelector('.hp-bar-fill');
     
-    // 현재 캐릭터 정보 갱신
-    currentP1 = data.p1Slot.owner;
-});
+    if (nameTag) nameTag.innerText = data.name;
 
-// 캐릭터 교체 함수 (페이드 효과 포함)
-function swapCharacter(bundleId, newOwnerData) {
+    if (hpBar) {
+        const hpPercent = (data.hp / data.maxHp) * 100;
+
+        if (!animate) {
+            hpBar.classList.add('no-transition');
+            hpBar.style.width = `${hpPercent}%`;
+            void hpBar.offsetWidth; // Reflow
+            hpBar.classList.remove('no-transition');
+        } else {
+            hpBar.style.width = `${hpPercent}%`;
+        }
+    }
+}
+
+/**
+ * 스킬 UI 재생성 (Delete & Recreate)
+ */
+function rebuildSkillUI(bundleId, skillData, power, coinPower) {
     const bundle = document.getElementById(bundleId);
     if (!bundle) return;
 
-    // 캐릭터 박스 찾기
-    const charBox = bundle.querySelector('.char-box');
-    const hpBar = bundle.querySelector('.hp-bar'); // HP바가 있다고 가정
-    const nameTag = bundle.querySelector('.name-tag'); // 이름표
+    // 1. 기존 UI 삭제
+    const existing = bundle.querySelector('.skill-container');
+    if (existing) existing.remove();
 
-    // 1. 일단 페이드 아웃 (잠시 숨김)
-    charBox.classList.add('fade-out');
+    if (!skillData) return; 
 
-    // 2. 0.2초(페이드 아웃 시간) 뒤에 내용물 교체
-    setTimeout(() => {
-        // --- 데이터 교체 시작 ---
-        
-        // (1) 이름/이미지 변경
-        nameTag.innerText = newOwnerData.name;
-        // charBox.style.backgroundImage = `url(${newOwnerData.img})`; 
-
-        // (2) [핵심] HP바 애니메이션 끄고 위치 잡기 (Snap)
-        if (hpBar) {
-            hpBar.classList.add('no-transition'); // 애니메이션 끄기
-            
-            const hpPercent = (newOwnerData.hp / newOwnerData.maxHp) * 100;
-            hpBar.style.width = `${hpPercent}%`;   // 즉시 이동 (이동 과정 안 보임)
-            
-            // 브라우저가 변경사항을 적용할 시간을 줌 (Reflow 강제)
-            void hpBar.offsetWidth; 
-            
-            hpBar.classList.remove('no-transition'); // 다시 애니메이션 켜기
-        }
-
-        // --- 데이터 교체 끝 ---
-
-        // 3. 다시 페이드 인 (짜잔~ 하고 등장)
-        charBox.classList.remove('fade-out');
-
-    }, 200); // CSS transition 시간과 맞춤
-}
-
-// [1] 캐릭터 박스 업데이트 함수 (DOM 재활용)
-function updateCharacterBox(bundleId, ownerData) {
-    const bundle = document.getElementById(bundleId);
-    if (!bundle || !ownerData) return; // 혹은 데이터 없으면 숨기기 처리
-
-    // 박스 자체를 찾는 게 아니라, 그 안의 요소들을 찾아서 값만 바꿈
-    // (HTML 구조상 .char-box 안에 HP바 등이 있다고 가정)
-    const hpBar = bundle.querySelector('.hp-bar');
-    const spBar = bundle.querySelector('.sp-bar');
-    
-    if (hpBar) {
-        const hpPercent = (ownerData.hp / ownerData.maxHp) * 100;
-        hpBar.style.width = `${hpPercent}%`; // CSS transition 덕분에 스르륵 줄어듦
+    // 2. HTML 문자열 생성
+    let coinsHtml = '';
+    for(let i=0; i < skillData.coinCount; i++) {
+        coinsHtml += `<div class="coin"></div>`;
     }
-    // ... 이름, SP 등 업데이트
-}
 
-// [2] 스킬 UI 재생성 함수 (기존 로직 활용)
-function rebuildSkillUI(bundleId, skillData) {
-    // 기존꺼 삭제
-    removeSkillUI(bundleId);
+    const container = document.createElement('div');
+    container.className = 'skill-container'; // style.css의 opacity: 0 적용됨
+    
+    container.innerHTML = `
+        <div class="skill-group">
+            <div class="coin-row">${coinsHtml}</div>
+            <div class="skill-bar">${skillData.name}</div>
+        </div>
+        <div class="circle-wrapper">
+            <div class="main-circle">${power}</div>
+            <div class="power-badge">${coinPower > 0 ? '+'+coinPower : coinPower}</div>
+        </div>
+    `;
 
-    if (!skillData) return; // 스킬 없으면(이미 씀) 삭제된 상태로 둠
+    // 3. DOM 추가 (캐릭터 박스 앞에)
+    bundle.prepend(container); 
 
-    // 새로 생성
-    createSkillUI(
-        bundleId, 
-        skillData.name, 
-        skillData.coinlist.length, 
-        skillData.BasePower, // 현재 위력
-        skillData.coinPower  // 코인 위력 표기 등
-    );
+    // 4. 등장 애니메이션
+    requestAnimationFrame(() => {
+        container.classList.add('visible');
+    });
 }
 
 // 실행

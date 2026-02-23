@@ -269,7 +269,8 @@ export class GameRoom {
             // ★ [이거 추가] 양쪽 클라이언트에게 "화면 바꿔라" 신호 전송
             io.to(this.roomId).emit('battle_start_confirmed');
 
-            // (나중에 여기에 ActManager.StartCombat() 들어감)
+            this.actManager.orderSort(); // ★ 순서 정렬 먼저 필수!
+            this.StartCombat();          // ★ 전투 루프 실행
         }
     }
     /*

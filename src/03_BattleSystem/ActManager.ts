@@ -36,7 +36,9 @@ export class ActManager {
             // try catch를 아직 생각 안해놔서 throw는 당장 못하겠음
             return;
         }
+        user.Slots[slotIndex].targetSlot = target.Slots[targetIndex];
         console.log(target.name, "의", targetIndex+1,"번째 슬롯 지정");
+        
         this.ActorList.set(user.Slots[slotIndex], target.Slots[targetIndex]);
         if (user.speed > target.speed)
             target.Slots[targetIndex].forcedTarget(user.Slots[slotIndex]);
