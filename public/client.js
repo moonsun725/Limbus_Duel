@@ -304,6 +304,15 @@ socket.on('ui_target_locked', (data) => {
     }
 });
 
+// (임시) 화살표 대신 로그 출력 및 스타일 변경 함수
+function drawArrow(uIdx, tIdx) {
+    // 일단 타겟 버튼에 스타일 표시로 대체
+    targetButtons.forEach(b => b.classList.remove('targeted'));
+    targetButtons[tIdx].classList.add('targeted');
+
+    alert(`[매핑 성공] 내 ${uIdx}번 유닛이 적 ${tIdx}번 유닛을 조준했습니다.`);
+}
+
 // --------------------------------------------------------
 // 페이즈/화면 전환 
 // --------------------------------------------------------
@@ -391,13 +400,101 @@ function createCoins(containerId, count) {
     }
 }
 
-// (임시) 화살표 대신 로그 출력 및 스타일 변경 함수
-function drawArrow(uIdx, tIdx) {
-    // 일단 타겟 버튼에 스타일 표시로 대체
-    targetButtons.forEach(b => b.classList.remove('targeted'));
-    targetButtons[tIdx].classList.add('targeted');
+// 서버에서 전투 진행 중 특정 슬롯의 정보가 올 때
+socket.on('update_battle_slot', (data) => {
+    // data 안에 "isNewCharacter: true" 같은 플래그를 주거나,
+    // 클라이언트가 "어? 아까랑 ID가 다르네?" 라고 판단해도 됨.
+    
+    // P1 처리
+    if (isDifferentCharacter(currentP1, data.p1Slot.owner)) {
+        // 1. 캐릭터가 바뀌었으면 -> Swap (페이드 아웃/인)
+        swapCharacter('p1-bundle', data.p1Slot.owner);
+    } else {
+        // 2. 같은 캐릭터면 -> Update (그냥 HP만 깎기)
+        updateCharacterHP('p1-bundle', data.p1Slot.owner);
+    }
 
-    alert(`[매핑 성공] 내 ${uIdx}번 유닛이 적 ${tIdx}번 유닛을 조준했습니다.`);
+    // 스킬은 무조건 재생성
+    rebuildSkillUI('p1-bundle', data.p1Slot.readySkill);
+    
+    // 현재 캐릭터 정보 갱신
+    currentP1 = data.p1Slot.owner;
+});
+
+// 캐릭터 교체 함수 (페이드 효과 포함)
+function swapCharacter(bundleId, newOwnerData) {
+    const bundle = document.getElementById(bundleId);
+    if (!bundle) return;
+
+    // 캐릭터 박스 찾기
+    const charBox = bundle.querySelector('.char-box');
+    const hpBar = bundle.querySelector('.hp-bar'); // HP바가 있다고 가정
+    const nameTag = bundle.querySelector('.name-tag'); // 이름표
+
+    // 1. 일단 페이드 아웃 (잠시 숨김)
+    charBox.classList.add('fade-out');
+
+    // 2. 0.2초(페이드 아웃 시간) 뒤에 내용물 교체
+    setTimeout(() => {
+        // --- 데이터 교체 시작 ---
+        
+        // (1) 이름/이미지 변경
+        nameTag.innerText = newOwnerData.name;
+        // charBox.style.backgroundImage = `url(${newOwnerData.img})`; 
+
+        // (2) [핵심] HP바 애니메이션 끄고 위치 잡기 (Snap)
+        if (hpBar) {
+            hpBar.classList.add('no-transition'); // 애니메이션 끄기
+            
+            const hpPercent = (newOwnerData.hp / newOwnerData.maxHp) * 100;
+            hpBar.style.width = `${hpPercent}%`;   // 즉시 이동 (이동 과정 안 보임)
+            
+            // 브라우저가 변경사항을 적용할 시간을 줌 (Reflow 강제)
+            void hpBar.offsetWidth; 
+            
+            hpBar.classList.remove('no-transition'); // 다시 애니메이션 켜기
+        }
+
+        // --- 데이터 교체 끝 ---
+
+        // 3. 다시 페이드 인 (짜잔~ 하고 등장)
+        charBox.classList.remove('fade-out');
+
+    }, 200); // CSS transition 시간과 맞춤
+}
+
+// [1] 캐릭터 박스 업데이트 함수 (DOM 재활용)
+function updateCharacterBox(bundleId, ownerData) {
+    const bundle = document.getElementById(bundleId);
+    if (!bundle || !ownerData) return; // 혹은 데이터 없으면 숨기기 처리
+
+    // 박스 자체를 찾는 게 아니라, 그 안의 요소들을 찾아서 값만 바꿈
+    // (HTML 구조상 .char-box 안에 HP바 등이 있다고 가정)
+    const hpBar = bundle.querySelector('.hp-bar');
+    const spBar = bundle.querySelector('.sp-bar');
+    
+    if (hpBar) {
+        const hpPercent = (ownerData.hp / ownerData.maxHp) * 100;
+        hpBar.style.width = `${hpPercent}%`; // CSS transition 덕분에 스르륵 줄어듦
+    }
+    // ... 이름, SP 등 업데이트
+}
+
+// [2] 스킬 UI 재생성 함수 (기존 로직 활용)
+function rebuildSkillUI(bundleId, skillData) {
+    // 기존꺼 삭제
+    removeSkillUI(bundleId);
+
+    if (!skillData) return; // 스킬 없으면(이미 씀) 삭제된 상태로 둠
+
+    // 새로 생성
+    createSkillUI(
+        bundleId, 
+        skillData.name, 
+        skillData.coinlist.length, 
+        skillData.BasePower, // 현재 위력
+        skillData.coinPower  // 코인 위력 표기 등
+    );
 }
 
 // 실행

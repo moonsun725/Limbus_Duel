@@ -476,6 +476,22 @@ body {
     z-index: 1; /* 스킬 뒤로 보냄 */
 }
 
+/* 트랜지션 끄기 (수치 교체 시 애니메이션 방지용) */
+.no-transition {
+    transition: none !important;
+}
+
+/* 페이드 아웃용 (내용 교체 중 안 보이게) */
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.char-box {
+    /* 기본적으로 투명도 애니메이션 장착 */
+    transition: opacity 0.2s ease;
+}
+
 
 /* ================================================= */
 /* [P1 - 왼쪽 진영] 배치 설정                         */
