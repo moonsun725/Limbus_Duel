@@ -340,8 +340,6 @@ socket.on('anim_clash_start', (data) => {
     rebuildSkillUI('p2-bundle', data.p2.skill, data.p2.power, data.p2.coinPower);
 });
 
-
-
 // 3. 공격 시작 신호 (데이터 수신) -> 상황에 따라 UI 유지 or 재생성
 socket.on('anim_attack_start', (data) => {
     console.log(`⚔️ 공격 시작! [${data.attacker.role}] -> [${data.defender.role}]`);
@@ -383,11 +381,29 @@ socket.on('anim_attack_start', (data) => {
     }
 });
 
+// [Helper] 스킬 UI 제거 함수 (삭제 + 애니메이션)
+function removeSkillUI(bundleId) {
+    const bundle = document.getElementById(bundleId);
+    if (!bundle) return;
+
+    const container = bundle.querySelector('.skill-container');
+    if (container) {
+        // (선택) 휙 사라지는 애니메이션 (css transition 활용)
+        container.style.opacity = '0';
+        container.style.transform = 'scale(0.9)';
+        
+        // 0.3초 뒤에 DOM에서 완전히 제거
+        setTimeout(() => {
+            if(container) container.remove();
+        }, 300);
+    }
+}
+
 // 4. 코인 토스() 신호
 // 이게 코인 던질때마다 받아야 됨(콜백이 루프 안에서 여러 번 던져주니까)
 socket.on('individual_coin_result', (data) => {
     // data: { role: 'p1'|'p2', isHead: boolean }
-
+    console.log(`🪙 코인 토스 결과 수신 [${data.role}] isHead: ${data.isHead}`);
     // 1. 타겟 번들 찾기
     const targetBundleId = (data.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
     const bundle = document.getElementById(targetBundleId);

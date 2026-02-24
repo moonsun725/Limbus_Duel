@@ -78,13 +78,12 @@ export class BattleManager
             char2.CoinToss();
 
             // 코인 토스 및 위력 계산
-            console.log(`[Clash]: 스킬명: ${skill1.name}`);
-            const power1 = await this.CoinToss(char1, skill1, coins1);
-            console.log(`[Clash]: 스킬위력: ${power1}`);
-
-            console.log(`[Clash]: 스킬명: ${skill2.name}`);
-            const power2 = await this.CoinToss(char2, skill2, coins2);
-            console.log(`[Clash]: 스킬위력: ${power2}`);
+            // [수정 후] 병렬 실행 (동시에 시작!)
+            const [power1, power2] = await Promise.all([
+                this.CoinToss(char1, skill1, coins1),
+                this.CoinToss(char2, skill2, coins2)
+            ]);
+            
 
             console.log(`   [Clash ${clashCount}합] ${char1.name}: ${power1} vs ${char2.name}: ${power2}`);
             await wait(1000); // 합 팅! 팅! 하는 연출 시간
@@ -136,7 +135,7 @@ export class BattleManager
                 console.log(`[CoinToss]: 뒷면: + 0`);
 
             await this.callbacks.onCoinToss(char, isHeads); // 이제 앞뒷면 둘다 연출될거임
-            await wait(300);
+            await wait(100);
         }
         return power;
     }
@@ -165,7 +164,7 @@ export class BattleManager
 
         for (const coin of activeCoins) {
             // 연출을 위한 딜레이 (코인 하나하나 때리는 느낌)
-            await wait(2000);
+            await wait(200);
 
             attacker.bufList.OnCoinToss();
             const isHeads = Math.random() * 100 < (attacker.Stats.sp + 50);

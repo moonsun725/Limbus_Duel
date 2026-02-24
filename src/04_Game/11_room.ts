@@ -78,51 +78,50 @@ export class GameRoom {
                 });
 
                 // 공격 시작 전 '두근!' 하는 딜레이
-                await sleep(1000);
+                await sleep(300);
             },
             onClashStart: async (slot1: BattleSlot, slot2: BattleSlot) => {
-                // Slot이 있으니까 owner와 readySkill에 바로 접근 가능!
                 const char1 = slot1.owner;
-                const skill1 = slot1.readySkill; // 이제 굳이 char1.GetReadySkill() 안 해도 됨
+                const skill1 = slot1.readySkill;
+
+                // ★ [핵심] 1. char1이 누구 팀인지 확인 (이미 만든 메서드 활용)
+                // char1이 P1 팀이면 'p1', P2 팀이면 'p2'가 나옴
+                const role1 = this.getOwnerRole(char1);
 
                 const char2 = slot2.owner;
                 const skill2 = slot2.readySkill;
 
-                // 클라이언트로 보낼 데이터 가공 (DTO)
-                const clashData = {
-                    p1: {
-                        char: {
-                            id: char1.id,
-                            name: char1.name,
-                            hp: char1.Stats.hp,
-                            maxHp: char1.Stats.maxHp
-                        },
-                        // ★ 여기가 핵심: Slot에 있는 스킬 정보를 바로 사용
-                        skill: {
-                            name: skill1?.name || "스킬 없음",
-                            coinCount: skill1?.coinlist.length || 0
-                        },
-                        power: skill1?.BasePower || 0,
-                        coinPower: skill1?.coinlist[0]?.CoinPower || 0
+                // 2. 데이터를 만드는 함수 (내부에서만 쓸 거니 간단하게 정의)
+                // 타입을 굳이 안 적어도 JS 객체로 잘 넘어갑니다.
+                const createDto = (c: any, s: any) => ({
+                    char: {
+                        id: c.id,
+                        name: c.name,
+                        hp: c.Stats.hp,
+                        maxHp: c.Stats.maxHp
                     },
-                    p2: {
-                        char: {
-                            id: char2.id,
-                            name: char2.name,
-                            hp: char2.Stats.hp,
-                            maxHp: char2.Stats.maxHp
-                        },
-                        skill: {
-                            name: skill2?.name || "스킬 없음",
-                            coinCount: skill2?.coinlist.length || 0
-                        },
-                        power: skill2?.BasePower || 0,
-                        coinPower: skill2?.coinlist[0]?.CoinPower || 0
-                    }
+                    skill: {
+                        name: s?.name || "스킬 없음",
+                        coinCount: s?.coinlist.length || 0
+                    },
+                    power: s?.BasePower || 0,
+                    coinPower: s?.coinlist[0]?.CoinPower || 0
+                });
+
+                // 3. 데이터 생성
+                const data1 = createDto(char1, skill1);
+                const data2 = createDto(char2, skill2);
+
+                // 4. ★ [핵심] 자리에 맞게 끼워넣기
+                // role1이 'p1'이면 -> p1 자리에 data1 (char1)
+                // role1이 'p2'이면 -> p1 자리에 data2 (char2) ... 즉, 진짜 P1을 찾아서 넣음
+                const clashData = {
+                    p1: (role1 === 'p1') ? data1 : data2,
+                    p2: (role1 === 'p2') ? data1 : data2
                 };
 
                 io.to(this.roomId).emit('anim_clash_start', clashData);
-                await sleep(2000);
+                await sleep(500);
             },
             onCoinToss: async (char: Character, isHeads: boolean) => {
                 const role = this.getOwnerRole(char);
@@ -134,7 +133,7 @@ export class GameRoom {
                     isHead: isHeads
                 });
 
-                await sleep(600); // 연출 딜레이
+                await sleep(100); // 연출 딜레이
             },
             onClashResult: async (c1, p1, count1, c2, p2, count2, clashCount) => {
 
@@ -164,8 +163,14 @@ export class GameRoom {
 
     // [Helper] 캐릭터가 P1 소속인지 P2 소속인지 객체 주소로 비교
     private getOwnerRole(char: Character): 'p1' | 'p2' | null {
-        if (this.p1 && this.p1.party.some(c => c === char)) return 'p1';
-        if (this.p2 && this.p2.party.some(c => c === char)) return 'p2';
+
+        // 1. P1 파티 확인
+        if (this.p1 && this.p1.party.includes(char)) return 'p1';
+
+        // 2. P2 파티 확인
+        if (this.p2 && this.p2.party.includes(char)) return 'p2';
+
+        console.warn(`[getOwnerRole] Role Not Found for ${char.name}`);
         return null;
     }
 
