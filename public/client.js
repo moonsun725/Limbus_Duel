@@ -360,33 +360,47 @@ socket.on('anim_attack_start', (data) => {
 // 4. 코인 토스() 신호
 // 이게 코인 던질때마다 받아야 됨(콜백이 루프 안에서 여러 번 던져주니까)
 socket.on('individual_coin_result', (data) => {
-    // data: { role: 'p1' | 'p2', isHead: boolean }
+    // data: { role: 'p1'|'p2', isHead: boolean }
 
-    // 1. [위치 선정] 서버가 'p1'이라고 하면 무조건 왼쪽 번들, 'p2'면 오른쪽 번들
+    // 1. 타겟 번들 찾기
     const targetBundleId = (data.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
     const bundle = document.getElementById(targetBundleId);
     if (!bundle) return;
 
-    // 2. [아군 판별] 로그나 사운드 출력용 (선택 사항)
-    const isMine = (data.role === myRole);
-    console.log(isMine ? "🍀 내 코인!" : "🔥 적 코인!", data.isHead);
-
-    // 3. [코인 탐색] 아직 결과가 안 나온(색이 안 변한) 첫 번째 코인을 찾음
+    // 2. 코인 뒤집기 연출 (기존 로직)
     const coins = bundle.querySelectorAll('.coin');
-    let targetCoin = null;
-
     for (let coin of coins) {
-        // heads도 아니고 tails도 아닌 녀석 발견!
         if (!coin.classList.contains('heads') && !coin.classList.contains('tails')) {
-            targetCoin = coin;
+            if (data.isHead) coin.classList.add('heads');
+            else coin.classList.add('tails');
             break; 
         }
     }
 
-    // 4. [스타일 적용]
-    if (targetCoin) {
-        if (data.isHead) targetCoin.classList.add('heads');
-        else targetCoin.classList.add('tails');
+    // 3. [추가됨] 위력 텍스트 갱신 로직 (Client Side Calculation)
+    if (data.isHead) {
+        const container = bundle.querySelector('.skill-container');
+        const circle = bundle.querySelector('.main-circle');
+
+        if (container && circle) {
+            // (1) 심어둔 코인 위력 가져오기 (문자열이라 숫자로 변환)
+            const coinPower = parseInt(container.dataset.coinPower || 0);
+            
+            // (2) 현재 적힌 위력 가져오기
+            let currentVal = parseInt(circle.innerText || 0);
+
+            // (3) 더하기!
+            const newVal = currentVal + coinPower;
+            circle.innerText = newVal;
+
+            // (4) 팝(Pop) 애니메이션 효과
+            circle.classList.remove('pop-anim');
+            void circle.offsetWidth; // Reflow 강제
+            circle.classList.add('pop-anim');
+            
+            // (선택) 텍스트 색상 강조
+            circle.style.color = '#ff9800'; 
+        }
     }
 });
 
@@ -398,10 +412,12 @@ socket.on('anim_clash_result', (data) => {
     // 서버가 알려준 role('p1' or 'p2')에 따라 어느 쪽 UI를 건드릴지 결정
     const bundle1 = (data.c1.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
     updateCoinDisplay(bundle1, data.c1.remainCoins);
+    resetPowerText(bundle1);
 
     // 2. 두 번째 캐릭터(c2) 처리
     const bundle2 = (data.c2.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
     updateCoinDisplay(bundle2, data.c2.remainCoins);
+    resetPowerText(bundle2);
 });
 
 // [Helper] 코인 개수 및 상태 업데이트 함수
@@ -429,6 +445,26 @@ function updateCoinDisplay(bundleId, targetCount) {
         currentCoins.forEach(coin => {
             coin.classList.remove('heads', 'tails');
         });
+    }
+}
+// [Helper] 위력 텍스트와 스타일을 초기 상태로 되돌린다
+function resetPowerText(bundleId) {
+    const bundle = document.getElementById(bundleId);
+    if (!bundle) return;
+
+    const container = bundle.querySelector('.skill-container');
+    const circle = bundle.querySelector('.main-circle');
+
+    if (container && circle) {
+        // 1. 심어뒀던 basePower 꺼내오기
+        const baseVal = container.dataset.basePower;
+        
+        // 2. 텍스트 원상복구
+        circle.innerText = baseVal;
+
+        // 3. 스타일 초기화 (주황색 -> 원래색, 팝 애니메이션 제거)
+        circle.style.color = ''; // 인라인 스타일 제거 (CSS 기본값인 흰색/검은색으로 돌아감)
+        circle.classList.remove('pop-anim'); 
     }
 }
 
@@ -525,6 +561,10 @@ function rebuildSkillUI(bundleId, skillData, power, coinPower) {
     const container = document.createElement('div');
     container.className = 'skill-container'; // style.css의 opacity: 0 적용됨
     
+    // ★ [핵심] 여기에 코인 위력을 데이터 속성으로 심어둡니다!
+    // 나중에 JS가 이 값을 읽어서 더하기 연산을 할 겁니다.
+    container.dataset.coinPower = coinPower;
+    container.dataset.basePower = power;
     container.innerHTML = `
         <div class="skill-group">
             <div class="coin-row">${coinsHtml}</div>

@@ -21,9 +21,11 @@ export interface BattleCallbacks {
         char1: Character, 
         power1: number, 
         coinCount1: number,  // ★ 추가
+
         char2: Character, 
         power2: number,
         coinCount2: number,  // ★ 추가
+        
         clashCount: number
     ) => Promise<void>;
     onDamage: (targetId: number, damage: number, newHp: number) => void;   
