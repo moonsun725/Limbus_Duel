@@ -28,6 +28,9 @@ export class Player {
         } else {
             throw new Error("수감자 엔트리가 비어 있습니다!");
         }
+        this.party.forEach(sinner => {
+            sinner.recoverSP(50); // 일단은 초기화할 때 SP 다 채워주는 걸로 할까요? ㅇㅇ
+        });
     }
 
     // 턴 관리, 

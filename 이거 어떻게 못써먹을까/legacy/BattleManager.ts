@@ -13,26 +13,17 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 // 콜백함수
 export interface BattleCallbacks {
     onLog: (msg: string) => void;
-    onAttackStart: (attacker: Character, target: Character, skill: Skill, coinList: Coin[]) => Promise<void>;
-    onClashStart: (slot1: BattleSlot, slot2: BattleSlot) => Promise<void>;
-    onCoinToss: (char: Character, isHeads: boolean) => Promise<void>;
-    onCoinResult: (isHeads: boolean, power: number) => Promise<void>; // 레거시 코드(일단은 남겨둠)
-    onClashResult: (
-        char1: Character, 
-        power1: number, 
-        coinCount1: number,  // ★ 추가
-
-        char2: Character, 
-        power2: number,
-        coinCount2: number,  // ★ 추가
-        
-        clashCount: number
-    ) => Promise<void>;
-    onDamage: (targetId: number, damage: number, newHp: number) => void;   
+    onAttackStart: (attackerId: number, targetId: number, skillName: string) => Promise<void>; // 연출 대기
+    onClashStart: (char1: Character, char2: Character) => Promise<void>;
+    onCoinToss: (isHeads: boolean) => Promise<void>;
+    onClashResult: (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) => Promise<void>;
+    onDamage: (targetId: number, damage: number, newHp: number) => void;
+    onCoinResult: (isHeads: boolean, power: number) => Promise<void>;
 }
 
 export class BattleManager 
 {
+
     private callbacks: BattleCallbacks;
 
     constructor(callbacks?: BattleCallbacks) {
@@ -42,9 +33,9 @@ export class BattleManager
             this.callbacks = {
                 onLog: (msg) => {},
                 onAttackStart: async (attackerId, targetId, skillName) => {}, // 연출 대기
-                onClashStart: async (slot1, slot2) => {},
-                onCoinToss: async (char, isHeads) => {},
-                onClashResult: async (char1, power1, coinCount1, char2, power2, coinCount2, clashCount) =>  {},
+                onClashStart: async (char1, char2) => {},
+                onCoinToss: async (isHeads) => {},
+                onClashResult: async (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) =>  {},
                 onDamage: (targetId: number, damage: number, newHp: number) => {},
                 onCoinResult: async (isHeads: boolean, power: number) => {}
             }
@@ -63,7 +54,7 @@ export class BattleManager
         if (!skill1 || !skill2) return;
 
         console.log(`[Clash Start] ${char1.name}(${skill1.name}) VS ${char2.name}(${skill2.name})`);
-        await this.callbacks.onClashStart(slot1, slot2);
+        await this.callbacks.onClashStart(char1, char2);
 
         // 코인 복사 (원본 손상 방지)
         let coins1 = [...skill1.coinlist];
@@ -85,6 +76,7 @@ export class BattleManager
             console.log(`[Clash]: 스킬명: ${skill2.name}`);
             const power2 = await this.CoinToss(char2, skill2, coins2);
             console.log(`[Clash]: 스킬위력: ${power2}`);
+            await this.callbacks.onClashResult(char1, power1, char2, power2, clashCount);
 
             console.log(`   [Clash ${clashCount}합] ${char1.name}: ${power1} vs ${char2.name}: ${power2}`);
             await wait(1000); // 합 팅! 팅! 하는 연출 시간
@@ -94,12 +86,6 @@ export class BattleManager
             } else if (power2 > power1) {
                 coins1.shift();
             } 
-
-            await this.callbacks.onClashResult(
-                char1, power1, coins1.length, 
-                char2, power2, coins2.length, 
-                clashCount
-            );
             console.log(`[Clash]: ${clashCount}합`);
             
             // 합 횟수에 따른 정신력/상태 업데이트 등은 여기서
@@ -122,20 +108,17 @@ export class BattleManager
         let power = skill.BasePower;
         let headsCount = 0;
         
-        
         for (const coin of coins) {
             // 정신력 기반 코인 토스
-            const coinPower = coin.CoinPower; // 여기에다가 나중에 버프리스트 등등 긁어와서 추가로 더해줄 수 있음
             const isHeads = Math.random() * 100 < (char.Stats.sp + 50)
             if (isHeads) {
-                console.log(`[CoinToss]: 앞면: + ${coinPower}`);
-                power += coinPower;
+                console.log(`[CoinToss]: 앞면: + ${coin.CoinPower}`);
+                await this.callbacks.onCoinToss(isHeads);
+                power += coin.CoinPower;
                 headsCount++;
             }
             else
                 console.log(`[CoinToss]: 뒷면: + 0`);
-
-            await this.callbacks.onCoinToss(char, isHeads); // 이제 앞뒷면 둘다 연출될거임
             await wait(300);
         }
         return power;
@@ -154,14 +137,14 @@ export class BattleManager
     public async Attack(attacker: Character, target: Character, skill: Skill, activeCoins: Coin[]) {
 
         console.log(`[Attack Start] ${attacker.name} -> ${target.name} (스킬: ${skill.name})`);
-        await this.callbacks.onAttackStart(attacker, target, skill, activeCoins);
+        await this.callbacks.onAttackStart(attacker.id, target.id, skill.name);
 
         // 일방공격이라면 공격 시작 시 효과 (OnUse) 이때 발동
         if (attacker.BattleState.GetState() === "NORMAL") {
             ProcessMoveEffects(skill, target, attacker, "OnUse");
         }
 
-        let currentPower = skill.BasePower; // 누적 위력 방식이므로
+        let currentPower = skill.BasePower; // 누적 위력 방식이라면 여기서 초기화
 
         for (const coin of activeCoins) {
             // 연출을 위한 딜레이 (코인 하나하나 때리는 느낌)
@@ -173,10 +156,10 @@ export class BattleManager
             if (isHeads) {
                 currentPower += coin.CoinPower; // 앞면이면 위력 증가
                 console.log(`   [Coin] 앞면! 현재 위력: ${currentPower}`);
+                await this.callbacks.onCoinResult(isHeads, currentPower);
             } else {
                 console.log(`   [Coin] 뒷면! 현재 위력: ${currentPower}`);
             }
-            await this.callbacks.onCoinToss(attacker, isHeads);
 
             // 데미지 계산 및 적용
             const damage = calculateDamage(attacker, target, skill, coin, currentPower);

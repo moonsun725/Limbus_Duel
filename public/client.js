@@ -341,20 +341,46 @@ socket.on('anim_clash_start', (data) => {
 });
 
 
-// 3. 일방 공격(Attack) 시작 신호
+
+// 3. 공격 시작 신호 (데이터 수신) -> 상황에 따라 UI 유지 or 재생성
 socket.on('anim_attack_start', (data) => {
-    // data: { atkId, targetId, skillName ... } 인데,
-    // 서버(11_room.ts)에서는 { atkId, targetId, skillName }만 보내고 있어서
-    // 캐릭터 전체 정보를 보내도록 서버 코드를 살짝 보완해야 완벽하게 작동합니다.
-    // 일단 구조만 잡아둡니다.
-    
-    console.log("⚔️ 공격 시작!", data);
-    
-    // (임시) 스킬창만 지우기
-    const p1Bundle = document.getElementById('p1-bundle');
-    const p2Bundle = document.getElementById('p2-bundle');
-    if(p1Bundle && p1Bundle.querySelector('.skill-container')) p1Bundle.querySelector('.skill-container').remove();
-    if(p2Bundle && p2Bundle.querySelector('.skill-container')) p2Bundle.querySelector('.skill-container').remove();
+    console.log(`⚔️ 공격 시작! [${data.attacker.role}] -> [${data.defender.role}]`);
+
+    // 1. 방어자 (Defender) 처리: 무조건 삭제
+    // (합에서 졌거나, 일방적으로 맞는 상황이므로 스킬 캔슬 연출)
+    const defBundleId = (data.defender.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+    // if (defBundleId.querySelector('.skill-container').coins.length > 0) { // 코인이 남아있으면 삭제 x(나중에 한참뒤에 파불코가 있음)
+    removeSkillUI(defBundleId);
+
+
+    // 2. 공격자 (Attacker) 처리: 상황에 따라 다름
+    const atkBundleId = (data.attacker.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+    const atkBundle = document.getElementById(atkBundleId);
+
+    if (atkBundle) {
+        // ★ [핵심] 이미 스킬 UI가 존재하는지 확인
+        const existingUI = atkBundle.querySelector('.skill-container');
+
+        if (existingUI) {
+            // [상황 A: 합 승리 후]
+            // 이미 UI가 있고, 합 진행 중에 코인이 알맞게 줄어들었음.
+            // 따라서 아무것도 하지 않고 유지함. (부드러운 연결)
+            console.log("♻️ 합 승리자 UI 유지");
+            
+            // (선택) 만약 확실히 하기 위해 텍스트 색상만 리셋하고 싶다면:
+            // resetPowerText(atkBundleId); 
+        } else {
+            // [상황 B: 일방 공격]
+            // 합 과정 없이 바로 공격하므로 UI가 없음. 새로 그려야 함.
+            console.log("🆕 일방 공격 UI 생성");
+            rebuildSkillUI(
+                atkBundleId, 
+                data.attacker.skill, 
+                data.attacker.power, 
+                data.attacker.coinPower
+            );
+        }
+    }
 });
 
 // 4. 코인 토스() 신호
@@ -383,15 +409,16 @@ socket.on('individual_coin_result', (data) => {
         const circle = bundle.querySelector('.main-circle');
 
         if (container && circle) {
-            // (1) 심어둔 코인 위력 가져오기 (문자열이라 숫자로 변환)
+            // (1) 데이터셋에서 값 가져오기 (숫자로 변환)
             const coinPower = parseInt(container.dataset.coinPower || 0);
-            
-            // (2) 현재 적힌 위력 가져오기
-            let currentVal = parseInt(circle.innerText || 0);
+            let currentTotal = parseInt(container.dataset.currentPower || 0);
 
-            // (3) 더하기!
-            const newVal = currentVal + coinPower;
-            circle.innerText = newVal;
+            // (2) 더하기
+            currentTotal += coinPower;
+
+            // (3) 저장 및 표시
+            container.dataset.currentPower = currentTotal; // 저장
+            circle.innerText = currentTotal; // 표시
 
             // (4) 팝(Pop) 애니메이션 효과
             circle.classList.remove('pop-anim');
@@ -458,6 +485,9 @@ function resetPowerText(bundleId) {
     if (container && circle) {
         // 1. 심어뒀던 basePower 꺼내오기
         const baseVal = container.dataset.basePower;
+        
+        // ★ [수정] currentPower도 초기화 필수!
+        container.dataset.currentPower = baseVal;
         
         // 2. 텍스트 원상복구
         circle.innerText = baseVal;
@@ -565,6 +595,8 @@ function rebuildSkillUI(bundleId, skillData, power, coinPower) {
     // 나중에 JS가 이 값을 읽어서 더하기 연산을 할 겁니다.
     container.dataset.coinPower = coinPower;
     container.dataset.basePower = power;
+    container.dataset.currentPower = power; // 추가: 현재 위력도 저장 (코인 토스 때마다 갱신할 예정)
+
     container.innerHTML = `
         <div class="skill-group">
             <div class="coin-row">${coinsHtml}</div>

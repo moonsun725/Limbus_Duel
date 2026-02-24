@@ -11,7 +11,7 @@ export function buildParty(data?: any[]): Character[]
                 const newPoke = createSinnerFromData(p.id);
                 party.push(newPoke);
             } catch (e) {
-                console.error(`[Room] 포켓몬 생성 실패 (${p.name}):`, e);
+                console.error(`[Room] 수감자 생성 실패 (${p.name}):`, e);
             }
         }
     }
@@ -20,7 +20,7 @@ export function buildParty(data?: any[]): Character[]
     if (party.length === 0) {
         console.log("[Room] 렌탈팀을 제공합니다.");
         for (var i = 10101; i <= 11201; i +=100)
-            party.push(createSinnerFromData(i))
+            party.push(createSinnerFromData(i)); // 10101, 10201, ..., 11201 (총 12명)
     }
     
     return party;

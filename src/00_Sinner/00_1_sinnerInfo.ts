@@ -27,7 +27,7 @@ export class SinnerInfo // 각종 스탯, 내성
     hp: number; // 체력
     sp: number; // 정신력
 
-    public maxSp: number = 45;
+    public maxSp: number = 45; 
     public minSp: number = -45;
 
     resistP: Resist1;
