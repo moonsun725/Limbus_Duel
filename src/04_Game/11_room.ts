@@ -133,10 +133,11 @@ export class GameRoom {
                     isHead: isHeads
                 });
 
-                await sleep(100); // 연출 딜레이
+                await sleep(200); // 연출 딜레이: 합칠 때는 몰라도 공격할 때는 좀 길게 가져가야 하는데 콜백을 따로 쓸까
             },
             onClashResult: async (c1, p1, count1, c2, p2, count2, clashCount) => {
 
+                await sleep(1000);
                 const r1 = this.getOwnerRole(c1);
                 const r2 = this.getOwnerRole(c2);
                 if (!r1 || !r2) return;
@@ -145,13 +146,18 @@ export class GameRoom {
                     c2: { role: r2, power: p2, remainCoins: count2 },
                     clashCount: clashCount
                 });
-
-                await sleep(1000);
             },
-            onCoinResult: async (isHeads, power) => {
-                // 공격 후 코인 결과 애니메이션 (예: 데미지 숫자 튀어나오기)
-                io.to(this.roomId).emit('anim_coin_toss', { isHeads, power });
-                await this.sleep(300);
+            onCoinResult: async (char: Character, isHeads: boolean) => { // 이거는 Ondamage의 딜레이도 있어서 조금 빨라도 됨. 지금은 없어서 느리게 만듦.
+                const role = this.getOwnerRole(char);
+                if (!role) return;
+
+                // ★ 핵심: ID가 아니라 role('p1' or 'p2')을 보냄
+                io.to(this.roomId).emit('individual_coin_result', {
+                    role: role,
+                    isHead: isHeads
+                });
+
+                await sleep(1000); // 연출 딜레이: 사실 coinToss랑 똑같지만 콜백 따로쓰기
             },
             onDamage: (targetId, dmg, newHp) => {
                 io.to(this.roomId).emit('update_hp', { targetId, dmg, newHp });

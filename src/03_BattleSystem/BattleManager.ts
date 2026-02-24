@@ -13,7 +13,7 @@ export interface BattleCallbacks {
     onAttackStart: (attacker: Character, target: Character, skill: Skill, coinList: Coin[]) => Promise<void>;
     onClashStart: (slot1: BattleSlot, slot2: BattleSlot) => Promise<void>;
     onCoinToss: (char: Character, isHeads: boolean) => Promise<void>;
-    onCoinResult: (isHeads: boolean, power: number) => Promise<void>; // 레거시 코드(일단은 남겨둠)
+    onCoinResult: (char: Character, isHeads: boolean) => Promise<void>; // 레거시 코드(일단은 남겨둠)
     onClashResult: (
         char1: Character, 
         power1: number, 
@@ -43,7 +43,7 @@ export class BattleManager
                 onCoinToss: async (char, isHeads) => {},
                 onClashResult: async (char1, power1, coinCount1, char2, power2, coinCount2, clashCount) =>  {},
                 onDamage: (targetId: number, damage: number, newHp: number) => {},
-                onCoinResult: async (isHeads: boolean, power: number) => {}
+                onCoinResult: async (char, isHeads) => {}
             }
     }
 
@@ -169,7 +169,7 @@ export class BattleManager
             } else {
                 console.log(`   [Coin] 뒷면! 현재 위력: ${currentPower}`);
             }
-            await this.callbacks.onCoinToss(attacker, isHeads);
+            await this.callbacks.onCoinResult(attacker, isHeads);
 
             // 데미지 계산 및 적용
             const damage = calculateDamage(attacker, target, skill, coin, currentPower);
