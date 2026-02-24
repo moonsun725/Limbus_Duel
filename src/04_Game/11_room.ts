@@ -104,26 +104,30 @@ export class GameRoom {
                 io.to(this.roomId).emit('anim_clash_start', clashData);
                 await sleep(2000);
             },
-            onCoinToss: async (char: Character, isHeads: boolean) => { 
-                const role = this.getOwnerRole(char); 
-                if (!role) return; 
+            onCoinToss: async (char: Character, isHeads: boolean) => {
+                const role = this.getOwnerRole(char);
+                if (!role) return;
 
                 // ★ 핵심: ID가 아니라 role('p1' or 'p2')을 보냄
-                io.to(this.roomId).emit('individual_coin_result', { 
-                    role: role,     
-                    isHead: isHeads 
+                io.to(this.roomId).emit('individual_coin_result', {
+                    role: role,
+                    isHead: isHeads
                 });
-                
+
                 await sleep(600); // 연출 딜레이
             },
-            onClashResult: async (c1, p1, c2, p2, clashCount) => {
-                // 합 도중 팅! 팅! 하는 연출 데이터 전송
-                io.to(this.roomId).emit('anim_clash_coin', {
-                    c1: { id: c1.id, power: p1 },
-                    c2: { id: c2.id, power: p2 },
+            onClashResult: async (c1, p1, count1, c2, p2, count2, clashCount) => {
+
+                const r1 = this.getOwnerRole(c1);
+                const r2 = this.getOwnerRole(c2);
+                if (!r1 || !r2) return;
+                io.to(this.roomId).emit('anim_clash_result', {
+                    c1: { role: r1, power: p1, remainCoins: count1 }, // ★ 남은 코인 추가
+                    c2: { role: r2, power: p2, remainCoins: count2 },
                     clashCount: clashCount
                 });
-                await this.sleep(500);
+
+                await sleep(1000);
             },
             onCoinResult: async (isHeads, power) => {
                 // 공격 후 코인 결과 애니메이션 (예: 데미지 숫자 튀어나오기)

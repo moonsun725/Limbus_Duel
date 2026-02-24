@@ -766,20 +766,20 @@
     },
     {
       "id": 1060102,
-      "level": 4,
+      "level": 20,
       "name": "이연격",
       "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +1",
-      "category": "",
-      "color": "",
+      "category": "attack",
+      "color": "yellow",
       "keywords": [],
-      "BasePower": 0,
-      "AtkLv": 0,
+      "BasePower": 4,
+      "AtkLv": 2,
       "Weight": 1,
       "coinlist": [
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Slash",
+          "Color": "yellow",
+          "CoinPower": 4,
           "coindescs": [
             {
               "desc": "[OnSucceedAttack] 침잠 2 부여"
@@ -788,9 +788,9 @@
           "abilities": []
         },
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Slash",
+          "Color": "yellow",
+          "CoinPower": 4,
           "coindescs": [
             {
               "desc": "[OnSucceedAttack] 파열 2 부여"
@@ -802,27 +802,27 @@
     },
     {
       "id": 1060103,
-      "level": 4,
+      "level": 30,
       "name": "선풍",
       "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +2",
-      "category": "",
-      "color": "",
+      "category": "attack",
+      "color": "orange",
       "keywords": [],
-      "BasePower": 0,
-      "AtkLv": 0,
+      "BasePower": 6,
+      "AtkLv": 2,
       "Weight": 1,
       "coinlist": [
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Blunt",
+          "Color": "orange",
+          "CoinPower": 4,
           "effectK": [],
           "effectB": []
         },
         {
-          "Type": "",
-          "Color": "",
-          "CoinPower": 0,
+          "Type": "Blunt",
+          "Color": "orange",
+          "CoinPower": 4,
           "coindescs": [
             {
               "desc": "[OnSucceedAttackHead] 공격 위력 감소 2 부여"
@@ -840,7 +840,7 @@
     },
     {
       "id": 1060104,
-      "level": 1,
+      "level": 40,
       "name": "회피",
       "desc": "",
       "category": "",

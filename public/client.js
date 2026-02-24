@@ -190,11 +190,18 @@ socket.on('role_assigned', (data) => {
     console.log(`Role Assigned: ${myRole}`);
 });
 
+// ui 갱신
 socket.on('update_ui', (data) => {
+    // 맨 처음 init
     const myData = (myRole === 'p1') ? data.p1 : data.p2;
     if (myData && myData.active) {
         skillDataCache = myData.active;
     }
+
+    // 선택 페이즈 레이어는 드러내기
+    phaseSelect.classList.remove('hidden');
+    // 전투 페이즈 레이어는 숨기기
+    phaseBattle.classList.add('hidden');
 });
 
 // 스킬 선택
@@ -382,11 +389,48 @@ socket.on('individual_coin_result', (data) => {
         else targetCoin.classList.add('tails');
     }
 });
+
 // 5. 합 결과 (Clash Result) 신호
 socket.on('anim_clash_result', (data) => {
-    console.log("🏁 합 연출 결과!", data);
-    
+    console.log(`⚔️ [${data.clashCount}합] 결과 수신`, data);
+
+    // 1. 첫 번째 캐릭터(c1) 처리
+    // 서버가 알려준 role('p1' or 'p2')에 따라 어느 쪽 UI를 건드릴지 결정
+    const bundle1 = (data.c1.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+    updateCoinDisplay(bundle1, data.c1.remainCoins);
+
+    // 2. 두 번째 캐릭터(c2) 처리
+    const bundle2 = (data.c2.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+    updateCoinDisplay(bundle2, data.c2.remainCoins);
 });
+
+// [Helper] 코인 개수 및 상태 업데이트 함수
+function updateCoinDisplay(bundleId, targetCount) {
+    const bundle = document.getElementById(bundleId);
+    if (!bundle) return;
+
+    const coinRow = bundle.querySelector('.coin-row');
+    if (!coinRow) return;
+
+    // 현재 화면에 그려진 코인들 가져오기
+    const currentCoins = coinRow.querySelectorAll('.coin');
+    const currentCount = currentCoins.length;
+
+    if (currentCount !== targetCount) {
+        // [상황 A] 코인이 깨짐 (개수 변경) -> 싹 지우고 남은 개수만큼 새로 그림
+        coinRow.innerHTML = '';
+        for(let i=0; i < targetCount; i++) {
+            const coin = document.createElement('div');
+            coin.className = 'coin'; // 초기 상태(노란색)로 생성
+            coinRow.appendChild(coin);
+        }
+    } else {
+        // [상황 B] 비김 (개수 유지) -> 앞면/뒷면 색깔만 뺌 (초기화)
+        currentCoins.forEach(coin => {
+            coin.classList.remove('heads', 'tails');
+        });
+    }
+}
 
 // --------------------------------------------------------
 // [UI Update Functions] 캐릭터 및 스킬 UI 갱신 구현부
@@ -500,25 +544,5 @@ function rebuildSkillUI(bundleId, skillData, power, coinPower) {
         container.classList.add('visible');
     });
 }
-
-// 코인 UI 동기화 함수
-function CoinUIUpdate(bundleId, coinCount) {
-    const bundle = document.getElementById(bundleId);
-    if (!bundle) return;
-
-    const coinContainer = bundle.querySelector('.coin-container');
-    if (!coinContainer) return;
-
-    // 기존 코인 제거
-    coinContainer.innerHTML = '';
-
-    // 새로운 코인 추가
-    for (let i = 0; i < coinCount; i++) {
-        const coin = document.createElement('div');
-        coin.className = 'coin';
-        coinContainer.appendChild(coin);
-    }
-}
-
 // 실행
 init();

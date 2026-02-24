@@ -538,7 +538,8 @@ body {
 }
 
 .unit-bundle.p1 .coin-row {
-    justify-content: flex-end;
+    flex-direction: row-reverse; /*좌우 반전시켜야 코인 순서가 맞아*/
+    justify-content: flex-start;
 }
 
 .unit-bundle.p1 .char-box {

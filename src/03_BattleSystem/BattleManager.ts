@@ -17,7 +17,15 @@ export interface BattleCallbacks {
     onClashStart: (slot1: BattleSlot, slot2: BattleSlot) => Promise<void>;
     onCoinToss: (char: Character, isHeads: boolean) => Promise<void>;
     onCoinResult: (isHeads: boolean, power: number) => Promise<void>;
-    onClashResult: (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) => Promise<void>;
+    onClashResult: (
+        char1: Character, 
+        power1: number, 
+        coinCount1: number,  // ★ 추가
+        char2: Character, 
+        power2: number,
+        coinCount2: number,  // ★ 추가
+        clashCount: number
+    ) => Promise<void>;
     onDamage: (targetId: number, damage: number, newHp: number) => void;   
 }
 
@@ -34,7 +42,7 @@ export class BattleManager
                 onAttackStart: async (attackerId, targetId, skillName) => {}, // 연출 대기
                 onClashStart: async (slot1, slot2) => {},
                 onCoinToss: async (char, isHeads) => {},
-                onClashResult: async (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) =>  {},
+                onClashResult: async (char1, power1, coinCount1, char2, power2, coinCount2, clashCount) =>  {},
                 onDamage: (targetId: number, damage: number, newHp: number) => {},
                 onCoinResult: async (isHeads: boolean, power: number) => {}
             }
@@ -75,7 +83,6 @@ export class BattleManager
             console.log(`[Clash]: 스킬명: ${skill2.name}`);
             const power2 = await this.CoinToss(char2, skill2, coins2);
             console.log(`[Clash]: 스킬위력: ${power2}`);
-            await this.callbacks.onClashResult(char1, power1, char2, power2, clashCount);
 
             console.log(`   [Clash ${clashCount}합] ${char1.name}: ${power1} vs ${char2.name}: ${power2}`);
             await wait(1000); // 합 팅! 팅! 하는 연출 시간
@@ -85,6 +92,11 @@ export class BattleManager
             } else if (power2 > power1) {
                 coins1.shift();
             } 
+            await this.callbacks.onClashResult(
+                char1, power1, coins1.length, 
+                char2, power2, coins2.length, 
+                clashCount
+            );
             console.log(`[Clash]: ${clashCount}합`);
             
             // 합 횟수에 따른 정신력/상태 업데이트 등은 여기서
