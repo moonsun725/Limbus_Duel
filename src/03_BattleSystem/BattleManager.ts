@@ -7,9 +7,6 @@ import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
 import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
 import { BattleSlot } from '../00_Sinner/00_4_Slot.js'; // 타입 참조용
 
-// 유틸리티: 비동기 지연 함수 (연출용)
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 // 콜백함수
 export interface BattleCallbacks {
     onLog: (msg: string) => void;
@@ -86,7 +83,6 @@ export class BattleManager
             
 
             console.log(`   [Clash ${clashCount}합] ${char1.name}: ${power1} vs ${char2.name}: ${power2}`);
-            await wait(1000); // 합 팅! 팅! 하는 연출 시간
 
             if (power1 > power2) {
                 coins2.shift(); // 패배한 쪽 코인 하나 제거 (앞에서부터)
@@ -135,7 +131,6 @@ export class BattleManager
                 console.log(`[CoinToss]: 뒷면: + 0`);
 
             await this.callbacks.onCoinToss(char, isHeads); // 이제 앞뒷면 둘다 연출될거임
-            await wait(100);
         }
         return power;
     }
@@ -164,7 +159,6 @@ export class BattleManager
 
         for (const coin of activeCoins) {
             // 연출을 위한 딜레이 (코인 하나하나 때리는 느낌)
-            await wait(200);
 
             attacker.bufList.OnCoinToss();
             const isHeads = Math.random() * 100 < (attacker.Stats.sp + 50);
