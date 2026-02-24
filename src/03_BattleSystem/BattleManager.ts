@@ -15,10 +15,10 @@ export interface BattleCallbacks {
     onLog: (msg: string) => void;
     onAttackStart: (attackerId: number, targetId: number, skillName: string) => Promise<void>; // 연출 대기
     onClashStart: (slot1: BattleSlot, slot2: BattleSlot) => Promise<void>;
-    onCoinToss: (isHeads: boolean) => Promise<void>;
-    onClashResult: (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) => Promise<void>;
-    onDamage: (targetId: number, damage: number, newHp: number) => void;
+    onCoinToss: (char: Character, isHeads: boolean) => Promise<void>;
     onCoinResult: (isHeads: boolean, power: number) => Promise<void>;
+    onClashResult: (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) => Promise<void>;
+    onDamage: (targetId: number, damage: number, newHp: number) => void;   
 }
 
 export class BattleManager 
@@ -33,7 +33,7 @@ export class BattleManager
                 onLog: (msg) => {},
                 onAttackStart: async (attackerId, targetId, skillName) => {}, // 연출 대기
                 onClashStart: async (slot1, slot2) => {},
-                onCoinToss: async (isHeads) => {},
+                onCoinToss: async (char, isHeads) => {},
                 onClashResult: async (char1: Character, charCoin: number, char2: Character, char2Coin: number, clashCount: number) =>  {},
                 onDamage: (targetId: number, damage: number, newHp: number) => {},
                 onCoinResult: async (isHeads: boolean, power: number) => {}
@@ -107,13 +107,15 @@ export class BattleManager
         let power = skill.BasePower;
         let headsCount = 0;
         
+        
         for (const coin of coins) {
             // 정신력 기반 코인 토스
+            let coinPower = coin.CoinPower; // 여기에다가 나중에 버프리스트 등등 긁어와서 추가로 더해줄 수 있음
             const isHeads = Math.random() * 100 < (char.Stats.sp + 50)
             if (isHeads) {
-                console.log(`[CoinToss]: 앞면: + ${coin.CoinPower}`);
-                await this.callbacks.onCoinToss(isHeads);
-                power += coin.CoinPower;
+                console.log(`[CoinToss]: 앞면: + ${coinPower}`);
+                await this.callbacks.onCoinToss(char, isHeads);
+                power += coinPower;
                 headsCount++;
             }
             else

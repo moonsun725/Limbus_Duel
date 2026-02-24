@@ -350,6 +350,43 @@ socket.on('anim_attack_start', (data) => {
     if(p2Bundle && p2Bundle.querySelector('.skill-container')) p2Bundle.querySelector('.skill-container').remove();
 });
 
+// 4. 코인 토스() 신호
+// 이게 코인 던질때마다 받아야 됨(콜백이 루프 안에서 여러 번 던져주니까)
+socket.on('individual_coin_result', (data) => {
+    // data: { role: 'p1' | 'p2', isHead: boolean }
+
+    // 1. [위치 선정] 서버가 'p1'이라고 하면 무조건 왼쪽 번들, 'p2'면 오른쪽 번들
+    const targetBundleId = (data.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+    const bundle = document.getElementById(targetBundleId);
+    if (!bundle) return;
+
+    // 2. [아군 판별] 로그나 사운드 출력용 (선택 사항)
+    const isMine = (data.role === myRole);
+    console.log(isMine ? "🍀 내 코인!" : "🔥 적 코인!", data.isHead);
+
+    // 3. [코인 탐색] 아직 결과가 안 나온(색이 안 변한) 첫 번째 코인을 찾음
+    const coins = bundle.querySelectorAll('.coin');
+    let targetCoin = null;
+
+    for (let coin of coins) {
+        // heads도 아니고 tails도 아닌 녀석 발견!
+        if (!coin.classList.contains('heads') && !coin.classList.contains('tails')) {
+            targetCoin = coin;
+            break; 
+        }
+    }
+
+    // 4. [스타일 적용]
+    if (targetCoin) {
+        if (data.isHead) targetCoin.classList.add('heads');
+        else targetCoin.classList.add('tails');
+    }
+});
+// 5. 합 결과 (Clash Result) 신호
+socket.on('anim_clash_result', (data) => {
+    console.log("🏁 합 연출 결과!", data);
+    
+});
 
 // --------------------------------------------------------
 // [UI Update Functions] 캐릭터 및 스킬 UI 갱신 구현부
@@ -462,6 +499,25 @@ function rebuildSkillUI(bundleId, skillData, power, coinPower) {
     requestAnimationFrame(() => {
         container.classList.add('visible');
     });
+}
+
+// 코인 UI 동기화 함수
+function CoinUIUpdate(bundleId, coinCount) {
+    const bundle = document.getElementById(bundleId);
+    if (!bundle) return;
+
+    const coinContainer = bundle.querySelector('.coin-container');
+    if (!coinContainer) return;
+
+    // 기존 코인 제거
+    coinContainer.innerHTML = '';
+
+    // 새로운 코인 추가
+    for (let i = 0; i < coinCount; i++) {
+        const coin = document.createElement('div');
+        coin.className = 'coin';
+        coinContainer.appendChild(coin);
+    }
 }
 
 // 실행

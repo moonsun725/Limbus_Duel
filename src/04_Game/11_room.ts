@@ -1,4 +1,5 @@
 import { Server } from 'socket.io';
+import { Character } from '../00_Sinner/00_0_sinner.js';
 import { Player } from './10_Player.js'; // Player 내부엔 Character[]가 있다고 가정
 import { buildParty } from './Utils/buildParty.js';
 import { BattleManager, type BattleCallbacks } from '../03_BattleSystem/BattleManager.js'; // ★ 매니저 추가
@@ -32,13 +33,13 @@ export class GameRoom {
     public players: { [socketId: string]: 'p1' | 'p2' } = {}; // 소켓ID -> 역할 매핑
 
     private p1Action: BattleAction[] | null = null; // 여러 슬롯을 지정할 수 있으므로 배열
-    private p2Action: BattleAction[] | null = null;
+    private p2Action: BattleAction[] | null = null; // >< 얘도 꼭 필요함?
 
     // ★ [New] 현재 방의 상태 (기본값: 전투 중)
     public gameState: RoomState = 'MOVE_SELECT';
     private battleManager: BattleManager;
     private actManager: ActManager;
-    private ActorList: BattleSlot[] = [];
+    private ActorList: BattleSlot[] = []; //  >< 이거 꼭 필요하냐?
 
     // 준비 상태 체크 변수 (둘 다 준비해야 전투 시작 가능)
     private p1Ready: boolean = false;
@@ -103,8 +104,17 @@ export class GameRoom {
                 io.to(this.roomId).emit('anim_clash_start', clashData);
                 await sleep(2000);
             },
-            onCoinToss: async (isHeads) => {
-                io.to(this.roomId).emit('indiviual_coin_result', { isHead: isHeads })
+            onCoinToss: async (char: Character, isHeads: boolean) => { 
+                const role = this.getOwnerRole(char); 
+                if (!role) return; 
+
+                // ★ 핵심: ID가 아니라 role('p1' or 'p2')을 보냄
+                io.to(this.roomId).emit('individual_coin_result', { 
+                    role: role,     
+                    isHead: isHeads 
+                });
+                
+                await sleep(600); // 연출 딜레이
             },
             onClashResult: async (c1, p1, c2, p2, clashCount) => {
                 // 합 도중 팅! 팅! 하는 연출 데이터 전송
@@ -116,6 +126,7 @@ export class GameRoom {
                 await this.sleep(500);
             },
             onCoinResult: async (isHeads, power) => {
+                // 공격 후 코인 결과 애니메이션 (예: 데미지 숫자 튀어나오기)
                 io.to(this.roomId).emit('anim_coin_toss', { isHeads, power });
                 await this.sleep(300);
             },
@@ -126,6 +137,13 @@ export class GameRoom {
         this.actManager = new ActManager();
     }
     private sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+    // [Helper] 캐릭터가 P1 소속인지 P2 소속인지 객체 주소로 비교
+    private getOwnerRole(char: Character): 'p1' | 'p2' | null {
+        if (this.p1 && this.p1.party.some(c => c === char)) return 'p1';
+        if (this.p2 && this.p2.party.some(c => c === char)) return 'p2';
+        return null;
+    }
 
     // 유저 입장 처리
     join(socketId: string, teamData?: any[]): 'p1' | 'p2' | 'spectator' {
@@ -197,6 +215,7 @@ export class GameRoom {
                 return;
         }
     }
+
     handleMoveSelect(socketId: string, action: BattleAction, io: Server) {
         const role = this.players[socketId];
         if (!role) return;
@@ -270,7 +289,7 @@ export class GameRoom {
             io.to(this.roomId).emit('battle_start_confirmed');
 
             this.actManager.orderSort(); // ★ 순서 정렬 먼저 필수!
-            this.StartCombat();          // ★ 전투 루프 실행
+            this.StartCombat(io);          // ★ 전투 루프 실행
         }
     }
     /*
@@ -325,98 +344,9 @@ export class GameRoom {
             io.to(this.roomId).emit('chat message', `🏆 ${target.id} 패배! 게임 종료.`);
             this.resetGame(io); 
         }
-    }
+    }*/
 
-    private sortActs(p1: Player, p2: Player, act1: BattleAction, act2: BattleAction) : { player: Player, act: BattleAction, speed: number, priority: number }[] 
-    {
-        const actions = [
-            { player: p1, act: act1 },
-            { player: p2, act: act2 }
-        ];
-
-        const turnOrder = actions.map(({ player, act }) => {
-            let priority = 0;
-            let speed = player.activePokemon.GetStat('spe');
-
-            if (act.type === 'switch') {
-                priority = 6; // 교체 우선도
-            } else if (act.type === 'move') {
-                // act.index가 기술 인덱스
-                const move = player.activePokemon.moves.Get(act.index);
-                if (move && move.def.priority) 
-                    priority = move.def.priority;
-            }
-
-            return { player, act, speed, priority };
-        });
-
-        // 정렬 로직 (내림차순)
-        turnOrder.sort((a, b) => {
-            if (a.priority !== b.priority) {
-                return b.priority - a.priority; // 우선도 높은 순
-            }
-            if (a.speed !== b.speed) {
-                return b.speed - a.speed; // 스피드 빠른 순
-            }
-            return Math.random() - 0.5; // 동속 보정 (스피드 타이)
-        });
-
-        return turnOrder;
-    }
-    // 턴 계산 로직 (기존 함수 이식)
-    private async resolveTurn(io: Server) 
-    {
-        if (this.gameState !== 'BATTLE') return;
-        if (!this.p1 || !this.p2 || !this.p1Action || !this.p2Action) return;
-
-        // 1️⃣ 순서 정렬
-        const turnOrder = this.sortActs(this.p1, this.p2, this.p1Action, this.p2Action);
-
-        // 2️⃣ 행동 실행
-        for (const item of turnOrder) {
-            const user = item.player;
-            const enemy = (user === this.p1) ? this.p2 : this.p1;
-            const action = item.act; // sortActs에서 act를 통째로 가져옴
-
-            // ★ 기절 체크: 내 턴이 오기 전에 이미 기절했으면 행동 불가
-            if (user.activePokemon.BattleState.Get() === "FNT") continue;
-
-            // A. 교체 행동
-            if (action.type === 'switch') {
-                const success = user.switchPokemon(action.index); // index는 포켓몬 슬롯 번호
-                if (success) {
-                    io.to(this.roomId).emit('chat message', `🔄 ${user.id}는 ${user.activePokemon.name}(으)로 교체했다!`);
-                    this.broadcastState(io);
-                    await sleep(1000);
-                }
-            } 
-            // B. 공격 행동 (교체가 아닐 때만 실행!)
-            else if (action.type === 'move') {
-                // 공격 실행 (메시지 출력 등은 useMove 내부나 이펙트 처리에서 담당한다고 가정)
-                io.to(this.roomId).emit('chat message', `⚔️ ${user.activePokemon.name}의 공격!`);
-                
-                user.activePokemon.useMove(action.index, enemy.activePokemon);
-                this.broadcastState(io); // HP 갱신
-                await sleep(1000);
-
-                // 상대 기절 체크
-                if (enemy.activePokemon.BattleState.Get() === "FNT") {
-                    io.to(this.roomId).emit('chat message', `💀 ${enemy.activePokemon.name}는 쓰러졌다!`);
-                    await sleep(1000);
-                    
-                    // 게임 종료 또는 강제 교체 페이즈로 전환
-                    this.handleFaint(enemy, io);
-                    return; // ★ 누군가 쓰러지면 턴 종료 로직(날씨, 상태이상) 스킵하고 교체 화면으로
-                }
-            }
-        }
-
-        // 3️⃣ 턴 종료 페이즈 (날씨, 상태이상 데미지 등)
-        this.endTurn(io);
-    }
-    */
-
-    async StartCombat() // 비동기 함수
+    async StartCombat(io: Server) // 비동기 함수
     {
         for (let user of this.actManager.turnOrder) {
             // 1. 이미 행동을 마친 경우(나보다 빠른 대상에 의해 합이 걸려왔다든지) 스킵
@@ -442,6 +372,8 @@ export class GameRoom {
             else
                 await this.battleManager.Attack(user.owner, uTarget.owner, user.readySkill, user.readySkill?.coinlist);
         }
+        // 루프 다 돌았으니 
+        this.endTurn(io); // 턴 종료 처리 (버프/상태이상 업데이트, UI 갱신, 다음 턴 신호 등)
     }
     // 턴 종료 시 공통 처리 (함수로 분리 추천)
     private endTurn(io: Server) {
@@ -454,7 +386,7 @@ export class GameRoom {
         this.p2Ready = false;
         this.gameState = 'MOVE_SELECT';
 
-        // UI 전체 갱신 (혹시 모를 싱크 맞추기)
+        // UI 전체 갱신 (싱크 맞추기)
         this.broadcastState(io);
 
         // 다음 턴 입력 시작 신호

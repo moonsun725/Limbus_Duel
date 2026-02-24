@@ -416,13 +416,29 @@ body {
     padding: 0 10px;
 }
 
+
 .coin {
-    width: 24px;  /* [설정] 코인 크기 */
-    height: 24px;
-    background-color: #ffff00;
-    border: 1px solid #c7c700;
+    width: 24px; height: 24px;
+    background-color: #ff9800; /* 기본 주황색 */
+    border: 2px solid #b29400;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.3s ease; /* 부드럽게 변함 */
+}
+
+/* 앞면 (성공) */
+.coin.heads {
+    background-color: #ffe066; /* 노랑 */
+    border-color: #e65100;
+    box-shadow: 0 0 10px #ff9800; /* 빛남 */
+    transform: scale(1.2); /* 커짐 */
+}
+
+/* 뒷면 (실패) */
+.coin.tails {
+    background-color: #4f1d0d; /* 짙은 갈색 */
+    border-color: #333;
+    opacity: 0.7; /* 흐려짐 */
+    transform: scale(0.9); /* 작아짐 */
 }
 
 /* --- 1-2. 원 & 배지 --- */
