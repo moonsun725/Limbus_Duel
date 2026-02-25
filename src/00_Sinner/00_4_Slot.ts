@@ -28,6 +28,7 @@ export class BattleSlot {
 
     forcedTarget(attacker: BattleSlot)
     {
+        console.log(this.owner.name, "의", this.targetSlot?.owner.name, "이/가", attacker.owner.name, "에게 강제 타겟팅 당함");
         this.targetSlot = attacker;
     }
 

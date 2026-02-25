@@ -36,7 +36,8 @@ export class ActManager {
             // try catch를 아직 생각 안해놔서 throw는 당장 못하겠음
             return;
         }
-        user.Slots[slotIndex].targetSlot = target.Slots[targetIndex];
+        if(!user.Slots[slotIndex].targetSlot) // 상대방에 의해 강제로 타겟이 변경되었을 때 유저에게는 더 이상 선택권이 없음 ㅇㅇ
+            user.Slots[slotIndex].targetSlot = target.Slots[targetIndex];
         console.log(target.name, "의", targetIndex+1,"번째 슬롯 지정");
         
         this.ActorList.set(user.Slots[slotIndex], target.Slots[targetIndex]);
@@ -46,10 +47,7 @@ export class ActManager {
     }
 
     orderSort(): BattleSlot[] {
-        this.turnOrder = Array.from(this.ActorList.keys()).sort((a, b) => a.speed - b.speed);
-        this.turnOrder.forEach((element, i) => {
-            console.log(i, '번', element.owner.name);
-        });
+        this.turnOrder = Array.from(this.ActorList.keys()).sort((a, b) => b.speed - a.speed); // 속도 내림차순 정렬
         return this.turnOrder;
     }
 

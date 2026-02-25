@@ -1,10 +1,11 @@
 import { Server } from 'socket.io';
-import { Character } from '../00_Sinner/00_0_sinner.js';
 import { Player } from './10_Player.js'; // Player 내부엔 Character[]가 있다고 가정
-import { buildParty } from './Utils/buildParty.js';
-import { BattleManager, type BattleCallbacks } from '../03_BattleSystem/BattleManager.js'; // ★ 매니저 추가
-import { ActManager } from '../03_BattleSystem/ActManager.js';
+import { Character } from '../00_Sinner/00_0_sinner.js';
 import { BattleSlot } from '../00_Sinner/00_4_Slot.js';
+import type { BattleCallbacks } from './Events/BattleEvents.js';
+import { BattleManager} from '../03_BattleSystem/BattleManager.js'; // ★ 매니저 추가
+import { ActManager } from '../03_BattleSystem/ActManager.js';
+import { buildParty } from './Utils/buildParty.js';
 
 // 상태 머신: typescript에서는 enum보다 유니온 쓰는 게 낫대!
 type RoomState = 'MOVE_SELECT' | 'TARGET_SELECT' | 'WAITING_OPPONENT' | 'BATTLE' | 'RESULT';
@@ -15,8 +16,8 @@ export type ActionType = 'skillSelect' | 'targetSelect' | 'BattleStart';
 // 행동 데이터 구조체
 export interface BattleAction {
     type: ActionType;
-    userIndex: number;
-    actionIndex: number; // 시작 버튼(0), 슬롯 인덱스(0,1) 또는 타깃 인덱스(0~6), 에고(0,1,2,3,4)
+    userIndex: number; // 어떤 캐릭터 슬롯에서 행동이 나왔는지 (0~5)
+    actionIndex: number; // 시작 버튼(0), 슬롯 인덱스(0,1) 또는 타깃 인덱스(0~5), 에고(0,1,2,3,4)
 }
 
 // 딜레이 함수
@@ -37,8 +38,14 @@ export class GameRoom {
 
     // ★ [New] 현재 방의 상태 (기본값: 전투 중)
     public gameState: RoomState = 'MOVE_SELECT';
+
+    // 매니저 클래스
     private battleManager: BattleManager;
     private actManager: ActManager;
+
+    // UI 동기화용 콜백
+    private callbacks: BattleCallbacks;
+
     private ActorList: BattleSlot[] = []; //  >< 이거 꼭 필요하냐?
 
     // 준비 상태 체크 변수 (둘 다 준비해야 전투 시작 가능)
@@ -50,8 +57,8 @@ export class GameRoom {
 
     constructor(id: string, io: Server) {
         this.roomId = id;
-        // ★ BattleManager 초기화 (콜백 주입 - 여기서 UI 갱신 로직 정의)
-        this.battleManager = new BattleManager({
+
+        this.callbacks = {
             onLog: (msg) => {
                 console.log(`[Battle] ${msg}`);
                 io.to(this.roomId).emit('chat message', msg);
@@ -133,11 +140,12 @@ export class GameRoom {
                     isHead: isHeads
                 });
 
+                // 원래는 요게 시간이 상수로 딱 정해져있고 코인개수에 따른 함수식으로 각 코인별 딜레이가 달라지긴 하는 것 같은데 잘 모르겠네
                 await sleep(200); // 연출 딜레이: 합칠 때는 몰라도 공격할 때는 좀 길게 가져가야 하는데 콜백을 따로 쓸까
             },
             onClashResult: async (c1, p1, count1, c2, p2, count2, clashCount) => {
 
-                await sleep(1000);
+                await sleep(1000); // 코인값은 다 더해진 상태
                 const r1 = this.getOwnerRole(c1);
                 const r2 = this.getOwnerRole(c2);
                 if (!r1 || !r2) return;
@@ -146,6 +154,7 @@ export class GameRoom {
                     c2: { role: r2, power: p2, remainCoins: count2 },
                     clashCount: clashCount
                 });
+                await sleep(500); // 초기화됐으니까 잠깐 멈춤
             },
             onCoinResult: async (char: Character, isHeads: boolean) => { // 이거는 Ondamage의 딜레이도 있어서 조금 빨라도 됨. 지금은 없어서 느리게 만듦.
                 const role = this.getOwnerRole(char);
@@ -159,10 +168,25 @@ export class GameRoom {
 
                 await sleep(1000); // 연출 딜레이: 사실 coinToss랑 똑같지만 콜백 따로쓰기
             },
-            onDamage: (targetId, dmg, newHp) => {
-                io.to(this.roomId).emit('update_hp', { targetId, dmg, newHp });
+            onDamage: async (target, dmg) => {
+                io.to(this.roomId).emit('update_hp', { });
+            },
+            onAttackEnd: async (attacker, target) => {
+                const atkRole = this.getOwnerRole(attacker); // 'p1' or 'p2'
+                const defRole = this.getOwnerRole(target);
+
+                if (!atkRole || !defRole) return;
+                io.to(this.roomId).emit('anim_attack_end', {
+                    atkRole: atkRole,
+                    defRole: defRole
+                });
+            },
+            onGetHit: async (target, dmg) => {
             }
-        });
+        }
+        // ★ BattleManager 초기화 (콜백 주입 - 여기서 UI 갱신 로직 정의)
+        
+        this.battleManager = new BattleManager(this.callbacks);
         this.actManager = new ActManager();
     }
     private sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
@@ -323,7 +347,10 @@ export class GameRoom {
             // ★ [이거 추가] 양쪽 클라이언트에게 "화면 바꿔라" 신호 전송
             io.to(this.roomId).emit('battle_start_confirmed');
 
-            this.actManager.orderSort(); // ★ 순서 정렬 먼저 필수!
+            this.ActorList = this.actManager.orderSort(); // ★ 순서 정렬 먼저 필수!
+            this.ActorList.forEach((element, i) => {
+                console.log("[플레이어]", this.getOwnerRole(element.owner), "[순서]:", i, '번', element.owner.name, "[속도]:", element.speed, "[선택 스킬]:", element.readySkill?.name);
+            });
             this.StartCombat(io);          // ★ 전투 루프 실행
         }
     }
@@ -402,6 +429,7 @@ export class GameRoom {
             }
 
             let tTarget = uTarget.targetSlot
+            console.log(`${user.owner.name}의 타겟: ${uTarget.owner.name}, ${uTarget.owner.name}의 타겟: ${tTarget?.owner.name || "없음"}`);
             if (tTarget && tTarget === user && tTarget.readySkill)
                 await this.battleManager.Clash(user, uTarget); // await this.battleManager.handleskillActions() 나중에는 스킬의 종류에 따라 합이 가능한지 따지는 로직 
             else

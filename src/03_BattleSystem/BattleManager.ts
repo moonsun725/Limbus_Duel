@@ -6,27 +6,7 @@ import { calculateDamage } from '../00_Sinner/00_7_dmgCalc.js';
 import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
 import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
 import { BattleSlot } from '../00_Sinner/00_4_Slot.js'; // 타입 참조용
-
-// 콜백함수
-export interface BattleCallbacks {
-    onLog: (msg: string) => void;
-    onAttackStart: (attacker: Character, target: Character, skill: Skill, coinList: Coin[]) => Promise<void>;
-    onClashStart: (slot1: BattleSlot, slot2: BattleSlot) => Promise<void>;
-    onCoinToss: (char: Character, isHeads: boolean) => Promise<void>;
-    onCoinResult: (char: Character, isHeads: boolean) => Promise<void>; // 레거시 코드(일단은 남겨둠)
-    onClashResult: (
-        char1: Character, 
-        power1: number, 
-        coinCount1: number,  // ★ 추가
-
-        char2: Character, 
-        power2: number,
-        coinCount2: number,  // ★ 추가
-        
-        clashCount: number
-    ) => Promise<void>;
-    onDamage: (targetId: number, damage: number, newHp: number) => void;   
-}
+import type { BattleCallbacks } from '../04_Game/Events/BattleEvents.js';
 
 export class BattleManager 
 {
@@ -42,8 +22,10 @@ export class BattleManager
                 onClashStart: async (slot1, slot2) => {},
                 onCoinToss: async (char, isHeads) => {},
                 onClashResult: async (char1, power1, coinCount1, char2, power2, coinCount2, clashCount) =>  {},
-                onDamage: (targetId: number, damage: number, newHp: number) => {},
-                onCoinResult: async (char, isHeads) => {}
+                onDamage: async (target, damage) => {},
+                onGetHit: async (target, damage) => {},
+                onCoinResult: async (char, isHeads) => {},
+                onAttackEnd: async (attacker, target) => {}
             }
     }
 
@@ -174,7 +156,7 @@ export class BattleManager
             // 데미지 계산 및 적용
             const damage = calculateDamage(attacker, target, skill, coin, currentPower);
             target.takeDamage(damage);
-            this.callbacks.onDamage(target.id, damage, target.Stats.hp); // UI 처리
+            this.callbacks.onDamage(target, damage); // UI 처리
             
             // 적중 시 효과 처리
             target.bufList.OnHit(attacker, Math.floor(damage));
@@ -187,5 +169,6 @@ export class BattleManager
         }
 
         console.log(`[Attack End] 공격 종료`);
+        this.callbacks.onAttackEnd(attacker, target);
     }
 }

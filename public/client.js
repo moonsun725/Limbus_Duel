@@ -350,7 +350,6 @@ socket.on('anim_attack_start', (data) => {
     // if (defBundleId.querySelector('.skill-container').coins.length > 0) { // 코인이 남아있으면 삭제 x(나중에 한참뒤에 파불코가 있음)
     removeSkillUI(defBundleId);
 
-
     // 2. 공격자 (Attacker) 처리: 상황에 따라 다름
     const atkBundleId = (data.attacker.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
     const atkBundle = document.getElementById(atkBundleId);
@@ -358,7 +357,7 @@ socket.on('anim_attack_start', (data) => {
     if (atkBundle) {
         // ★ [핵심] 이미 스킬 UI가 존재하는지 확인
         const existingUI = atkBundle.querySelector('.skill-container');
-
+        // 조건이 너무 널널한데
         if (existingUI) {
             // [상황 A: 합 승리 후]
             // 이미 UI가 있고, 합 진행 중에 코인이 알맞게 줄어들었음.
@@ -379,6 +378,19 @@ socket.on('anim_attack_start', (data) => {
             );
         }
     }
+
+    // 공격 끝났으니 UI 지워야지
+    // removeSkillUI(atkBundleId);
+    // attack에서 지우면 공격 코인 굴리기 전에 UI가 사라져
+});
+
+socket.on('anim_attack_end', (data) => {
+    // data: { atkRole: 'p1'|'p2', defRole: 'p1'|'p2' }
+    console.log(`🛡️ 공격 종료 신호 수신! 공격자: [${data.atkRole}], 방어자: [${data.defRole}]`);
+    
+    // 공격자 찾기
+    const atkBundleId = (data.atkRole === 'p1') ? 'p1-bundle' : 'p2-bundle';
+    removeSkillUI(atkBundleId);
 });
 
 // [Helper] 스킬 UI 제거 함수 (삭제 + 애니메이션)
