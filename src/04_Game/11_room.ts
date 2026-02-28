@@ -354,59 +354,6 @@ export class GameRoom {
             this.StartCombat(io);          // ★ 전투 루프 실행
         }
     }
-    /*
-    private handleBattleInput(socketId: string, action: BattleAction, io: Server) {
-        const role = this.players[socketId];
-        if (!role) return;
-
-        // 1. 이미 선택한 사람이 또 보낸 경우 (WAITING 상태 방어)
-        if (role === 'p1' && this.p1Action) return; 
-        if (role === 'p2' && this.p2Action) return;
-
-        // 2. 행동 저장
-        if (role === 'p1') this.p1Action = action;
-        if (role === 'p2') this.p2Action = action;
-        
-        // UI 잠금 (해당 유저에게만)
-        io.to(socketId).emit('input_locked');
-        console.log(`[room.ts]/[handleBattleInput]: ${socketId} 입력 잠금 (WAITING_OPPONENT 진입 예상)`);
-
-        // 3. 상태 전이 판단
-        if (this.p1Action && this.p2Action) {
-            // 둘 다 준비 완료! -> 전투 개시
-            this.gameState = 'BATTLE'; // 잠시 배틀 상태로 변경
-            console.log(`[room.ts]/[handleBattleInput]: State (WAITING -> BATTLE) / 턴 계산 시작`);
-            this.resolveTurn(io);      // 턴 계산 (여기서 다시 MOVE_SELECT나 FORCE_SWITCH로 바뀜)
-        } else {
-            // 한 명만 준비됨 -> 대기 상태
-            console.log(`[room.ts]/[handleBattleInput]: State (MOVE_SELECT -> WAITING_OPPONENT) / 상대 대기 중`);
-            this.gameState = 'WAITING_OPPONENT';
-            const waiter = role === 'p1' ? 'P1' : 'P2';
-            io.to(this.roomId).emit('chat message', `[시스템] ${waiter} 준비 완료!`);
-        }
-        console.log("[room.ts]/[handleBattleInput]: ",this.gameState);
-    }
-
-    private handleFaint(target: Player, deadindex: number, io: Server) {
-        if (!target.isDefeated()) {
-            // 1. 상태 변경
-            console.log(`[room.ts]/[endTurn]: State (${this.gameState} -> FORCE_SWITCH)`);
-            this.gameState = 'FORCE_SWITCH';
-            
-            // 2. ★ [중요] 누가 죽었는지 기억해야 함!
-            this.faintPlayerId = target.id; 
-
-            // 3. 요청 전송은 할 필요가 없다! 왜냐면 여기서는 자동 교체거든
-            target.switchCharacter(deadindex);
-
-            this.broadcastState(io); // >< 포켓몬이 기절했는데 UI 갱신 처리가 안 되어있었다...
-
-        } else {
-            // 전멸 -> 게임 종료 및 리셋
-            io.to(this.roomId).emit('chat message', `🏆 ${target.id} 패배! 게임 종료.`);
-            this.resetGame(io); 
-        }
-    }*/
 
     async StartCombat(io: Server) // 비동기 함수
     {
@@ -518,42 +465,4 @@ export class GameRoom {
             faintPlayerId: this.faintPlayerId
         });
     }
-    /*
-    resetGame(io: Server) {
-        // 1. 공통 초기화 로직 (함수로 분리하여 중복 제거)
-        const resetPlayerTeam = (player: Player | null) => {
-            if (!player) return;
-
-            // ★ forEach 사용법
-            // player.party 배열의 모든 요소를 순회하며 'pokemon' 변수에 담아 실행
-            player.party.forEach((pokemon)=>{pokemon.ResetCondition()});
-
-            // (4) 선봉 초기화 (다시 1번 타자로 설정)
-            // 게임이 리셋됐으니 다시 첫 번째 포켓몬이 나와야겠죠?
-            if (player.party.length > 0) {
-                player.activePokemon = player.party[0]!;
-            }};
-
-        // 2. 양쪽 플레이어 팀 리셋
-        resetPlayerTeam(this.p1);
-        resetPlayerTeam(this.p2);
-
-        // 3. 행동 선택 정보 초기화
-        this.p1Action = null;
-        this.p2Action = null;
-
-        this.gameState = 'MOVE_SELECT'; 
-        this.faintPlayerId = null;
-
-        // 4. UI 업데이트 및 알림
-        io.to(this.roomId).emit('chat message', `🔄 게임이 재시작되었습니다. 모든 포켓몬이 회복되었습니다.`);
-            
-        // 정보 갱신 (이제 activePokemon이 0번으로 바뀌었으므로 갱신 필수)
-        this.broadcastState(io);
-            
-        // 턴 시작 신호
-        io.to(this.roomId).emit('turn_start');
-    }
-        */
 }
-
