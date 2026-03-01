@@ -23,7 +23,7 @@ let selectedSkillSlot = null;
 let skillDataCache = [];
 let targetingData = {};
 
-// [New] 현재 슬롯 캐릭터 ID 기억 (교체 판단용)
+// [New] 현재 슬롯 캐릭터 ID 기억 (교체 판단용): 전투 화면에서 사용
 let currentP1CharId = null;
 let currentP2CharId = null;
 
@@ -41,10 +41,6 @@ function init() {
     buttons.forEach(btn => {
         btn.addEventListener('click', handleClick);
     });
-}
-
-function handleClick(event) {
-    // console.log('Clicked:', event.currentTarget);
 }
 
 // --------------------------------------------------------
@@ -202,6 +198,12 @@ socket.on('update_ui', (data) => {
     phaseSelect.classList.remove('hidden');
     // 전투 페이즈 레이어는 숨기기
     phaseBattle.classList.add('hidden');
+
+    // GO 버튼 초기화
+    if (goButton) {
+        goButton.innerText = "GO";
+        goButton.classList.remove('disabled');
+    }
 });
 
 // 스킬 선택
@@ -296,7 +298,6 @@ if (goButton) {
         socket.emit('start_battle', { type: 'BattleStart' });
     });
 }
-
 
 // --------------------------------------------------------
 // [핵심] 전투 화면(Battle Phase) 연출 로직
@@ -598,7 +599,7 @@ function applyCharData(charBox, data, animate) {
 }
 
 /**
- * 스킬 UI 재생성 (Delete & Recreate)
+ * 배틀 화면: 스킬 UI 재생성 (Delete & Recreate)
  */
 function rebuildSkillUI(bundleId, skillData, power, coinPower) {
     const bundle = document.getElementById(bundleId);
