@@ -21,19 +21,12 @@
 import { socket } from "./network.js";
 
 // --------------------------------------------------------
-// DOM 요소 참조
+// DOM 요소 선언
 // --------------------------------------------------------
-const tooltip = document.getElementById('info-tooltip');
-const tooltipText = document.getElementById('tooltip-text');
-const interactableElements = document.querySelectorAll('[data-has-info="true"]');
-const buttons = document.querySelectorAll('button');
-
-const phaseSelect = document.getElementById('phase-select');
-const phaseBattle = document.getElementById('phase-battle');
-const goButton = document.querySelector('.circle.large');
-
-const skillButtons = document.querySelectorAll('.type-red');
-const targetButtons = document.querySelectorAll('.right-team .circle');
+let tooltip, tooltipText;
+let interactableElements;
+let buttons, skillButtons, targetButtons, goButton;
+let phaseSelect, phaseBattle;
 
 // 상태 변수
 let myRole = null;
@@ -42,7 +35,10 @@ let selectedSkillSlot = null;
 let skillDataCache = [];
 let targetingData = {};
 
-function init() {
+export function initBattleSelect() {
+    // DOM 요소 할당
+    initDOMs_BattleSelect();
+
     interactableElements.forEach(el => {
         el.addEventListener('mouseenter', handleMouseEnter);
         el.addEventListener('mouseleave', handleMouseLeave);
@@ -52,14 +48,134 @@ function init() {
     buttons.forEach(btn => {
         btn.addEventListener('click', handleClick);
     });
+
+    // 스킬 선택 버튼 스크립트 할당
+    skillButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            if (!myRole) return;
+            const uIndex = index % 6;
+            const sIndex = (index < 6) ? 1 : 0;
+
+            // UI 초기화
+            const colStart = uIndex;
+            const colEnd = uIndex + 6;
+            if (skillButtons[colStart]) skillButtons[colStart].classList.remove('used');
+            if (skillButtons[colEnd]) skillButtons[colEnd].classList.remove('used');
+
+            // 서버 전송
+            socket.emit('action_select', {
+                type: 'skillSelect',
+                userIndex: uIndex,
+                actionIndex: sIndex
+            });
+            selectedUnitIndex = uIndex;
+            selectedSkillSlot = sIndex;
+        });
+    });
+
+    // 타겟 선택 버튼 스크립트 할당
+    targetButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            if (selectedUnitIndex === null) {
+                alert("먼저 스킬을 선택해주세요!");
+                return;
+            }
+            socket.emit('target_select', {
+                type: 'targetSelect',
+                userIndex: selectedUnitIndex,
+                actionIndex: index
+            });
+        });
+    });
+
+    // 전투 시작 버튼 스크립트 할당
+    // 전투 시작 요청 (GO 버튼)
+    if (goButton) {
+        goButton.addEventListener('click', () => {
+            if (goButton.classList.contains('disabled')) return;
+            goButton.innerText = "WAIT";
+            goButton.classList.add('disabled');
+            socket.emit('start_battle', { type: 'BattleStart' });
+        });
+    }
+    socket.emit('join_game', 'room1');
+
+    socket.on('role_assigned', (data) => {
+        myRole = data.role;
+        console.log(`Role Assigned: ${myRole}`);
+    });
+
+    // ui 갱신 이벤트 등록
+    socket.on('turn_start', (data) => {
+        OnTurnStart(data);
+    });
+
+    // 스킬 선택 하이라이트 동기화 이벤트 등록
+    socket.on('ui_move_selected', (data) => {
+        skillButtons.forEach(b => b.classList.remove('selected'));
+        const targetBtnIndex = (data.skillSlot === 1) ? data.userIndex : data.userIndex + 6;
+        if (skillButtons[targetBtnIndex]) skillButtons[targetBtnIndex].classList.add('selected');
+    });
+
+    // 타겟 매핑 확인
+    socket.on('ui_target_locked', (data) => {
+        // data: { srcPlayer, srcIndex, targetIndex }
+
+        if (data.srcPlayer === myRole) {
+            // 1. 데이터 갱신 (내 유닛 srcIndex가 targetIndex를 찜함)
+            targetingData[data.srcIndex] = data.targetIndex;
+
+            // 2. 스킬 버튼 스타일 업데이트 (Used 처리)
+            const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0;
+            const btnIdx = (sSlot === 1) ? data.srcIndex : data.srcIndex + 6;
+
+            // 같은 유닛의 다른 버튼 선택 해제
+            const siblingIdx = (sSlot === 1) ? data.srcIndex + 6 : data.srcIndex;
+            if (skillButtons[siblingIdx]) skillButtons[siblingIdx].classList.remove('used', 'selected');
+
+            if (skillButtons[btnIdx]) {
+                skillButtons[btnIdx].classList.remove('selected');
+                skillButtons[btnIdx].classList.add('used');
+            }
+
+            // 3. 적 유닛 'Locked' 상태 전면 재계산 (요구사항 22: 매핑 해제 시 초기화)
+            // 모든 적의 locked를 지우고, targetingData에 있는 애들만 다시 칠함
+            const enemyUnits = document.querySelectorAll('.right-team .circle');
+            enemyUnits.forEach(el => el.classList.remove('locked'));
+
+            // 현재 targetingData에 등록된 모든 타겟들에게 locked 부여
+            Object.values(targetingData).forEach(tIdx => {
+                if (enemyUnits[tIdx]) enemyUnits[tIdx].classList.add('locked');
+            });
+
+            // 변수 초기화
+            selectedUnitIndex = null;
+            selectedSkillSlot = null;
+        }
+    });
+
 }
 
-// 기본적으로 클릭했을때 추가
+function initDOMs_BattleSelect() {
+    tooltip = document.getElementById('info-tooltip');
+    tooltipText = document.getElementById('tooltip-text');
+    interactableElements = document.querySelectorAll('[data-has-info="true"]');
+    buttons = document.querySelectorAll('button');
+
+    phaseSelect = document.getElementById('phase-select');
+    phaseBattle = document.getElementById('phase-battle');
+    goButton = document.querySelector('.circle.large');
+
+    skillButtons = document.querySelectorAll('.type-red');
+    targetButtons = document.querySelectorAll('.right-team .circle');
+}
+
+// 기본적으로 클릭했을때 실행되는 함수
 function handleClick(event) {
     console.log('Clicked:', event.currentTarget);
 }
 
-// 마우스가 객체 위에 올라갔을 때
+// 마우스가 객체 위에 올라갔을 때 실행되는 함수
 function handleMouseEnter(event) {
     const target = event.currentTarget;
     const type = getElementType(target);
@@ -131,7 +247,7 @@ function handleMouseEnter(event) {
     tooltipText.innerText = infoMessage;
 }
 
-// 마우스가 객체에서 벗어났을 때
+// 마우스가 객체에서 벗어났을 때 실행되는 함수
 function handleMouseLeave(event) {
     tooltip.classList.add('hidden');
 
@@ -141,9 +257,44 @@ function handleMouseLeave(event) {
     });
 }
 
-// 마우스 움직임에 따라 툴팁 위치 갱신
+// 마우스 움직임에 따라 툴팁 위치 갱신하는 헬퍼 함수
 function handleMouseMove(event) {
     // 마우스 커서 약간 옆에 툴팁 표시
     tooltip.style.left = (event.pageX + 10) + 'px';
     tooltip.style.top = (event.pageY + 10) + 'px';
+}
+
+// --------------------------------------------------------
+// 헬퍼 함수
+// --------------------------------------------------------
+
+// 요소의 클래스를 분석하여 타입(색상) 반환
+function getElementType(element) {
+    if (element.classList.contains('type-pink')) return 'pink'; // 핑크: 전투 패시브/서포트 패시브
+    if (element.classList.contains('type-blue')) return 'blue'; // 아군 스킬 슬롯
+    if (element.classList.contains('type-orange')) return 'orange'; // 단순 스프라이트/나중에는 버튼으로?
+    if (element.classList.contains('type-red')) return 'red'; // 스킬 패널 -> 스킬 버튼
+    if (element.classList.contains('type-green')) return 'green'; // 초상화 있어야하는 곳인데 당장은 눌렀을 때 수비 나가게
+    if (element.classList.contains('type-yellow')) return 'yellow'; // 전투 시작 버튼
+    return 'unknown';
+}
+
+// 헬퍼 함수: 턴 시작시 UI 만들기
+function OnTurnStart(data) {
+    // 맨 처음 init: 이거는 따로 분리를 해야되나?
+    const myData = (myRole === 'p1') ? data.p1 : data.p2;
+    if (myData && myData.active) {
+        skillDataCache = myData.active;
+    }
+
+    // 선택 페이즈 레이어는 드러내기
+    phaseSelect.classList.remove('hidden');
+    // 전투 페이즈 레이어는 숨기기
+    phaseBattle.classList.add('hidden');
+
+    // GO 버튼 초기화
+    if (goButton) {
+        goButton.innerText = "GO";
+        goButton.classList.remove('disabled');
+    }
 }
