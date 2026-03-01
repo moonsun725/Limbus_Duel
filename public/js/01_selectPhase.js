@@ -18,7 +18,7 @@
     - 보유/공명에 따라 활성화되는 패시브 표기
 
 */
-import { socket } from "./network";
+import { socket } from './network.js';
 
 // --------------------------------------------------------
 // DOM 요소 선언
