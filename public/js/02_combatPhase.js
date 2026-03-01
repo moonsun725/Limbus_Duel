@@ -18,7 +18,7 @@
         - 회피
         - 반격
 */
-import { socket } from "./00_main";
+import { socket } from './network';
 
 export function initBattleCombat() {
     // DOM 요소 할당
