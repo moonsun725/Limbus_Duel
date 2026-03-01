@@ -1,6 +1,6 @@
 import { Character } from "../00_Sinner/00_0_sinner.js";
 import { type Skill } from "./01_0_skill.js";
-import { GetMoves, MoveBundleRegistry } from "./01_2_ skillLoader.js";
+import { GetMoves, MoveBundleRegistry } from "./01_2_skillLoader.js";
 import data_S from '../06_Data/SkillData/Skills.json' with {type: 'json'}; 
 
 export class SkillManager 

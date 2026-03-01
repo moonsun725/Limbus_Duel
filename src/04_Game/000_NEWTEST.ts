@@ -1,7 +1,7 @@
 // npx tsx src/04_Game/000_NEWTEST.ts
 
 import { Character, createSinnerFromData, } from '../00_Sinner/00_0_sinner.js'
-import { LoadSkillData } from '../01_Skill/01_2_ skillLoader.js';
+import { LoadSkillData } from '../01_Skill/01_2_skillLoader.js';
 import { BattleManager } from '../03_BattleSystem/BattleManager.js'; // 새로 만든 매니저
 import { BattleSlot } from '../00_Sinner/00_4_Slot.js'; // 슬롯 클래스
 

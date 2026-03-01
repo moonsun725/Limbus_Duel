@@ -6,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GameRoom } from './04_Game/11_room.js'; 
 import type { BattleAction } from './04_Game/11_room.js';
-import { LoadSkillData } from './01_Skill/01_2_ skillLoader.js';
+import { LoadSkillData } from './01_Skill/01_2_skillLoader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

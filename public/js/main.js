@@ -1,5 +1,5 @@
-import { initBattleSelect } from "./selectPhase";
-import { initBattleCombat } from "./combatPhase";
+import { initBattleSelect } from "./selectPhase.js";
+import { initBattleCombat } from "./combatPhase.js";
 /*
     역할 설명:
     // 나눠놓은 js 파일들을 한번에 실행하는 역할 

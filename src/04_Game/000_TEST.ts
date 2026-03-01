@@ -1,7 +1,7 @@
 import { Character, createSinnerFromData, } from '../00_Sinner/00_0_sinner.js'
 import { type Skill, CoinToss } from '../01_Skill/01_0_skill.js';
 import { type Coin } from '../02_Coin/02_0_coin.js';
-import { LoadSkillData } from '../01_Skill/01_2_ skillLoader.js';
+import { LoadSkillData } from '../01_Skill/01_2_skillLoader.js';
 
 LoadSkillData();
 const yisang : Character = createSinnerFromData(10101);

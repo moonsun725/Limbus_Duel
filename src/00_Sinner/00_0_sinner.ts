@@ -1,13 +1,12 @@
 import data from '../06_Data/IdentityData/10_personalities_LCB.json' with {type: 'json'};
-import { GetMoves } from '../01_Skill/01_2_ skillLoader.js';
+import { GetMoves } from '../01_Skill/01_2_skillLoader.js';
 // skill.ts 상속
 import type { Skill } from '../01_Skill/01_0_skill.js';
-import { type Coin } from '../02_Coin/02_0_coin.js';
 
 import { SinnerInfo, type IsinnerData } from './00_1_sinnerInfo.js';
 import { BattleStateManager } from './00_2_BattleStateManager.js';
 import { BattleUnitBufList } from './00_3_BufList.js';
-import { SkillManager } from '../01_Skill/01_1_SkillManager.js';
+import { SkillManager } from '../01_Skill/01_1_skillManager.js';
 import { BattleSlot } from './00_4_Slot.js';
 
 
