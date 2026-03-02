@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
 
         console.log(`[server]/join_game: 파티 데이터 확인 ${teamData}`);
         // 3. 이제 room은 무조건 GameRoom 타입임 (undefined 아님)
-        const myRole = room.join(socket.id, teamData);
+        const myRole = room.join(socket.id, io, teamData);
 
         // 결과 전송
         socket.emit('role_assigned', { role: myRole, roomId: roomId });

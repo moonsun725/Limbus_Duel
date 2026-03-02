@@ -233,7 +233,7 @@ export class GameRoom {
     }
 
     // 유저 입장 처리
-    join(socketId: string, teamData?: any[]): 'p1' | 'p2' | 'spectator' {
+    join(socketId: string, io: Server, teamData?: any[]): 'p1' | 'p2' | 'spectator' {
 
         // 헬퍼 함수: 플레이어 세팅 (P1, P2 공통 로직)
         const setupPlayer = (pid: 'p1' | 'p2'): Player => {
@@ -253,6 +253,9 @@ export class GameRoom {
             this.p2 = setupPlayer('p2');
             console.log(`[Room] Player 2 입장 (ID: ${socketId})`);
             return 'p2';
+
+            // 이제 둘 다 들어왔으니까 턴 시작 이벤트 실행해도 되겠지?
+            this.startTurn(io);
         }
 
         return 'spectator';

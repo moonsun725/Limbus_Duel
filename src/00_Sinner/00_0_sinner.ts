@@ -116,6 +116,7 @@ export class Character {
         this.speed += 0; // 당장은 더미로 남겨놓고(신속, 속박 처리)
         if (this.speed <= 0)
             this.speed = 1;
+        console.log(`${this.name}의 속도: ${this.speed}`);
     }
 
     ResetCondition(): void {
