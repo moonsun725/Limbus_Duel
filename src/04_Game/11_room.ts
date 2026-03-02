@@ -72,6 +72,8 @@ export class GameRoom {
                 io.to(this.roomId).emit('anim_attack_start', {
                     attacker: {
                         role: atkRole,
+                        id: attacker.id,      // 식별용
+                        name: attacker.name,  // UI 표시용
                         skill: {
                             name: skill.name,
                             coinCount: coins.length // 남은 코인 개수
@@ -80,7 +82,10 @@ export class GameRoom {
                         coinPower: coins[0]?.CoinPower || 0 // 첫 번째 코인의 위력 (있다면)
                     },
                     defender: {
-                        role: defRole
+                        role: defRole,
+                        id: target.id,        // ★ [추가] 방어자도 누군지 알아야 함
+                        name: target.name
+
                     }
                 });
 
@@ -141,7 +146,7 @@ export class GameRoom {
                 });
 
                 // 원래는 요게 시간이 상수로 딱 정해져있고 코인개수에 따른 함수식으로 각 코인별 딜레이가 달라지긴 하는 것 같은데 잘 모르겠네
-                await sleep(80); 
+                await sleep(80);
             },
             onClashResult: async (c1, p1, count1, c2, p2, count2, clashCount) => {
 
@@ -408,7 +413,7 @@ export class GameRoom {
         // 루프 다 돌았으니 
         this.endTurn(io); // 턴 종료 처리 (버프/상태이상 업데이트, UI 갱신, 다음 턴 신호 등)
     }
-    
+
     // 턴 종료 시 공통 처리 (함수로 분리 추천)
     private endTurn(io: Server) {
         console.log("=== 턴 종료 ===");
@@ -418,12 +423,12 @@ export class GameRoom {
         if (!this.p1 || !this.p2) return;
         for (let char of this.p1.battleEntry) {
             if (char) {
-                char.bufList.OnTurnEnd();
+                char.BattleState.ChangeState('TURNEND');
             }
         }
         for (let char of this.p2.battleEntry) {
             if (char) {
-                char.bufList.OnTurnEnd();
+                char.BattleState.ChangeState('TURNEND');
             }
         }
 
@@ -438,6 +443,21 @@ export class GameRoom {
     private startTurn(io: Server) {
         console.log("=== 턴 시작 ===");
         this.gameState = 'MOVE_SELECT';
+        if (!this.p1 || !this.p2) return; // 여기에서 없으면 나갔다는 뜻이라, 화면에 알림 같은 걸 띄울수도 있을거임
+
+        for (let char of this.p1.battleEntry) {
+            if (char) {
+                char.BattleState.ChangeState('TURNSTART');
+            }
+        }
+        for (let char of this.p2.battleEntry) {
+            if (char) {
+                char.BattleState.ChangeState('TURNSTART');
+            }
+        }
+        // 위의 과정에서 개별 속도 정리는 했을거고
+        this.p1.battleEntry.sort((a,b) => b.speed - a.speed);
+
         this.broadcastState(io);
     }
 
@@ -464,7 +484,7 @@ export class GameRoom {
 
     // UI 업데이트 헬퍼
     // UI는 턴 시작시 갱신하도록 하자
-    broadcastState(io: Server) { 
+    broadcastState(io: Server) {
         // [Helper] 플레이어의 battleEntry(출전 캐릭터들)를 UI 데이터로 변환하는 함수
         // toData() 메서드가 없다면 여기서 직접 객체를 만들어줍니다.
         const getEntryData = (player: Player | null) => {
