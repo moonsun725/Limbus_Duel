@@ -1,7 +1,6 @@
 import type { Character } from "./00_0_sinner.js";
 import { type BattleUnitBuf, BufRegistry } from "../05_Ability/04_battleUnitBufs.js";
 
-
 export class BattleUnitBufList 
 {
     private owner: Character
@@ -35,7 +34,7 @@ export class BattleUnitBufList
             if (data.stack)
                 this.BufList.get(keyword)!.stack += data.stack;
             if (data.count)
-                this.BufList.get(keyword)!.count! += data.count
+                this.BufList.get(keyword)!.count! += data.count;
         }
         else    
         {
@@ -44,7 +43,7 @@ export class BattleUnitBufList
             if (!data.count) data.count = 1; 
             else if (data.stack) data.count++; 
             this.BufList.set(keyword, data);
-            const logic = BufRegistry[keyword]
+            const logic = BufRegistry[keyword];
             if (logic)
                 logic.OnAddBuf(this.owner, data);
         }
@@ -87,13 +86,26 @@ export class BattleUnitBufList
     // 이벤트
     OnTurnEnd() : void
     {
+        for (const [id, status] of this.BufList) {
+            const logic = BufRegistry[id];
+            if (logic && logic.OnTurnEnd) {
+                logic.OnTurnEnd(this.owner, status);
+            }
+        }
         // 1. 버프리스트에서 TurnEnd인 친구들은 먼저 처리한다
         // 2. 횟수나 위력이 0인 버프들은 날린다
-        // 3. readyBufList에 있는 친구들을 옮겨온다
+        for (const [id, status] of this.BufList) {
+            if (status.count && status.count <= 0) {
+                this.RemoveBuf(id);
+            }
+        }
+    
+        this.BufList = new Map(this.ReadyBufList);
     }
     OnTurnStart() : void 
     {
-        // 1. 버프리스트에서 TurnStart인 친구들은 먼저 처리한다
+        // readyBufList에 있는 친구들을 옮겨온다
+        // 버프리스트에서 TurnStart인 친구들은 먼저 처리한다
         // 나머진 모르겠음
     }
     OnHit(attacker?: Character, damage?: number)

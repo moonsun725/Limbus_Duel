@@ -130,7 +130,6 @@ export class Character {
         return newLen - 1; // 인덱스 접근할 거니까 이게 맞아 ㅇㅇ
     }
 
-
     // 이벤트 관리들
 
     CoinToss() {
@@ -166,6 +165,11 @@ export class Character {
             return this.deck[choice];
         }
     }
+    EndTurn() { 
+        // 속도 설정
+        this.speed = Math.floor(Math.random() * (this.maxSpeed - this.minSpeed + 1)) + this.minSpeed; // 턴이 끝날 때마다 속도 재설정
+    }
+
 
     // 클라이언트 전달용 데이터 변환 함수
     public toData() {

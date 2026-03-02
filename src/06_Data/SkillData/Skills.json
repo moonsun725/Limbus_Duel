@@ -825,13 +825,13 @@
           "CoinPower": 4,
           "coindescs": [
             {
-              "desc": "[OnSucceedAttackHead] 공격 위력 감소 2 부여"
+              "desc": "[OnSucceedAttackHead] 공격 위력 감소 2 부여\n"
             },
             {
-              "desc": "[OnSucceedAttack] 침잠 2 부여"
+              "desc": "[OnSucceedAttack] 침잠 2 부여\n"
             },
             {
-              "desc": "[OnSucceedAttack] 파열 2 부여"
+              "desc": "[OnSucceedAttack] 파열 2 부여\n"
             }
           ],
           "abilities": []

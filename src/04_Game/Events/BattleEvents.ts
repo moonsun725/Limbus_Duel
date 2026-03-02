@@ -22,6 +22,6 @@ export interface BattleCallbacks {
         clashCount: number
     ) => Promise<void>;
     onDamage: (target: Character, damage: number) => Promise<void>; // 얘는 일반적인 데미지 전반
-    onGetHit: (target: Character, damage: number) => Promise<void>; // 얘는 공격 적중
+    onGetHit: (target: Character, motiontype?: number) => Promise<void>; // 얘는 공격 적중
     onAttackEnd: (attacker: Character, target: Character) => Promise<void>;
 }
