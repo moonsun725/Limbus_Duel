@@ -104,11 +104,13 @@ export function initBattleSelect() {
         myRole = data.role;
         console.log(`Role Assigned: ${myRole}`);
     });
-
-    // ui 갱신 이벤트 등록
+    
+    // 턴 시작시 UI 할당
     socket.on('turn_start', (data) => {
         OnTurnStart(data);
     });
+
+    // 턴 종료시 UI 초기화
 
     // 스킬 선택 하이라이트 동기화 이벤트 등록
     socket.on('ui_move_selected', (data) => {
@@ -200,12 +202,14 @@ function handleMouseEnter(event) {
                 const skill = charData.skills[sIndex];
 
                 infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
-                if (skill.coinPower) infoMessage += ` (+${skill.coinPower} x ${skill.coinNum})`;
+                if (skill.coinPower) infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
+                
                 infoMessage += `\n\n${skill.desc || ''}`;
 
                 if (skill.coinDescs) {
                     skill.coinDescs.forEach((desc, idx) => {
                         if (desc) infoMessage += `\n🪙${idx + 1}: ${desc}`;
+                        else infoMessage += `\n🪙${idx + 1}`;
                     });
                 }
             } else {
@@ -280,6 +284,9 @@ function getElementType(element) {
 }
 
 // 헬퍼 함수: 턴 시작시 UI 만들기
+/** 
+@param {Object} data  - 서버에서 받은 턴 시작 데이터 (p1, p2 정보 포함)
+*/
 function OnTurnStart(data) {
     // 맨 처음 init: 이거는 따로 분리를 해야되나?
     const myData = (myRole === 'p1') ? data.p1 : data.p2;
@@ -297,4 +304,14 @@ function OnTurnStart(data) {
         goButton.innerText = "GO";
         goButton.classList.remove('disabled');
     }
+
+    // UI 초기화: 스킬 버튼 초기화
+    skillButtons.forEach(btn => {
+        btn.classList.remove('used', 'selected');
+    });
+
+    // UI 초기화: 타겟 버튼 초기화
+    targetButtons.forEach(btn => {
+        btn.classList.remove('locked');
+    });
 }

@@ -20,6 +20,10 @@
 */
 import { socket } from './network.js';
 
+// [New] 현재 슬롯 캐릭터 ID 기억 (교체 판단용): 전투 화면에서 사용
+let currentP1CharId = null;
+let currentP2CharId = null;
+
 export function initBattleCombat() {
     // DOM 요소 할당
     const phaseSelect = document.getElementById('phase-select');
@@ -47,6 +51,8 @@ export function initBattleCombat() {
 
     // 2. 합(Clash) 시작 신호 (데이터 수신)
     socket.on('anim_clash_start', (data) => {
+        // data: {p1: {char: { id, name, hp, maxhp }, skill: { name, coinCount }, power, coinPower}
+        
         console.log("🔥 합 연출 시작!", data);
 
         // 혹시 화면 전환 안됐을까봐 안전장치
@@ -63,47 +69,62 @@ export function initBattleCombat() {
     });
 
     // 3. 공격 시작 신호 (데이터 수신) -> 상황에 따라 UI 유지 or 재생성
-    socket.on('anim_attack_start', (data) => {
-        console.log(`⚔️ 공격 시작! [${data.attacker.role}] -> [${data.defender.role}]`);
+    /**
+     * @param {Object} data = { attacker: { role, skill: {name, coinCount}, power, coinPower} defender: {role} }
+     */
+   socket.on('anim_attack_start', (data) => {
+        // 1. 데이터 정리: 누가 P1이고 누가 P2인가?
+        // (공격자가 P1이면 -> P1데이터=attacker, P2데이터=defender)
+        // (공격자가 P2이면 -> P1데이터=defender, P2데이터=attacker)
+        let p1Data, p2Data;
+        let attackerData; // 스킬 UI 그릴 때 필요
 
-        // 1. 방어자 (Defender) 처리: 무조건 삭제
-        // (합에서 졌거나, 일방적으로 맞는 상황이므로 스킬 캔슬 연출)
-        const defBundleId = (data.defender.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
-        // if (defBundleId.querySelector('.skill-container').coins.length > 0) { // 코인이 남아있으면 삭제 x(나중에 한참뒤에 파불코가 있음)
-        removeSkillUI(defBundleId);
-
-        // 2. 공격자 (Attacker) 처리: 상황에 따라 다름
-        const atkBundleId = (data.attacker.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
-        const atkBundle = document.getElementById(atkBundleId);
-
-        if (atkBundle) {
-            // ★ [핵심] 이미 스킬 UI가 존재하는지 확인
-            const existingUI = atkBundle.querySelector('.skill-container');
-            // 조건이 너무 널널한데
-            if (existingUI) {
-                // [상황 A: 합 승리 후]
-                // 이미 UI가 있고, 합 진행 중에 코인이 알맞게 줄어들었음.
-                // 따라서 아무것도 하지 않고 유지함. (부드러운 연결)
-                console.log("♻️ 합 승리자 UI 유지");
-
-                // (선택) 만약 확실히 하기 위해 텍스트 색상만 리셋하고 싶다면:
-                // resetPowerText(atkBundleId); 
-            } else {
-                // [상황 B: 일방 공격]
-                // 합 과정 없이 바로 공격하므로 UI가 없음. 새로 그려야 함.
-                console.log("🆕 일방 공격 UI 생성");
-                rebuildSkillUI(
-                    atkBundleId,
-                    data.attacker.skill,
-                    data.attacker.power,
-                    data.attacker.coinPower
-                );
-            }
+        if (data.attacker.role === 'p1') {
+            p1Data = data.attacker;
+            p2Data = data.defender;
+            attackerData = data.attacker;
+        } else {
+            p1Data = data.defender;
+            p2Data = data.attacker;
+            attackerData = data.attacker;
         }
 
-        // 공격 끝났으니 UI 지워야지
-        // removeSkillUI(atkBundleId);
-        // attack에서 지우면 공격 코인 굴리기 전에 UI가 사라져
+        console.log(`⚔️ 공격 시작! P1[${p1Data.name}] vs P2[${p2Data.name}]`);
+
+        // 2. ★ 양쪽 진영 캐릭터 갱신 (함수로 분리해서 깔끔하게 처리)
+        checkAndUpdateChar('p1', p1Data);
+        checkAndUpdateChar('p2', p2Data);
+
+        // 3. 스킬 UI 처리
+        // 3-1. 방어자는 스킬 UI 제거 (맞을 준비)
+        const defBundleId = (data.attacker.role === 'p1') ? 'p2-bundle' : 'p1-bundle';
+        removeSkillUI(defBundleId);
+
+        // 3-2. 공격자는 스킬 UI 생성/유지
+        const atkBundleId = (data.attacker.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+        // (여기는 아까 짰던 로직 그대로: 이미 있으면 유지, 없으면 생성)
+        const existingUI = document.getElementById(atkBundleId).querySelector('.skill-container');
+        
+        // 주의: 캐릭터가 바뀌었으면(방금 위에서 갱신됨) 기존 UI가 있어도 무효일 수 있음.
+        // 하지만 checkAndUpdateChar 안에서 초기화를 안 했다면, 
+        // 여기서 "캐릭터가 교체된 직후"인지 알 필요가 있음.
+        
+        // 팁: checkAndUpdateChar가 "true(교체됨)"를 반환하게 하면 편함
+        // 하지만 간단하게 가려면: rebuildSkillUI를 그냥 호출하되, 
+        // "합 승리 후 연계" 상황만 구분하면 됨.
+        
+        // 가장 안전한 방법: 
+        // 캐릭터가 바뀌었으면 -> 무조건 rebuild
+        // 캐릭터가 안 바뀌었고 UI가 있다 -> 유지
+        if (existingUI) {
+             // UI가 있는데 캐릭터가 바뀌었는지 확인은 이미 위에서 끝났음.
+             // 다만 "기존 UI"가 "이전 캐릭터의 UI"일 수도 있으므로,
+             // checkAndUpdateChar 함수 안에서 "캐릭터 바뀌면 스킬 UI 싹 지우기"를 넣어주는 게 베스트.
+             console.log("♻️ UI 유지");
+        } else {
+             console.log("🆕 UI 생성");
+             rebuildSkillUI(atkBundleId, attackerData.skill, attackerData.power, attackerData.coinPower);
+        }
     });
 
     socket.on('anim_attack_end', (data) => {
@@ -152,13 +173,21 @@ export function initBattleCombat() {
                 container.dataset.currentPower = currentTotal; // 저장
                 circle.innerText = currentTotal; // 표시
 
-                // (4) 팝(Pop) 애니메이션 효과
-                circle.classList.remove('pop-anim');
-                void circle.offsetWidth; // Reflow 강제
-                circle.classList.add('pop-anim');
+                // (수정) 글자만 감싸는 span 생성 또는 선택
+                let textSpan = circle.querySelector('.anim-target');
+                if (!textSpan) {
+                    circle.innerHTML = `<span class="anim-target">${currentTotal}</span>`;
+                    textSpan = circle.querySelector('.anim-target');
+                } else {
+                    textSpan.innerText = currentTotal;
+                }
 
-                // (선택) 텍스트 색상 강조
-                circle.style.color = '#ff9800';
+                // (수정) 애니메이션을 circle이 아닌 textSpan에 적용
+                textSpan.classList.remove('pop-anim');
+                void textSpan.offsetWidth; // Reflow 강제
+                textSpan.classList.add('pop-anim');
+
+                circle.style.color = '#ffffff';
             }
         }
     });
@@ -178,6 +207,54 @@ export function initBattleCombat() {
         updateCoinDisplay(bundle2, data.c2.remainCoins);
         resetPowerText(bundle2);
     });
+
+    // 6. 피격 연출(흔들림)
+    socket.on('anim_hit_reaction', (data) => {
+        const bundleId = (data.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+        const bundle = document.getElementById(bundleId);
+
+        if (bundle) {
+            const charImg = bundle.querySelector('.character-image');
+            // 흔들림 애니메이션 재시작 테크닉
+            if (charImg) {
+                charImg.classList.remove('shake');
+                void charImg.offsetWidth; // Reflow 강제 (애니메이션 리셋용)
+                charImg.classList.add('shake');
+            }
+        }
+    });
+
+    // 7. 데미지 UI (HP바, 숫자)
+    socket.on('anim_damage_ui', (data) => {
+        const bundleId = (data.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+        const bundle = document.getElementById(bundleId);
+
+        if (bundle) {
+            // (1) HP 바 줄이기
+            const hpBar = bundle.querySelector('.hp-fill');
+            if (hpBar) {
+                const percent = (data.hp / data.maxHp) * 100;
+                hpBar.style.width = `${percent}%`;
+            }
+
+            // (2) 데미지 숫자 띄우기 (Helper 함수)
+            showFloatingDamage(bundle, data.damage);
+        }
+    });
+
+    // [Helper] 데미지 텍스트 생성
+    function showFloatingDamage(parent, damage) {
+        const el = document.createElement('div');
+        el.className = 'floating-damage';
+        el.innerText = `-${damage}`;
+
+        // 위치를 살짝 랜덤하게 (겹치지 않게)
+        const randomX = (Math.random() - 0.5) * 40;
+        el.style.left = `calc(50% + ${randomX}px)`;
+
+        parent.appendChild(el);
+        setTimeout(() => el.remove(), 800); // 0.8초 뒤 삭제
+    }
 }
 
 
@@ -378,3 +455,31 @@ function resetPowerText(bundleId) {
     }
 }
 
+/**
+ * [Helper] 진영별 캐릭터 갱신 검사기
+ * 역할: "지금 그려진 놈이랑 데이터랑 다르면 갈아치워라"
+ */
+function checkAndUpdateChar(side, data) {
+    const isP1 = (side === 'p1');
+    const currentId = isP1 ? currentP1CharId : currentP2CharId;
+    const bundleId = isP1 ? 'p1-bundle' : 'p2-bundle';
+    
+    // 1. ID가 다르면 교체!
+    if (currentId !== data.id) {
+        console.log(`🔄 [${side}] 캐릭터 교체: ${currentId} -> ${data.id} (${data.name})`);
+        
+        // ID 업데이트
+        if (isP1) currentP1CharId = data.id;
+        else currentP2CharId = data.id;
+
+        // 화면 갱신 (초상화, 이름 등)
+        updateCharacterUI(bundleId, data);
+        
+        // ★ [중요] 캐릭터가 바뀌었으니, 기존에 남아있던(이전 놈의) 스킬 UI나 코인 등은 싹 지워야 함!
+        // 그래야 밖에서 "UI가 없네? 새로 그려야지" 하고 정상 작동함.
+        removeSkillUI(bundleId); 
+        
+        return true; // 교체됨
+    }
+    return false; // 유지됨
+}
