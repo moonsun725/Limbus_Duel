@@ -252,10 +252,13 @@ export class GameRoom {
         else if (!this.p2) {
             this.p2 = setupPlayer('p2');
             console.log(`[Room] Player 2 입장 (ID: ${socketId})`);
-            return 'p2';
 
             // 이제 둘 다 들어왔으니까 턴 시작 이벤트 실행해도 되겠지?
             this.startTurn(io);
+
+            return 'p2';
+
+            
         }
 
         return 'spectator';
@@ -448,11 +451,13 @@ export class GameRoom {
         this.gameState = 'MOVE_SELECT';
         if (!this.p1 || !this.p2) return; // 여기에서 없으면 나갔다는 뜻이라, 화면에 알림 같은 걸 띄울수도 있을거임
 
+        console.log('p1 파티 속도 갱신');
         for (let char of this.p1.battleEntry) {
             if (char) {
                 char.BattleState.ChangeState('TURNSTART');
             }
         }
+        console.log('p2 파티 속도 갱신');
         for (let char of this.p2.battleEntry) {
             if (char) {
                 char.BattleState.ChangeState('TURNSTART');
@@ -460,6 +465,7 @@ export class GameRoom {
         }
         // 위의 과정에서 개별 속도 정리는 했을거고
         this.p1.battleEntry.sort((a,b) => b.speed - a.speed);
+        this.p2.battleEntry.sort((a,b) => b.speed - a.speed);
 
         this.broadcastState(io);
     }
