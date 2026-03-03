@@ -27,6 +27,7 @@ let tooltip, tooltipText;
 let interactableElements;
 let buttons, skillButtons, targetButtons, goButton;
 let phaseSelect, phaseBattle;
+let myteamInfo, targetInfo;
 
 // 상태 변수
 let myRole = null;
@@ -72,8 +73,10 @@ export function initBattleSelect() {
             selectedSkillSlot = sIndex;
         });
     });
+    // 아군 정보 버튼 스크립트 할당
 
     // 타겟 선택 버튼 스크립트 할당
+    // 속도가 빠른 놈은 뒤에 위치하니까 얘는 또 역순으로 돌아야 돼
     targetButtons.forEach((btn, index) => {
         btn.addEventListener('click', () => {
             if (selectedUnitIndex === null) {
@@ -87,6 +90,8 @@ export function initBattleSelect() {
             });
         });
     });
+    // 타겟 정보 버튼 스크립트 할당
+    // 얘도 좌우반전이라 역순으로 돌아야 됨
 
     // 전투 시작 버튼 스크립트 할당
     // 전투 시작 요청 (GO 버튼)
@@ -314,4 +319,5 @@ function OnTurnStart(data) {
     targetButtons.forEach(btn => {
         btn.classList.remove('locked');
     });
+    targetingData = {}; // 
 }

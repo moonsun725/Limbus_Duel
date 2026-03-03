@@ -363,15 +363,17 @@ function rebuildSkillUI(bundleId, skillData, power, coinPower) {
     container.dataset.currentPower = power; // 추가: 현재 위력도 저장 (코인 토스 때마다 갱신할 예정)
 
     container.innerHTML = `
-        <div class="skill-group">
-            <div class="coin-row">${coinsHtml}</div>
-            <div class="skill-bar">${skillData.name}</div>
+    <div class="skill-group">
+        <div class="coin-row">${coinsHtml}</div>
+        <div class="skill-bar">
+            <span class="skill-text">${skillData.name}</span>
         </div>
-        <div class="circle-wrapper">
-            <div class="main-circle">${power}</div>
-            <div class="power-badge">${coinPower > 0 ? '+' + coinPower : coinPower}</div>
-        </div>
-    `;
+    </div>
+    <div class="circle-wrapper">
+        <div class="main-circle">${power}</div>
+        <div class="power-badge">${coinPower > 0 ? '+' + coinPower : coinPower}</div>
+    </div>
+`;
 
     // 3. DOM 추가 (캐릭터 박스 앞에)
     bundle.prepend(container);
