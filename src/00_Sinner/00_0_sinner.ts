@@ -112,7 +112,7 @@ export class Character {
     }
     SpeedSetting()
     {
-        this.speed = Math.floor(Math.random()*(this.maxSpeed-this.maxSpeed)+this.minSpeed); // 스피드 세팅
+        this.speed = Math.floor(Math.random()*(this.maxSpeed-this.minSpeed+1))+this.minSpeed; // 스피드 세팅
         this.speed += 0; // 당장은 더미로 남겨놓고(신속, 속박 처리)
         if (this.speed <= 0)
             this.speed = 1;
