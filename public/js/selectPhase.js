@@ -110,7 +110,7 @@ export function initBattleSelect() {
         myRole = data.role;
         console.log(`Role Assigned: ${myRole}`);
     });
-    
+
     // 턴 시작시 UI 할당
     socket.on('turn_start', (data) => {
         OnTurnStart(data);
@@ -275,8 +275,8 @@ function handleMouseEnter(event) {
             case 'green': infoMessage = "수비 스킬"; break;
             case 'white': infoMessage = "적군 유닛"; break; // 적군 추가
             default: infoMessage = "정보";
-        }
     }
+}
 
     // 줄바꿈 처리를 위해 textContent 대신 innerText 혹은 HTML 사용
     tooltipText.innerText = infoMessage;
@@ -297,13 +297,13 @@ function handleMouseEnter(event) {
     // 타입에 따라 분기
     if (type === 'red' || type === 'blue' || type === 'green') {
         handleMouseEnter_SkillIcon(target, type);
-    } 
+    }
     else if (type === 'orange') {
         handleMouseEnter_Character(target, 'ally');
-    } 
+    }
     else if (type === 'white') {
         handleMouseEnter_Character(target, 'enemy');
-    } 
+    }
     else {
         // 기타 마우스를 따라다녀야 하는 작은 아이콘들 (버프/디버프 등)
         tooltipText.innerText = "기타 정보";
@@ -314,9 +314,9 @@ function handleMouseEnter(event) {
 function handleMouseEnter_SkillIcon(target, type) {
     // CSS 클래스 부여 -> 상단 중앙 고정
     tooltip.classList.add('tooltip-skill');
-    
+
     let infoMessage = "";
-    
+
     if (type === 'red') {
         // 현재 버튼이 몇 번째 버튼인지 찾기 (0~11)
         const allRedButtons = document.querySelectorAll('.type-red');
@@ -334,7 +334,7 @@ function handleMouseEnter_SkillIcon(target, type) {
 
                 infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
                 if (skill.coinPower) infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
-                
+
                 infoMessage += `\n\n${skill.desc || ''}`;
 
                 if (skill.coinDescs) {
@@ -365,7 +365,7 @@ function handleMouseEnter_SkillIcon(target, type) {
                 }
             }
         }
-        
+
     } else if (type === 'green') {
         infoMessage = "수비 스킬 정보";
     }
@@ -389,11 +389,11 @@ function handleMouseEnter_Character(target, team) {
 function handleMouseMove(event) {
     // 고정형 툴팁 클래스가 하나라도 있으면 좌표를 따라가지 않음
     if (
-        tooltip.classList.contains('tooltip-skill') || 
-        tooltip.classList.contains('tooltip-ally') || 
+        tooltip.classList.contains('tooltip-skill') ||
+        tooltip.classList.contains('tooltip-ally') ||
         tooltip.classList.contains('tooltip-enemy')
     ) {
-        return; 
+        return;
     }
 
     // 마우스 커서 옆에 툴팁 표시 (기타 아이콘용)
