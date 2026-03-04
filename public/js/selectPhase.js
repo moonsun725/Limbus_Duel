@@ -35,7 +35,7 @@ let selectedUnitIndex = null;
 let selectedSkillSlot = null;
 let skillDataCache = [];
 let targetingData = {};
-let isTooltipLocked = false; 
+let isSkillTooltipLocked = false;
 
 export function initBattleSelect() {
     // DOM 요소 할당
@@ -162,11 +162,35 @@ export function initBattleSelect() {
         }
     });
 
+    document.addEventListener('click', (event) => {
+        // 1. 내가 클릭한 곳이 상호작용 가능한 요소(버튼)인가?
+        const isInteractable = event.target.closest('.type-red, .type-blue, .type-green, .type-orange, .type-white, .type-yellow');
+
+        // 2. 내가 클릭한 곳이 툴팁 그 자체인가? (툴팁 안의 텍스트를 드래그할 수도 있으니)
+        const isTooltip = event.target.closest('#tooltip-skill');
+
+        // 버튼도 아니고 툴팁도 아닌 완전 엉뚱한 곳(배경)을 눌렀다면!
+        if (!isInteractable && !isTooltip) {
+            isSkillTooltipLocked = false;
+            skillTooltip.classList.add('hidden');
+        }
+    });
 }
 
 function initDOMs_BattleSelect() {
-    tooltip = document.getElementById('info-tooltip');
-    tooltipText = document.getElementById('tooltip-text');
+    // tooltip = document.getElementById('info-tooltip');
+    // tooltipText = document.getElementById('tooltip-text');
+
+    // 1. 컨테이너 (보이고 숨기는 용도)
+    floatingTooltip = document.getElementById('tooltip-floating');
+    skillTooltip = document.getElementById('tooltip-skill');
+    charTooltip = document.getElementById('tooltip-char');
+
+    // 2. 텍스트 요소 (글자 집어넣는 용도)
+    floatingText = document.getElementById('text-floating');
+    skillText = document.getElementById('text-skill');
+    charText = document.getElementById('text-char');
+
     interactableElements = document.querySelectorAll('[data-has-info="true"]');
     buttons = document.querySelectorAll('button');
 
@@ -378,13 +402,28 @@ function handleMouseMove(event) {
 }
 
 // 마우스가 객체에서 벗어났을 때 실행되는 함수
+// 5. 마우스가 벗어날 때 (숨김 처리)
 function handleMouseLeave(event) {
-    tooltip.classList.add('hidden');
+    const target = event.currentTarget;
+    const type = getElementType(target);
 
-    // [New] 호버 효과 제거
-    document.querySelectorAll('.hover-targeted').forEach(el => {
-        el.classList.remove('hover-targeted');
-    });
+    switch (type) {
+        case 'red':
+        case 'blue':
+        case 'green':
+            // ★ 스킬 툴팁: 잠겨있으면 숨기지 않음!
+            if (!isSkillTooltipLocked) {
+                skillTooltip.classList.add('hidden');
+            }
+            break;
+        case 'orange':
+        case 'white':
+            charTooltip.classList.add('hidden');
+            break;
+        default:
+            floatingTooltip.classList.add('hidden');
+            break;
+    }
 }
 
 // --------------------------------------------------------
