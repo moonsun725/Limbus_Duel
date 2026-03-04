@@ -247,14 +247,20 @@ export class GameRoom {
         if (!this.p1) {
             this.p1 = setupPlayer('p1');
             console.log(`[Room] Player 1 입장 (ID: ${socketId})`);
+            if(this.p1 && this.p2) {
+                // this.resetGame();
+                this.startTurn(io);
+            }
             return 'p1';
         }
         else if (!this.p2) {
             this.p2 = setupPlayer('p2');
             console.log(`[Room] Player 2 입장 (ID: ${socketId})`);
-
-            // 이제 둘 다 들어왔으니까 턴 시작 이벤트 실행해도 되겠지?
-            this.startTurn(io);
+            if(this.p1 && this.p2) {
+                // this.resetGame();
+                // 이제 둘 다 들어왔으니까 턴 시작 이벤트 실행해도 되겠지?
+                this.startTurn(io);
+            }
 
             return 'p2';
 
@@ -518,10 +524,10 @@ export class GameRoom {
         const p2PartyData = this.p2 ? this.p2.party.map(p => p.toData ? p.toData() : p) : null;
 
         // 2. 클라이언트로 전송
-        io.to(this.roomId).emit('turn_start', {
+        io.to(this.roomId).emit('turn_start', { // 매핑 해제는 플레이어가 얼마든지 할 수 있
             p1: {
                 active: entry1Data, // 이제 배열([])이 전송됩니다.
-                party: p1PartyData
+                party: p1PartyData 
             },
 
             p2: {
@@ -532,5 +538,11 @@ export class GameRoom {
             gameState: this.gameState,
             faintPlayerId: this.faintPlayerId
         });
+    }
+
+    resetGame()
+    {
+        this.p1?.reset();
+        this.p2?.reset();
     }
 }

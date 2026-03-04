@@ -124,6 +124,13 @@ export class Character {
         this.Stats.reset();
         this.BattleState.ChangeState("NORMAL");
         // >< 버프리스트 초기화
+        // (3) 스킬슬롯에서 스킬 빼내기
+        this.Slots.forEach((element) =>{
+            element.readySkill = null;
+        });
+        // 덱 섞기
+        this.shuffleDeck(this.deck);
+        this.shuffleDeck(this.readyDeck);
     }
 
     // 슬롯 관리
