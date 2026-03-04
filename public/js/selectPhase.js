@@ -35,6 +35,7 @@ let selectedUnitIndex = null;
 let selectedSkillSlot = null;
 let skillDataCache = [];
 let targetingData = {};
+let isTooltipLocked = false; 
 
 export function initBattleSelect() {
     // DOM 요소 할당
@@ -182,7 +183,8 @@ function handleClick(event) {
     console.log('Clicked:', event.currentTarget);
 }
 
-// 마우스가 객체 위에 올라갔을 때 실행되는 함수
+// 마우스가 객체 위에 올라갔을 때 실행되는 함수(아래는 레거시 코드)
+/*
 function handleMouseEnter(event) {
     const target = event.currentTarget;
     const type = getElementType(target);
@@ -255,6 +257,125 @@ function handleMouseEnter(event) {
     // 줄바꿈 처리를 위해 textContent 대신 innerText 혹은 HTML 사용
     tooltipText.innerText = infoMessage;
 }
+*/
+function handleMouseEnter(event) {
+    const target = event.currentTarget;
+    const type = getElementType(target);
+
+    // 툴팁 띄우기 준비
+    tooltip.classList.remove('hidden');
+
+    // ★ [핵심] 기존에 붙어있던 위치 고정 클래스와 인라인 스타일 싹 초기화
+    tooltip.classList.remove('tooltip-skill', 'tooltip-ally', 'tooltip-enemy');
+    tooltip.style.left = '';
+    tooltip.style.top = '';
+
+    // 타입에 따라 분기
+    if (type === 'red' || type === 'blue' || type === 'green') {
+        handleMouseEnter_SkillIcon(target, type);
+    } 
+    else if (type === 'orange') {
+        handleMouseEnter_Character(target, 'ally');
+    } 
+    else if (type === 'white') {
+        handleMouseEnter_Character(target, 'enemy');
+    } 
+    else {
+        // 기타 마우스를 따라다녀야 하는 작은 아이콘들 (버프/디버프 등)
+        tooltipText.innerText = "기타 정보";
+    }
+}
+
+// 2. 스킬 툴팁 전담 로직
+function handleMouseEnter_SkillIcon(target, type) {
+    // CSS 클래스 부여 -> 상단 중앙 고정
+    tooltip.classList.add('tooltip-skill');
+    
+    let infoMessage = "";
+    
+    if (type === 'red') {
+        // 현재 버튼이 몇 번째 버튼인지 찾기 (0~11)
+        const allRedButtons = document.querySelectorAll('.type-red');
+        const btnIndex = Array.from(allRedButtons).indexOf(target);
+
+        if (btnIndex >= 0 && skillDataCache.length > 0) {
+            // 유닛 인덱스(0~5), 스킬 슬롯(0 or 1) 계산
+            const uIndex = btnIndex % 6;
+            const sIndex = (btnIndex < 6) ? 1 : 0;
+
+            const charData = skillDataCache[uIndex];
+
+            if (charData && charData.skills && charData.skills[sIndex]) {
+                const skill = charData.skills[sIndex];
+
+                infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
+                if (skill.coinPower) infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
+                
+                infoMessage += `\n\n${skill.desc || ''}`;
+
+                if (skill.coinDescs) {
+                    skill.coinDescs.forEach((desc, idx) => {
+                        if (desc) infoMessage += `\n🪙${idx + 1}: ${desc}`;
+                        else infoMessage += `\n🪙${idx + 1}`;
+                    });
+                }
+            } else {
+                console.warn("Skill data is missing for this slot!");
+                infoMessage = "스킬 정보 없음 (데이터 누락)";
+            }
+            console.groupEnd(); // 로그 그룹 닫기
+        } else {
+            infoMessage = "데이터 로딩 중...";
+        }
+
+        // 이 버튼이 'used'(확정된 스킬) 상태라면, 누구를 때리는지 적에게 표시
+        if (target.classList.contains('used')) {
+            const uIndex = btnIndex % 6;
+            const targetEnemyIdx = targetingData[uIndex];
+
+            if (targetEnemyIdx !== undefined) {
+                const enemyUnits = document.querySelectorAll('.right-team .circle'); // .unit-column button
+                // 적 유닛에게 'hover-targeted' 효과 부여
+                if (enemyUnits[targetEnemyIdx]) {
+                    enemyUnits[targetEnemyIdx].classList.add('hover-targeted');
+                }
+            }
+        }
+        
+    } else if (type === 'green') {
+        infoMessage = "수비 스킬 정보";
+    }
+
+    tooltipText.innerText = infoMessage;
+}
+
+// 3. 캐릭터 툴팁 전담 로직
+function handleMouseEnter_Character(target, team) {
+    if (team === 'ally') {
+        tooltip.classList.add('tooltip-ally');
+        // 나중에는 target.dataset.charId 등으로 캐시를 뒤져서 정보를 가져옵니다.
+        tooltipText.innerText = "[아군 정보]\n\n체력: 100/100\n흐트러짐: 30, 60\n내성 정보...";
+    } else {
+        tooltip.classList.add('tooltip-enemy');
+        tooltipText.innerText = "[적군 정보]\n\n주요 패턴: ...\n약점: 참격";
+    }
+}
+
+// 4. 마우스 이동 핸들러 수정 (따라다니기 해제)
+function handleMouseMove(event) {
+    // 고정형 툴팁 클래스가 하나라도 있으면 좌표를 따라가지 않음
+    if (
+        tooltip.classList.contains('tooltip-skill') || 
+        tooltip.classList.contains('tooltip-ally') || 
+        tooltip.classList.contains('tooltip-enemy')
+    ) {
+        return; 
+    }
+
+    // 마우스 커서 옆에 툴팁 표시 (기타 아이콘용)
+    tooltip.style.left = (event.pageX + 10) + 'px';
+    tooltip.style.top = (event.pageY + 10) + 'px';
+}
 
 // 마우스가 객체에서 벗어났을 때 실행되는 함수
 function handleMouseLeave(event) {
@@ -264,13 +385,6 @@ function handleMouseLeave(event) {
     document.querySelectorAll('.hover-targeted').forEach(el => {
         el.classList.remove('hover-targeted');
     });
-}
-
-// 마우스 움직임에 따라 툴팁 위치 갱신하는 헬퍼 함수
-function handleMouseMove(event) {
-    // 마우스 커서 약간 옆에 툴팁 표시
-    tooltip.style.left = (event.pageX + 10) + 'px';
-    tooltip.style.top = (event.pageY + 10) + 'px';
 }
 
 // --------------------------------------------------------

@@ -11,9 +11,20 @@
 <body>
     <div id="game-screen">
         <div id="game-container">
-            <div id="info-tooltip" class="hidden">
-                <span id="tooltip-text">정보</span>
+            <!-- 툴팁 -->
+            <div id="tooltip-floating" class="tooltip hidden">
+                <span id="text-floating">기본 정보</span>
             </div>
+
+            <div id="tooltip-skill" class="tooltip-skill hidden">
+                <span id="text-skill">스킬 정보</span>
+            </div>
+
+            <div id="tooltip-char" class="hidden">
+                <span id="text-char">캐릭터 정보</span>
+            </div>
+
+            <!-- 선택 화면 메인 UI -->
             <div id="phase-select">
                 <div class="top-layer">
                     <div class="box type-gray player-info-box">Player 1 Info</div>
@@ -145,6 +156,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 전투 화면 UI -->
             <div id="phase-battle" class="hidden">
                 <div class="battle-stage">
 
