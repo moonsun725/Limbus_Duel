@@ -24,10 +24,13 @@ import { socket } from './network.js';
 // DOM 요소 선언
 // --------------------------------------------------------
 let tooltip, tooltipText;
+let floatingTooltip, skillTooltip, charTooltip;
+let floatingText, skillText, charText;
 let interactableElements;
 let buttons, skillButtons, targetButtons, goButton;
 let phaseSelect, phaseBattle;
 let myteamInfo, targetInfo;
+
 
 // 상태 변수
 let myRole = null;
@@ -202,11 +205,6 @@ function initDOMs_BattleSelect() {
     targetButtons = document.querySelectorAll('.right-team .circle');
 }
 
-// 기본적으로 클릭했을때 실행되는 함수
-function handleClick(event) {
-    console.log('Clicked:', event.currentTarget);
-}
-
 // 마우스가 객체 위에 올라갔을 때 실행되는 함수(아래는 레거시 코드)
 /*
 function handleMouseEnter(event) {
@@ -282,38 +280,78 @@ function handleMouseEnter(event) {
     tooltipText.innerText = infoMessage;
 }
 */
+// ==========================================
+// 1. 마우스 진입 (Hover) - switch문 리팩토링
+// ==========================================
 function handleMouseEnter(event) {
     const target = event.currentTarget;
     const type = getElementType(target);
 
-    // 툴팁 띄우기 준비
-    tooltip.classList.remove('hidden');
+    switch (type) {
+        // 스킬 아이콘들 (red, blue, green 모두 이 로직을 탐)
+        case 'red':
+        case 'blue':
+        case 'green':
+            handleMouseEnter_SkillIcon(target, type);
+            break;
 
-    // ★ [핵심] 기존에 붙어있던 위치 고정 클래스와 인라인 스타일 싹 초기화
-    tooltip.classList.remove('tooltip-skill', 'tooltip-ally', 'tooltip-enemy');
-    tooltip.style.left = '';
-    tooltip.style.top = '';
+        // 아군 캐릭터
+        case 'orange':
+            handleMouseEnter_Character(target, 'ally');
+            break;
 
-    // 타입에 따라 분기
-    if (type === 'red' || type === 'blue' || type === 'green') {
-        handleMouseEnter_SkillIcon(target, type);
+        // 적군 캐릭터
+        case 'white':
+            handleMouseEnter_Character(target, 'enemy');
+            break;
+
+        // 기타 아이콘 (버프, 디버프 등)
+        default:
+            floatingTooltip.classList.remove('hidden');
+            floatingText.innerText = "기타 정보";
+            break;
     }
-    else if (type === 'orange') {
-        handleMouseEnter_Character(target, 'ally');
-    }
-    else if (type === 'white') {
-        handleMouseEnter_Character(target, 'enemy');
-    }
-    else {
-        // 기타 마우스를 따라다녀야 하는 작은 아이콘들 (버프/디버프 등)
-        tooltipText.innerText = "기타 정보";
+}
+
+// ==========================================
+// 2. 마우스 클릭 (Click) - switch문 리팩토링
+// ==========================================
+function handleClick(event) {
+    const target = event.currentTarget;
+    const type = getElementType(target);
+    
+    console.log(`Clicked: ${type}`, target);
+
+    switch (type) {
+        // 스킬 아이콘 클릭 시 -> 잠금 ON
+        case 'red':
+        case 'blue':
+        case 'green':
+            isSkillTooltipLocked = true;
+            console.log("🔒 스킬 툴팁 잠금 ON!");
+            // (여기에 기존 스킬 선택 처리 로직 작성)
+            // selectSkill(target);
+            break;
+
+        // 그 외 모든 곳 클릭 시 -> 잠금 OFF    
+        default:
+            isSkillTooltipLocked = false;
+            skillTooltip.classList.add('hidden');
+            console.log("🔓 스킬 툴팁 잠금 OFF!");
+            
+            // (여기에 캐릭터 선택 등 다른 버튼 처리 로직 추가)
+            break;
     }
 }
 
 // 2. 스킬 툴팁 전담 로직
 function handleMouseEnter_SkillIcon(target, type) {
-    // CSS 클래스 부여 -> 상단 중앙 고정
-    tooltip.classList.add('tooltip-skill');
+    // 1. [핵심] 스킬 툴팁의 숨김 상태를 해제해서 화면에 보이게 함!
+    skillTooltip.classList.remove('hidden');
+    
+    // 2. CSS 클래스 부여 (상단 중앙 고정)
+    // (이미 HTML에 클래스가 하드코딩 되어있다면 이 줄은 없어도 무방합니다)
+    skillTooltip.classList.add('tooltip-skill');
 
     let infoMessage = "";
 
@@ -347,7 +385,6 @@ function handleMouseEnter_SkillIcon(target, type) {
                 console.warn("Skill data is missing for this slot!");
                 infoMessage = "스킬 정보 없음 (데이터 누락)";
             }
-            console.groupEnd(); // 로그 그룹 닫기
         } else {
             infoMessage = "데이터 로딩 중...";
         }
@@ -358,7 +395,7 @@ function handleMouseEnter_SkillIcon(target, type) {
             const targetEnemyIdx = targetingData[uIndex];
 
             if (targetEnemyIdx !== undefined) {
-                const enemyUnits = document.querySelectorAll('.right-team .circle'); // .unit-column button
+                const enemyUnits = document.querySelectorAll('.sidebar.right .circle'); // 오른쪽 팀 캐릭터들
                 // 적 유닛에게 'hover-targeted' 효과 부여
                 if (enemyUnits[targetEnemyIdx]) {
                     enemyUnits[targetEnemyIdx].classList.add('hover-targeted');
@@ -366,11 +403,14 @@ function handleMouseEnter_SkillIcon(target, type) {
             }
         }
 
+    } else if (type === 'blue') {
+        infoMessage = "아군 스킬 정보 (데이터 연결 필요)";
     } else if (type === 'green') {
         infoMessage = "수비 스킬 정보";
     }
 
-    tooltipText.innerText = infoMessage;
+    // 3. [핵심] 텍스트를 skillText에 꽂아넣기!
+    skillText.innerText = infoMessage;
 }
 
 // 3. 캐릭터 툴팁 전담 로직
