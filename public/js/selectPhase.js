@@ -29,8 +29,7 @@ let floatingText, skillText, charText;
 let interactableElements;
 let buttons, skillButtons, targetButtons, goButton;
 let phaseSelect, phaseBattle;
-let myteamInfo, targetInfo;
-let allyCharBoxes;
+let allyCharBoxes, enemyCharBoxes;
 
 
 // 상태 변수
@@ -106,7 +105,9 @@ export function initBattleSelect() {
         });
     });
     // 타겟 정보 버튼 스크립트 할당
-    // 얘도 좌우반전이라 역순으로 돌아야 됨
+    enemyCharBoxes.forEach((box, index) => {
+        box.dataset.unitIndex = 5 - index; 
+    });
 
     // 전투 시작 버튼 스크립트 할당
     // 전투 시작 요청 (GO 버튼)
@@ -217,6 +218,7 @@ function initDOMs_BattleSelect() {
     targetButtons = document.querySelectorAll('.right-team .circle');
 
     allyCharBoxes = document.querySelectorAll('.type-orange');
+    enemyCharBoxes = document.querySelectorAll('type-violet');
 }
 
 // 마우스가 객체 위에 올라갔을 때 실행되는 함수
@@ -376,7 +378,8 @@ function handleMouseEnter_Character(target, team) {
         charText.innerText = `[아군 정보 - 자리 번호: ${uIndex}]\n\n체력: 100/100\n흐트러짐: 30, 60\n내성 정보...`;
     } else {
         charTooltip.classList.add('tooltip-enemy');
-        charText.innerText = "[적군 정보]\n\n주요 패턴: ...\n약점: 참격";
+        // ★ 확인용 텍스트 추가
+        charText.innerText = `[적군 정보 - 자리 번호: ${uIndex}]\n\n주요 패턴: ...\n약점: 참격`;
     }
 }
 
@@ -424,13 +427,19 @@ function handleMouseLeave(event) {
 // 요소의 클래스를 분석하여 타입(색상) 반환
 function getElementType(element) {
     if (element.classList.contains('type-pink')) return 'pink'; // 핑크: 전투 패시브/서포트 패시브
+    
     if (element.classList.contains('type-blue')) return 'blue'; // 아군 스킬 슬롯
+    if (element.classList.contains('type-white')) return 'white'; // 동그란 타겟 버튼/적군 스킬 슬롯
+
     if (element.classList.contains('type-orange')) return 'orange'; // 단순 스프라이트/나중에는 버튼으로?
     if (element.classList.contains('type-violet')) return 'violet'; // ★ [추가] 적군 네모 박스용
+
     if (element.classList.contains('type-red')) return 'red'; // 스킬 패널 -> 스킬 버튼
     if (element.classList.contains('type-green')) return 'green'; // 초상화 있어야하는 곳인데 당장은 눌렀을 때 수비 나가게
+
     if (element.classList.contains('type-yellow')) return 'yellow'; // 전투 시작 버튼
-    if (element.classList.contains('type-white')) return 'white'; // 동그란 타겟 버튼용
+
+    
     return 'unknown';
 }
 
