@@ -77,25 +77,17 @@ export function initBattleSelect() {
             selectedSkillSlot = sIndex;
         });
     });
-    // 아군 정보 버튼 스크립트 할당: 인덱스만 넣음
-    allyCharBoxes.forEach((box, index) => {
-        // HTML 요소에 data-unit-index="0", "1"... 형태로 각인
-        box.dataset.unitIndex = index; 
-    });
 
     // 타겟 선택 버튼 스크립트 할당
-    targetButtons.forEach((btn, index) => {
-        // ★ [init 단계] 서버 기준 인덱스 (역순: 가장 우측이 0번) 부여
-        btn.dataset.targetIndex = 5 - index; 
-
+    targetButtons.forEach((btn) => {
         btn.addEventListener('click', (event) => {
             if (selectedUnitIndex === null) {
                 alert("먼저 스킬을 선택해주세요!");
                 return;
             }
             
-            // ★ [동작 단계] 계산할 필요 없이 자기한테 붙은 번호표만 꺼내서 씀
-            const tIndex = parseInt(event.currentTarget.dataset.targetIndex, 10);
+            // ★ [핵심 통합] 클릭한 흰색 동그라미의 부모(unit-column)에서 번호표 추출!
+            const tIndex = parseInt(event.currentTarget.closest('.unit-column').dataset.unitIndex, 10);
 
             socket.emit('target_select', {
                 type: 'targetSelect',
@@ -103,10 +95,6 @@ export function initBattleSelect() {
                 actionIndex: tIndex 
             });
         });
-    });
-    // 타겟 정보 버튼 스크립트 할당
-    enemyCharBoxes.forEach((box, index) => {
-        box.dataset.unitIndex = 5 - index; 
     });
 
     // 전투 시작 버튼 스크립트 할당
@@ -218,7 +206,7 @@ function initDOMs_BattleSelect() {
     targetButtons = document.querySelectorAll('.right-team .circle');
 
     allyCharBoxes = document.querySelectorAll('.type-orange');
-    enemyCharBoxes = document.querySelectorAll('type-violet');
+    enemyCharBoxes = document.querySelectorAll('.type-violet');
 }
 
 // 마우스가 객체 위에 올라갔을 때 실행되는 함수
@@ -356,7 +344,11 @@ function handleMouseEnter_SkillIcon(target, type) {
     // 3. [핵심] 텍스트를 skillText에 꽂아넣기!
     skillText.innerText = infoMessage;
 }
-
+// 2-1. 스킬버튼 헬퍼 함수
+function findSkillDesc()  {
+    let skillDesc = ""
+    return skillDesc;
+}
 // 3. 캐릭터 툴팁 전담 로직
 function handleMouseEnter_Character(target, team) {
     // 1. [핵심] 툴팁의 숨김 상태를 해제해서 화면에 보이게 함!
@@ -366,20 +358,15 @@ function handleMouseEnter_Character(target, team) {
     // (이게 없으면 아군 봤다가 적군 보면 클래스가 2개 겹쳐서 UI가 고장 납니다)
     charTooltip.classList.remove('tooltip-ally', 'tooltip-enemy');
 
-    // 3. 진영에 맞춰서 위치 클래스 붙이고 텍스트(innerText) 넣기
+    // ★ [핵심 통합] 아군이든 적군이든 무조건 부모(unit-column)한테 번호표 내놓으라고 함!
+    const uIndex = target.closest('.unit-column').dataset.unitIndex; 
+
     if (team === 'ally') {
         charTooltip.classList.add('tooltip-ally');
-        
-        // ★ init에서 부여한 번호표 꺼내기!
-        const uIndex = target.dataset.unitIndex; 
-
-        // 나중에는 이 uIndex를 가지고 skillDataCache[uIndex] 등을 뒤져서 진짜 데이터를 넣습니다.
-        // 일단은 매핑이 잘 되었는지 확인하기 위해 텍스트에 띄워보겠습니다.
-        charText.innerText = `[아군 정보 - 자리 번호: ${uIndex}]\n\n체력: 100/100\n흐트러짐: 30, 60\n내성 정보...`;
+        charText.innerText = `[아군 정보 - 자리 번호: ${uIndex}]\n\n...`;
     } else {
         charTooltip.classList.add('tooltip-enemy');
-        // ★ 확인용 텍스트 추가
-        charText.innerText = `[적군 정보 - 자리 번호: ${uIndex}]\n\n주요 패턴: ...\n약점: 참격`;
+        charText.innerText = `[적군 정보 - 자리 번호: ${uIndex}]\n\n...`;
     }
 }
 
