@@ -23,7 +23,7 @@ import { socket } from './network.js';
 // --------------------------------------------------------
 // DOM 요소 선언
 // --------------------------------------------------------
-let tooltip, tooltipText;
+
 let floatingTooltip, skillTooltip, charTooltip;
 let floatingText, skillText, charText;
 let interactableElements;
@@ -415,13 +415,21 @@ function handleMouseEnter_SkillIcon(target, type) {
 
 // 3. 캐릭터 툴팁 전담 로직
 function handleMouseEnter_Character(target, team) {
+    // 1. [핵심] 툴팁의 숨김 상태를 해제해서 화면에 보이게 함!
+    charTooltip.classList.remove('hidden');
+
+    // 2. [중요] 이전에 붙어있던 위치 클래스 지우기
+    // (이게 없으면 아군 봤다가 적군 보면 클래스가 2개 겹쳐서 UI가 고장 납니다)
+    charTooltip.classList.remove('tooltip-ally', 'tooltip-enemy');
+
+    // 3. 진영에 맞춰서 위치 클래스 붙이고 텍스트(innerText) 넣기
     if (team === 'ally') {
-        tooltip.classList.add('tooltip-ally');
+        charTooltip.classList.add('tooltip-ally');
         // 나중에는 target.dataset.charId 등으로 캐시를 뒤져서 정보를 가져옵니다.
-        tooltipText.innerText = "[아군 정보]\n\n체력: 100/100\n흐트러짐: 30, 60\n내성 정보...";
+        charText.innerText = "[아군 정보]\n\n체력: 100/100\n흐트러짐: 30, 60\n내성 정보...";
     } else {
-        tooltip.classList.add('tooltip-enemy');
-        tooltipText.innerText = "[적군 정보]\n\n주요 패턴: ...\n약점: 참격";
+        charTooltip.classList.add('tooltip-enemy');
+        charText.innerText = "[적군 정보]\n\n주요 패턴: ...\n약점: 참격";
     }
 }
 
