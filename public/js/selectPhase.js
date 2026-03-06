@@ -55,17 +55,19 @@ export function initBattleSelect() {
     });
 
     // 스킬 선택 버튼 스크립트 할당
-    skillButtons.forEach((btn, index) => {
-        btn.addEventListener('click', () => {
+    skillButtons.forEach((btn) => {
+        btn.addEventListener('click', (event) => {
             if (!myRole) return;
-            const uIndex = index % 6;
-            const sIndex = (index < 6) ? 1 : 0;
+            
+            const targetBtn = event.currentTarget;
+            const parentCol = targetBtn.closest('.skill-column');
+            
+            // ★ 수학 계산 필요 없이 속성에서 바로 꺼내옴!
+            const uIndex = parseInt(parentCol.dataset.unitIndex, 10);
+            const sIndex = parseInt(targetBtn.dataset.skillSlot, 10);
 
-            // UI 초기화
-            const colStart = uIndex;
-            const colEnd = uIndex + 6;
-            if (skillButtons[colStart]) skillButtons[colStart].classList.remove('used');
-            if (skillButtons[colEnd]) skillButtons[colEnd].classList.remove('used');
+            // UI 초기화: 내가 속한 기둥(캐릭터)의 다른 스킬들 불 다 끄기
+            parentCol.querySelectorAll('.type-red').forEach(b => b.classList.remove('used'));
 
             // 서버 전송
             socket.emit('action_select', {
@@ -124,29 +126,28 @@ export function initBattleSelect() {
     // 스킬 선택 하이라이트 동기화 이벤트 등록
     socket.on('ui_move_selected', (data) => {
         skillButtons.forEach(b => b.classList.remove('selected'));
-        const targetBtnIndex = (data.skillSlot === 1) ? data.userIndex : data.userIndex + 6;
-        if (skillButtons[targetBtnIndex]) skillButtons[targetBtnIndex].classList.add('selected');
+        // 쿼리셀렉터로 단번에 찾기!
+        const targetBtn = document.querySelector(`.skill-column[data-unit-index="${data.userIndex}"] .type-red[data-skill-slot="${data.skillSlot}"]`);
+        if (targetBtn) targetBtn.classList.add('selected');
     });
 
     // 타겟 매핑 확인
+    // 타겟 지정 완료 시 (노란 테두리 표시 등)
     socket.on('ui_target_locked', (data) => {
-        // data: { srcPlayer, srcIndex, targetIndex }
-
         if (data.srcPlayer === myRole) {
-            // 1. 데이터 갱신 (내 유닛 srcIndex가 targetIndex를 찜함)
             targetingData[data.srcIndex] = data.targetIndex;
 
-            // 2. 스킬 버튼 스타일 업데이트 (Used 처리)
-            const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0;
-            const btnIdx = (sSlot === 1) ? data.srcIndex : data.srcIndex + 6;
-
-            // 같은 유닛의 다른 버튼 선택 해제
-            const siblingIdx = (sSlot === 1) ? data.srcIndex + 6 : data.srcIndex;
-            if (skillButtons[siblingIdx]) skillButtons[siblingIdx].classList.remove('used', 'selected');
-
-            if (skillButtons[btnIdx]) {
-                skillButtons[btnIdx].classList.remove('selected');
-                skillButtons[btnIdx].classList.add('used');
+            // 해당 캐릭터 기둥 찾기
+            const parentCol = document.querySelector(`.skill-column[data-unit-index="${data.srcIndex}"]`);
+            
+            if (parentCol) {
+                // 내 기둥에 있는 모든 스킬 선택/사용 해제
+                parentCol.querySelectorAll('.type-red').forEach(b => b.classList.remove('used', 'selected'));
+                
+                // 선택했던 스킬에만 'used' 달아주기
+                const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0;
+                const targetBtn = parentCol.querySelector(`.type-red[data-skill-slot="${sSlot}"]`);
+                if (targetBtn) targetBtn.classList.add('used');
             }
 
             // 3. 적 유닛 'Locked' 상태 전면 재계산 (요구사항 22: 매핑 해제 시 초기화)
@@ -288,15 +289,11 @@ function handleMouseEnter_SkillIcon(target, type) {
     let infoMessage = "";
 
     if (type === 'red') {
-        // 현재 버튼이 몇 번째 버튼인지 찾기 (0~11)
-        const allRedButtons = document.querySelectorAll('.type-red');
-        const btnIndex = Array.from(allRedButtons).indexOf(target);
+        // ★ [수정] 복잡한 Indexing 싹 지우고 closest로 직관적으로 찾음!
+        const uIndex = parseInt(target.closest('.skill-column').dataset.unitIndex, 10);
+        const sIndex = parseInt(target.dataset.skillSlot, 10);
 
-        if (btnIndex >= 0 && skillDataCache.length > 0) {
-            // 유닛 인덱스(0~5), 스킬 슬롯(0 or 1) 계산
-            const uIndex = btnIndex % 6;
-            const sIndex = (btnIndex < 6) ? 1 : 0;
-
+        if (skillDataCache.length > 0) {
             const charData = skillDataCache[uIndex];
 
             if (charData && charData.skills && charData.skills[sIndex]) {

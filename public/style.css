@@ -165,19 +165,22 @@ body {
     pointer-events: auto; /* 버튼 클릭 가능하게 복구 */
 }
 
-/* 붉은색 그리드 (2줄 x 6칸) */
-.red-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 6개의 같은 너비 기둥 */
-    column-gap: 15px; /* ★ 캐릭터 간격 (초록색과 일치해야 함) */
-    row-gap: 5px;     /* 같은 캐릭터의 스킬 1, 0 사이 간격 (좁게) */
+/* style.css 에서 .red-grid와 .green-grid를 지우고 아래로 교체 */
+.skill-panel {
+    display: flex;
+    flex-direction: row; /* 이러면 요소들이 가로 배치된대 */
+    gap: 15px; /* 캐릭터 간격 (위쪽 배틀 필드 유닛들과 줄을 맞추기 편합니다) */
 }
 
-/* 초록색 그리드 (1줄 x 6칸) */
-.green-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 붉은색과 동일한 구조 */
-    column-gap: 15px; /* ★ 붉은색의 column-gap과 반드시 일치해야 줄이 맞음 */
+.skill-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; /* 기둥 안의 스킬 버튼들 사이 간격 */
+}
+
+.skill-column .type-green {
+    margin-top: 5px; /* 방어 스킬은 조금 더 떨어트려서 구분감 주기 (선택 사항) */
 }
 
 /* 버튼 스타일 미세 조정 */
