@@ -417,8 +417,10 @@ export class GameRoom {
 
             let tTarget = uTarget.targetSlot
             console.log(`${user.owner.name}의 타겟: ${uTarget.owner.name}, ${uTarget.owner.name}의 타겟: ${tTarget?.owner.name || "없음"}`);
-            if (tTarget && tTarget === user && tTarget.readySkill)
-                await this.battleManager.Clash(user, uTarget); // await this.battleManager.handleskillActions() 나중에는 스킬의 종류에 따라 합이 가능한지 따지는 로직 
+            if (tTarget && tTarget === user && tTarget.readySkill && uTarget.readySkill){
+                    await this.battleManager.Clash(user, uTarget); 
+                    console.log(`${tTarget.owner.name}, ${tTarget.readySkill.name}`);
+                }// await this.battleManager.handleskillActions() 나중에는 스킬의 종류에 따라 합이 가능한지 따지는 로직 
             else
                 await this.battleManager.Attack(user, uTarget, user.readySkill?.coinlist);
         }

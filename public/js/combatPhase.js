@@ -398,7 +398,7 @@ function removeSkillUI(bundleId) {
         // 0.3초 뒤에 DOM에서 완전히 제거
         setTimeout(() => {
             if (container) container.remove();
-        }, 300);
+        }, 30);
     }
 }
 

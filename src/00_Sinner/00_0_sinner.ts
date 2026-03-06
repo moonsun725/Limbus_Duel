@@ -180,10 +180,6 @@ export class Character {
             return this.deck[choice];
         }
     }
-    EndTurn() { 
-        // 속도 설정
-        this.speed = Math.floor(Math.random() * (this.maxSpeed - this.minSpeed + 1)) + this.minSpeed; // 턴이 끝날 때마다 속도 재설정
-    }
 
 
     // 클라이언트 전달용 데이터 변환 함수
