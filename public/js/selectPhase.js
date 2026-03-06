@@ -427,18 +427,11 @@ function handleMouseEnter_Character(target, team) {
 
 // 4. 마우스 이동 핸들러 수정 (따라다니기 해제)
 function handleMouseMove(event) {
-    // 고정형 툴팁 클래스가 하나라도 있으면 좌표를 따라가지 않음
-    if (
-        tooltip.classList.contains('tooltip-skill') ||
-        tooltip.classList.contains('tooltip-ally') ||
-        tooltip.classList.contains('tooltip-enemy')
-    ) {
-        return;
+    // floatingTooltip이 숨겨져 있지 않을 때만 마우스를 따라다니게 함
+    if (!floatingTooltip.classList.contains('hidden')) {
+        floatingTooltip.style.left = (event.pageX + 10) + 'px';
+        floatingTooltip.style.top = (event.pageY + 10) + 'px';
     }
-
-    // 마우스 커서 옆에 툴팁 표시 (기타 아이콘용)
-    tooltip.style.left = (event.pageX + 10) + 'px';
-    tooltip.style.top = (event.pageY + 10) + 'px';
 }
 
 // 마우스가 객체에서 벗어났을 때 실행되는 함수
