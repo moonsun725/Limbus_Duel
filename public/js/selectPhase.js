@@ -208,6 +208,8 @@ function initDOMs_BattleSelect() {
 
     skillButtons = document.querySelectorAll('.type-red');
     targetButtons = document.querySelectorAll('.right-team .circle');
+
+    allyCharBoxes = document.querySelectorAll('.type-orange');
 }
 
 // 마우스가 객체 위에 올라갔을 때 실행되는 함수
@@ -357,8 +359,13 @@ function handleMouseEnter_Character(target, team) {
     // 3. 진영에 맞춰서 위치 클래스 붙이고 텍스트(innerText) 넣기
     if (team === 'ally') {
         charTooltip.classList.add('tooltip-ally');
-        // 나중에는 target.dataset.charId 등으로 캐시를 뒤져서 정보를 가져옵니다.
-        charText.innerText = "[아군 정보]\n\n체력: 100/100\n흐트러짐: 30, 60\n내성 정보...";
+        
+        // ★ init에서 부여한 번호표 꺼내기!
+        const uIndex = target.dataset.unitIndex; 
+
+        // 나중에는 이 uIndex를 가지고 skillDataCache[uIndex] 등을 뒤져서 진짜 데이터를 넣습니다.
+        // 일단은 매핑이 잘 되었는지 확인하기 위해 텍스트에 띄워보겠습니다.
+        charText.innerText = `[아군 정보 - 자리 번호: ${uIndex}]\n\n체력: 100/100\n흐트러짐: 30, 60\n내성 정보...`;
     } else {
         charTooltip.classList.add('tooltip-enemy');
         charText.innerText = "[적군 정보]\n\n주요 패턴: ...\n약점: 참격";
