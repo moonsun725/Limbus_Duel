@@ -85,14 +85,14 @@ export function initBattleSelect() {
                 alert("먼저 스킬을 선택해주세요!");
                 return;
             }
-            
+
             // ★ [핵심 통합] 클릭한 흰색 동그라미의 부모(unit-column)에서 번호표 추출!
             const tIndex = parseInt(event.currentTarget.closest('.unit-column').dataset.unitIndex, 10);
 
             socket.emit('target_select', {
                 type: 'targetSelect',
                 userIndex: selectedUnitIndex,
-                actionIndex: tIndex 
+                actionIndex: tIndex
             });
         });
     });
@@ -155,8 +155,9 @@ export function initBattleSelect() {
             enemyUnits.forEach(el => el.classList.remove('locked'));
 
             Object.values(targetingData).forEach(tIdx => {
-                // ★ [수정] 번호표(data-target-index)가 tIdx랑 똑같은 요소를 찾아라!
-                const targetEl = document.querySelector(`.right-team .circle[data-target-index="${tIdx}"]`);
+                // ★ [수정] 부모(unit-column)의 번호표를 찾아서, 그 안에 있는 동그라미(.circle)를 선택!
+                const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${tIdx}"] .circle`);
+
                 if (targetEl) targetEl.classList.add('locked');
             });
 
@@ -232,7 +233,7 @@ function handleMouseEnter(event) {
 
         // 적군 캐릭터
         case 'white':
-        case 'violet': 
+        case 'violet':
             handleMouseEnter_Character(target, 'enemy');
             break;
 
@@ -250,7 +251,7 @@ function handleMouseEnter(event) {
 function handleClick(event) {
     const target = event.currentTarget;
     const type = getElementType(target);
-    
+
     console.log(`Clicked: ${type}`, target);
 
     switch (type) {
@@ -269,7 +270,7 @@ function handleClick(event) {
             isSkillTooltipLocked = false;
             skillTooltip.classList.add('hidden');
             console.log("🔓 스킬 툴팁 잠금 OFF!");
-            
+
             // (여기에 캐릭터 선택 등 다른 버튼 처리 로직 추가)
             break;
     }
@@ -279,7 +280,7 @@ function handleClick(event) {
 function handleMouseEnter_SkillIcon(target, type) {
     // 1. [핵심] 스킬 툴팁의 숨김 상태를 해제해서 화면에 보이게 함!
     skillTooltip.classList.remove('hidden');
-    
+
     // 2. CSS 클래스 부여 (상단 중앙 고정)
     // (이미 HTML에 클래스가 하드코딩 되어있다면 이 줄은 없어도 무방합니다)
     skillTooltip.classList.add('tooltip-skill');
@@ -326,9 +327,9 @@ function handleMouseEnter_SkillIcon(target, type) {
             const targetEnemyIdx = targetingData[uIndex]; // 서버 인덱스
 
             if (targetEnemyIdx !== undefined) {
-                // ★ [수정] 번호표로 바로 찾아서 클래스 부여
-                const targetEl = document.querySelector(`.right-team .circle[data-target-index="${targetEnemyIdx}"]`);
-                
+                // ★ [수정] 똑같이 부모를 거쳐서 찾도록 변경!
+                const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${targetEnemyIdx}"] .circle`);
+
                 if (targetEl) {
                     targetEl.classList.add('hover-targeted');
                 }
@@ -345,7 +346,7 @@ function handleMouseEnter_SkillIcon(target, type) {
     skillText.innerText = infoMessage;
 }
 // 2-1. 스킬버튼 헬퍼 함수
-function findSkillDesc()  {
+function findSkillDesc() {
     let skillDesc = ""
     return skillDesc;
 }
@@ -359,7 +360,7 @@ function handleMouseEnter_Character(target, team) {
     charTooltip.classList.remove('tooltip-ally', 'tooltip-enemy');
 
     // ★ [핵심 통합] 아군이든 적군이든 무조건 부모(unit-column)한테 번호표 내놓으라고 함!
-    const uIndex = target.closest('.unit-column').dataset.unitIndex; 
+    const uIndex = target.closest('.unit-column').dataset.unitIndex;
 
     if (team === 'ally') {
         charTooltip.classList.add('tooltip-ally');
@@ -387,6 +388,8 @@ function handleMouseLeave(event) {
 
     switch (type) {
         case 'red':
+            const enemyCircles = document.querySelectorAll('.right-team .circle');
+            enemyCircles.forEach(circle => circle.classList.remove('hover-targeted'));
         case 'blue':
         case 'green':
             // ★ 스킬 툴팁: 잠겨있으면 숨기지 않음!
@@ -414,7 +417,7 @@ function handleMouseLeave(event) {
 // 요소의 클래스를 분석하여 타입(색상) 반환
 function getElementType(element) {
     if (element.classList.contains('type-pink')) return 'pink'; // 핑크: 전투 패시브/서포트 패시브
-    
+
     if (element.classList.contains('type-blue')) return 'blue'; // 아군 스킬 슬롯
     if (element.classList.contains('type-white')) return 'white'; // 동그란 타겟 버튼/적군 스킬 슬롯
 
@@ -426,7 +429,7 @@ function getElementType(element) {
 
     if (element.classList.contains('type-yellow')) return 'yellow'; // 전투 시작 버튼
 
-    
+
     return 'unknown';
 }
 
