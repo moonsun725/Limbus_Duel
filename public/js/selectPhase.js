@@ -85,17 +85,23 @@ export function initBattleSelect() {
     });
 
     // 타겟 선택 버튼 스크립트 할당
-    // 속도가 빠른 놈은 뒤에 위치하니까 얘는 또 역순으로 돌아야 돼
     targetButtons.forEach((btn, index) => {
-        btn.addEventListener('click', () => {
+        // ★ [init 단계] 서버 기준 인덱스 (역순: 가장 우측이 0번) 부여
+        btn.dataset.targetIndex = 5 - index; 
+
+        btn.addEventListener('click', (event) => {
             if (selectedUnitIndex === null) {
                 alert("먼저 스킬을 선택해주세요!");
                 return;
             }
+            
+            // ★ [동작 단계] 계산할 필요 없이 자기한테 붙은 번호표만 꺼내서 씀
+            const tIndex = parseInt(event.currentTarget.dataset.targetIndex, 10);
+
             socket.emit('target_select', {
                 type: 'targetSelect',
                 userIndex: selectedUnitIndex,
-                actionIndex: index
+                actionIndex: tIndex 
             });
         });
     });
@@ -159,9 +165,10 @@ export function initBattleSelect() {
             const enemyUnits = document.querySelectorAll('.right-team .circle');
             enemyUnits.forEach(el => el.classList.remove('locked'));
 
-            // 현재 targetingData에 등록된 모든 타겟들에게 locked 부여
             Object.values(targetingData).forEach(tIdx => {
-                if (enemyUnits[tIdx]) enemyUnits[tIdx].classList.add('locked');
+                // ★ [수정] 번호표(data-target-index)가 tIdx랑 똑같은 요소를 찾아라!
+                const targetEl = document.querySelector(`.right-team .circle[data-target-index="${tIdx}"]`);
+                if (targetEl) targetEl.classList.add('locked');
             });
 
             // 변수 초기화
@@ -326,13 +333,14 @@ function handleMouseEnter_SkillIcon(target, type) {
         // 이 버튼이 'used'(확정된 스킬) 상태라면, 누구를 때리는지 적에게 표시
         if (target.classList.contains('used')) {
             const uIndex = btnIndex % 6;
-            const targetEnemyIdx = targetingData[uIndex];
+            const targetEnemyIdx = targetingData[uIndex]; // 서버 인덱스
 
             if (targetEnemyIdx !== undefined) {
-                const enemyUnits = document.querySelectorAll('.sidebar.right .circle'); // 오른쪽 팀 캐릭터들
-                // 적 유닛에게 'hover-targeted' 효과 부여
-                if (enemyUnits[targetEnemyIdx]) {
-                    enemyUnits[targetEnemyIdx].classList.add('hover-targeted');
+                // ★ [수정] 번호표로 바로 찾아서 클래스 부여
+                const targetEl = document.querySelector(`.right-team .circle[data-target-index="${targetEnemyIdx}"]`);
+                
+                if (targetEl) {
+                    targetEl.classList.add('hover-targeted');
                 }
             }
         }
