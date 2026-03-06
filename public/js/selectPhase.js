@@ -167,7 +167,7 @@ export function initBattleSelect() {
 
     document.addEventListener('click', (event) => {
         // 1. 내가 클릭한 곳이 상호작용 가능한 요소(버튼)인가?
-        const isInteractable = event.target.closest('.type-red, .type-blue, .type-green, .type-orange, .type-white, .type-yellow');
+        const isInteractable = event.target.closest('.type-red, .type-blue, .type-green, .type-orange, .type-white, .type-yellow, .type-violet');
 
         // 2. 내가 클릭한 곳이 툴팁 그 자체인가? (툴팁 안의 텍스트를 드래그할 수도 있으니)
         const isTooltip = event.target.closest('#tooltip-skill');
@@ -302,6 +302,7 @@ function handleMouseEnter(event) {
 
         // 적군 캐릭터
         case 'white':
+        case 'violet': 
             handleMouseEnter_Character(target, 'enemy');
             break;
 
@@ -457,10 +458,13 @@ function handleMouseLeave(event) {
                 skillTooltip.classList.add('hidden');
             }
             break;
+
         case 'orange':
         case 'white':
+        case 'violet':
             charTooltip.classList.add('hidden');
             break;
+
         default:
             floatingTooltip.classList.add('hidden');
             break;
@@ -476,9 +480,11 @@ function getElementType(element) {
     if (element.classList.contains('type-pink')) return 'pink'; // 핑크: 전투 패시브/서포트 패시브
     if (element.classList.contains('type-blue')) return 'blue'; // 아군 스킬 슬롯
     if (element.classList.contains('type-orange')) return 'orange'; // 단순 스프라이트/나중에는 버튼으로?
+    if (element.classList.contains('type-violet')) return 'violet'; // ★ [추가] 적군 네모 박스용
     if (element.classList.contains('type-red')) return 'red'; // 스킬 패널 -> 스킬 버튼
     if (element.classList.contains('type-green')) return 'green'; // 초상화 있어야하는 곳인데 당장은 눌렀을 때 수비 나가게
     if (element.classList.contains('type-yellow')) return 'yellow'; // 전투 시작 버튼
+    if (element.classList.contains('type-white')) return 'white'; // 동그란 타겟 버튼용
     return 'unknown';
 }
 
