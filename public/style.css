@@ -204,7 +204,7 @@ body {
 
 
 /* === 툴팁 === */
-#info-tooltip {
+.tooltip {
     position: absolute;
     background: rgba(0,0,0,0.9);
     color: #fff;
@@ -216,14 +216,13 @@ body {
     box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
 }
 .hidden { display: none; }
-/* ㄴ> 일단은 구버전 코드*/
 
 .tooltip-skill {
     position: fixed !important;
     top: 5% !important; /* 위에서 살짝 띄움 */
-    left: 50% !important;
-    transform: translateX(-90%); /* 가로 중앙 정렬 */
-    width: 400px; /* 스킬 정보는 넓게 */
+    left: 36% !important;
+    transform: translateX(-50%); /* 가로 중앙 정렬 */
+    width: 400px; /* 스킬 정보는 넓게 */    
 
     background: rgba(0,0,0,0.9);
     color: #fff;
@@ -236,8 +235,8 @@ body {
 /* 2. 아군 캐릭터 상세 (좌측 중앙) */
 .tooltip-ally {
     position: fixed !important;
-    top: 50% !important;
-    left: 2% !important; /* 왼쪽 끝에 붙임 */
+    top: 35% !important;
+    left: 5% !important; /* 왼쪽 끝에 붙임 */
     transform: translateY(-50%); /* 세로 중앙 정렬 */
     width: 300px;
 
@@ -252,8 +251,8 @@ body {
 /* 3. 적군 캐릭터 상세 (우측 중앙) */
 .tooltip-enemy {
     position: fixed !important;
-    top: 50% !important;
-    right: 2% !important; /* 오른쪽 끝에 붙임 */
+    top: 35% !important;
+    right: 5% !important; /* 오른쪽 끝에 붙임 */
     left: auto !important; /* 기존에 JS로 들어갔을 수 있는 left 속성 무효화 */
     transform: translateY(-50%);
     width: 300px;
