@@ -30,6 +30,7 @@ let interactableElements;
 let buttons, skillButtons, targetButtons, goButton;
 let phaseSelect, phaseBattle;
 let myteamInfo, targetInfo;
+let allyCharBoxes;
 
 
 // 상태 변수
@@ -77,7 +78,11 @@ export function initBattleSelect() {
             selectedSkillSlot = sIndex;
         });
     });
-    // 아군 정보 버튼 스크립트 할당
+    // 아군 정보 버튼 스크립트 할당: 인덱스만 넣음
+    allyCharBoxes.forEach((box, index) => {
+        // HTML 요소에 data-unit-index="0", "1"... 형태로 각인
+        box.dataset.unitIndex = index; 
+    });
 
     // 타겟 선택 버튼 스크립트 할당
     // 속도가 빠른 놈은 뒤에 위치하니까 얘는 또 역순으로 돌아야 돼
