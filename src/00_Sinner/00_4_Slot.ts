@@ -11,7 +11,7 @@ export class BattleSlot {
     public id: number;
     public speed: number; 
     public deckIndex?: 0|1; // 스킬패널 번호: 0 or 1
-    readySkill?: Readonly<Skill> | null = null; // 재할당은 가능하지만 내부 속성은 변경 불가하게 함.
+    readySkill: Readonly<Skill> | null = null; // 재할당은 가능하지만 내부 속성은 변경 불가하게 함.
     targetSlot?: BattleSlot | null;
 
     constructor(owner: Character) {

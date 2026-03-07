@@ -199,32 +199,32 @@ export class Character {
             resistP: { ...this.Stats.resistP }, 
             resistS: { ...this.Stats.resistS },
 
-            // [핵심] 객체 배열은 반드시 .map()을 통해 새로 만들어야 함
-            skills: this.deck.map(skill => {
-                if (!skill) return null; // 빈 슬롯 방어
+           // 3. 하단 스킬 패널 (deck)
+            // ★ 헬퍼 함수 덕분에 한 줄로 끝!
+            skills: this.deck.map(skill => this.serializeSkill(skill)),
 
-                return {
-                    // skill 객체 자체를 넣지 말고, skill.name 처럼 값을 꺼내 넣으세요.
-                    name: skill.name,
-                    color: skill.color, // (만약 color가 객체라면 skill.color.code 처럼 문자열로 변환 필요)
-                    desc: skill.desc,
-                    basePower: skill.BasePower,
+            // 4. 상단 장착 슬롯 (Slots)
+            // ★ Slots 배열 전체를 돌면서 readySkill을 빼와서 헬퍼 함수에 던짐!
+            slots: this.Slots.map(slot => this.serializeSkill(slot.readySkill))
+        };
+    }
 
-                    // 코인 정보도 마찬가지로 필요한 값만 추출
-                    coinPower: skill.coinlist[0]?.CoinPower || 0,
-                    coinNum: skill.coinlist.length,
+    // ★ [추가] 스킬 데이터를 클라이언트용으로 포장해주는 헬퍼 함수 (DRY 원칙 적용!)
+    private serializeSkill(skill: Skill | null ) {
+        if (!skill) return null; // 스킬이 없으면 null 반환
 
-                    // [수정] 코인 설명 추출 로직
-                    // 데이터 구조: coindescs: [ { "desc": "진동 1 부여" } ]
-                    coinDescs: skill.coinlist.map(coin => {
-                        // 1. coindescs가 있는지 확인
-                        if (coin.coindescs && Array.isArray(coin.coindescs)) {
-                            // 2. 내부 객체들을 순회하며 'desc' 텍스트만 추출해서 합침
-                            return coin.coindescs.map((d: any) => d.desc).join(', ');
-                        }
-                        return ""; // 없으면 빈 문자열
-                    })
-                };
+        return {
+            name: skill.name,
+            color: skill.color, 
+            desc: skill.desc,
+            basePower: skill.BasePower,
+            coinPower: skill.coinlist[0]?.CoinPower || 0,
+            coinNum: skill.coinlist.length,
+            coinDescs: skill.coinlist.map(coin => {
+                if (coin.coindescs && Array.isArray(coin.coindescs)) {
+                    return coin.coindescs.map((d: any) => d.desc).join(', ');
+                }
+                return "";
             })
         };
     }

@@ -155,6 +155,17 @@ export function initBattleSelect() {
         if (data.srcPlayer === myRole) {
             targetingData[data.srcIndex] = data.targetIndex;
 
+            const charData = allyTeamInfo[data.srcIndex];
+            const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0; // 선택했던 스킬 번호
+            
+            if (charData && charData.skills) {
+                // 아직 slots 배열이 없다면 빈 배열로 만들어 줌
+                if (!charData.slots) charData.slots = []; 
+                
+                // 하단 스킬(skills)의 데이터를 상단 장착 슬롯(slots)으로 그대로 복사!
+                charData.slots[0] = charData.skills[sSlot]; // 하드코딩인거 마음에 정말 안 듦
+            }
+
             // 해당 캐릭터 기둥 찾기
             const parentCol = document.querySelector(`.skill-column[data-unit-index="${data.srcIndex}"]`);
 
@@ -163,7 +174,7 @@ export function initBattleSelect() {
                 parentCol.querySelectorAll('.type-red').forEach(b => b.classList.remove('used', 'selected'));
 
                 // 선택했던 스킬에만 'used' 달아주기
-                const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0;
+                // const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0;
                 const targetBtn = parentCol.querySelector(`.type-red[data-skill-slot="${sSlot}"]`);
                 if (targetBtn) targetBtn.classList.add('used');
             }
@@ -321,8 +332,16 @@ function handleMouseEnter_SkillIcon(target, type) {
     let infoMessage = "";
 
     if (type === 'red') {
-        infoMessage = handleSkillText(target);
-        // 이 버튼이 'used'(확정된 스킬) 상태라면, 누구를 때리는지 적에게 표시
+        // [빨간 버튼] 하단 스킬 패널에서 데이터 찾기
+        const uIndex = parseInt(target.closest('.skill-column').dataset.unitIndex, 10);
+        const sIndex = parseInt(target.dataset.skillSlot, 10);
+        const charData = allyTeamInfo[uIndex];
+
+        // ★ 찾은 데이터를 텍스트 조립기에 던짐!
+        const skillData = charData ? charData.skills[sIndex] : null;
+        infoMessage = buildSkillText(skillData);
+
+        // 타겟팅 선 UI 로직 (uIndex 에러 해결)
         if (target.classList.contains('used')) {
             const targetEnemyIdx = targetingData[uIndex];
             if (targetEnemyIdx !== undefined) {
@@ -334,49 +353,39 @@ function handleMouseEnter_SkillIcon(target, type) {
         }
 
     } else if (type === 'blue') {
-        infoMessage = "아군 스킬 정보 (데이터 연결 필요)";
+        // [파란 버튼] 상단 캐릭터 슬롯에서 데이터 찾기
+        const uIndex = parseInt(target.closest('.unit-column').dataset.unitIndex, 10);
+        const charData = allyTeamInfo[uIndex];
+
+        // ★ 찾은 데이터(slots)를 텍스트 조립기에 똑같이 던짐!
+        const skillData = (charData && charData.slots) ? charData.slots[0] : null;
+        infoMessage = skillData ? buildSkillText(skillData) : "장착된 스킬 없음";
+
     } else if (type === 'green') {
         infoMessage = "수비 스킬 정보";
     }
 
     skillText.innerText = infoMessage;
 }
+// 헬퍼 함수: 순수 텍스트 조립기 (데이터를 주면 글자로 바꿔서 리턴만 함)
+// 빨간 버튼이든 파란 버튼이든 '스킬 데이터'만 던져주면 다 처리해줍니다.
+function buildSkillText(skill) {
+    if (!skill) return "스킬 정보 없음 (데이터 누락)";
 
-function handleSkillText(target) {
-    let infoMessage = "아군 스킬 정보 (데이터 연결 필요)";
-    // ★ [수정] 복잡한 Indexing 싹 지우고 closest로 직관적으로 찾음!
-    const uIndex = parseInt(target.closest('.skill-column').dataset.unitIndex, 10);
-    const sIndex = parseInt(target.dataset.skillSlot, 10);
+    let infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
 
-    // ★ 아군 스킬이므로 아군 캐시에서 꺼냄
-    const charData = allyTeamInfo[uIndex];
-
-    if (charData && charData.skills && charData.skills[sIndex]) {
-        const skill = charData.skills[sIndex];
-
-        // toData() 에서 보낸 변수명(basePower, coinPower 등) 그대로 사용
-        infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
-
-        if (skill.coinPower) {
-            infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
-        }
-        infoMessage += `\n\n${skill.desc || ''}`;
-
-        if (skill.coinDescs && skill.coinDescs.length > 0) {
-            skill.coinDescs.forEach((desc, idx) => {
-                // 코인 효과 설명 출력
-                infoMessage += `\n🪙${idx + 1}: ${desc}`;
-            });
-        }
-    } else {
-        infoMessage = "스킬 정보 없음 (데이터 누락)";
+    if (skill.coinPower) {
+        infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
     }
-    return infoMessage;
-}
+    infoMessage += `\n\n${skill.desc || ''}`;
 
-function handleAllySlot() {
-    let infoMessage = "아군 스킬 정보 (데이터 연결 필요)";
+    if (skill.coinDescs && skill.coinDescs.length > 0) {
+        skill.coinDescs.forEach((desc, idx) => {
+            infoMessage += `\n🪙${idx + 1}: ${desc}`;
+        });
+    }
     
+    return infoMessage;
 }
 
 // 3. 캐릭터 툴팁 전담 로직
