@@ -293,40 +293,35 @@ function handleMouseEnter_SkillIcon(target, type) {
         const uIndex = parseInt(target.closest('.skill-column').dataset.unitIndex, 10);
         const sIndex = parseInt(target.dataset.skillSlot, 10);
 
-        if (skillDataCache.length > 0) {
-            const charData = skillDataCache[uIndex];
+        // ★ 아군 스킬이므로 아군 캐시에서 꺼냄
+        const charData = allyDataCache[uIndex];
 
-            if (charData && charData.skills && charData.skills[sIndex]) {
-                const skill = charData.skills[sIndex];
+        if (charData && charData.skills && charData.skills[sIndex]) {
+            const skill = charData.skills[sIndex];
 
-                infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
-                if (skill.coinPower) infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
+            // toData() 에서 보낸 변수명(basePower, coinPower 등) 그대로 사용
+            infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
+            
+            if (skill.coinPower) {
+                infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
+            }
+            infoMessage += `\n\n${skill.desc || ''}`;
 
-                infoMessage += `\n\n${skill.desc || ''}`;
-
-                if (skill.coinDescs) {
-                    skill.coinDescs.forEach((desc, idx) => {
-                        if (desc) infoMessage += `\n🪙${idx + 1}: ${desc}`;
-                        else infoMessage += `\n🪙${idx + 1}`;
-                    });
-                }
-            } else {
-                console.warn("Skill data is missing for this slot!");
-                infoMessage = "스킬 정보 없음 (데이터 누락)";
+            if (skill.coinDescs && skill.coinDescs.length > 0) {
+                skill.coinDescs.forEach((desc, idx) => {
+                    // 코인 효과 설명 출력
+                    infoMessage += `\n🪙${idx + 1}: ${desc}`; 
+                });
             }
         } else {
-            infoMessage = "데이터 로딩 중...";
+            infoMessage = "스킬 정보 없음 (데이터 누락)";
         }
 
         // 이 버튼이 'used'(확정된 스킬) 상태라면, 누구를 때리는지 적에게 표시
         if (target.classList.contains('used')) {
-            const uIndex = btnIndex % 6;
-            const targetEnemyIdx = targetingData[uIndex]; // 서버 인덱스
-
+            const targetEnemyIdx = targetingData[uIndex]; 
             if (targetEnemyIdx !== undefined) {
-                // ★ [수정] 똑같이 부모를 거쳐서 찾도록 변경!
                 const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${targetEnemyIdx}"] .circle`);
-
                 if (targetEl) {
                     targetEl.classList.add('hover-targeted');
                 }
