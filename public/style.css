@@ -117,12 +117,12 @@ body {
     justify-content: center;
     align-items: center;
     height: 100%;
-    gap: 80px; /* 양 팀 사이 간격 (유닛이 많아져서 간격 조금 조정) */
+    gap: 150px; /* 양 팀 사이 간격 (유닛이 많아져서 간격 조금 조정) */
 }
 
 .team-container {
     display: flex;
-    gap: 8px; /* 같은 팀 유닛 사이 간격 */
+    gap: 12px; /* 같은 팀 유닛 사이 간격 */
 }
 
 /* 유닛 기둥 스타일 */
@@ -131,13 +131,16 @@ body {
     flex-direction: column;
     width: 60px;
 }
-.unit-column .box, .unit-column .circle {
-    width: 60px; height: 90px; /* 길쭉한 직사각형 */
+.unit-column .box {
+    width: 60px; height: 120px; /* 길쭉한 직사각형 */
+}
+.unit-column .circle {
+    width: 60px; height: 60px;
 }
 
 /* 지그재그 (Translate 값 증가로 더 역동적으로) */
-.unit-column.up { transform: translateY(-40px); }
-.unit-column.down { transform: translateY(40px); }
+.unit-column.up { transform: translateY(-80px); }
+.unit-column.down { transform: translateY(50px); }
 
 .bottom-layer {
     position: absolute; 

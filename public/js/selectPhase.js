@@ -29,6 +29,7 @@ let floatingText, skillText, charText;
 let interactableElements;
 let buttons, skillButtons, targetButtons, goButton;
 let phaseSelect, phaseBattle;
+let allySlots;
 
 // 상태 변수
 let myRole = null;
@@ -38,6 +39,7 @@ let selectedUnitIndex = null;
 let selectedSkillSlot = null;
 let targetingData = {};
 let isSkillTooltipLocked = false;
+let isCharTooltipLocked = false;
 
 // 로컬라이즈?
 const translateP = {
@@ -189,12 +191,18 @@ export function initBattleSelect() {
         const isInteractable = event.target.closest('.type-red, .type-blue, .type-green, .type-orange, .type-white, .type-yellow, .type-violet');
 
         // 2. 내가 클릭한 곳이 툴팁 그 자체인가? (툴팁 안의 텍스트를 드래그할 수도 있으니)
-        const isTooltip = event.target.closest('#tooltip-skill');
+        const isTooltipS = event.target.closest('#tooltip-skill');
+        const isTooltipC = event.target.closest('#tooltip-char');
+
 
         // 버튼도 아니고 툴팁도 아닌 완전 엉뚱한 곳(배경)을 눌렀다면!
-        if (!isInteractable && !isTooltip) {
+        if (!isInteractable && !isTooltipS) {
             isSkillTooltipLocked = false;
             skillTooltip.classList.add('hidden');
+        }
+        if (!isInteractable && !isTooltipC) {
+            isCharTooltipLocked = false;
+            charTooltip.classList.add('hidden');
         }
     });
 }
@@ -222,6 +230,9 @@ function initDOMs_BattleSelect() {
 
     skillButtons = document.querySelectorAll('.type-red');
     targetButtons = document.querySelectorAll('.right-team .circle');
+
+    allySlots = document.querySelectorAll('.left-team .circle');
+
 }
 
 // 마우스가 객체 위에 올라갔을 때 실행되는 함수
@@ -247,6 +258,7 @@ function handleMouseEnter(event) {
 
         // 적군 캐릭터
         case 'white':
+            break;
         case 'violet':
             handleMouseEnter_Character(target, 'enemy');
             break;
@@ -278,12 +290,19 @@ function handleClick(event) {
             // (여기에 기존 스킬 선택 처리 로직 작성)
             // selectSkill(target);
             break;
-
+        case 'orange':
+        case 'violet':
+            isCharTooltipLocked = true;
+            console.log("🔒 캐릭터 툴팁 잠금 ON!");
+            break;
         // 그 외 모든 곳 클릭 시 -> 잠금 OFF    
         default:
             isSkillTooltipLocked = false;
+            isCharTooltipLocked = false;
             skillTooltip.classList.add('hidden');
+            charTooltip.classList.add('hidden');
             console.log("🔓 스킬 툴팁 잠금 OFF!");
+            console.log("🔓 캐릭터 툴팁 잠금 OFF!");
 
             // (여기에 캐릭터 선택 등 다른 버튼 처리 로직 추가)
             break;
@@ -302,34 +321,7 @@ function handleMouseEnter_SkillIcon(target, type) {
     let infoMessage = "";
 
     if (type === 'red') {
-        // ★ [수정] 복잡한 Indexing 싹 지우고 closest로 직관적으로 찾음!
-        const uIndex = parseInt(target.closest('.skill-column').dataset.unitIndex, 10);
-        const sIndex = parseInt(target.dataset.skillSlot, 10);
-
-        // ★ 아군 스킬이므로 아군 캐시에서 꺼냄
-        const charData = allyTeamInfo[uIndex];
-
-        if (charData && charData.skills && charData.skills[sIndex]) {
-            const skill = charData.skills[sIndex];
-
-            // toData() 에서 보낸 변수명(basePower, coinPower 등) 그대로 사용
-            infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
-
-            if (skill.coinPower) {
-                infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
-            }
-            infoMessage += `\n\n${skill.desc || ''}`;
-
-            if (skill.coinDescs && skill.coinDescs.length > 0) {
-                skill.coinDescs.forEach((desc, idx) => {
-                    // 코인 효과 설명 출력
-                    infoMessage += `\n🪙${idx + 1}: ${desc}`;
-                });
-            }
-        } else {
-            infoMessage = "스킬 정보 없음 (데이터 누락)";
-        }
-
+        infoMessage = handleSkillText(target);
         // 이 버튼이 'used'(확정된 스킬) 상태라면, 누구를 때리는지 적에게 표시
         if (target.classList.contains('used')) {
             const targetEnemyIdx = targetingData[uIndex];
@@ -348,6 +340,43 @@ function handleMouseEnter_SkillIcon(target, type) {
     }
 
     skillText.innerText = infoMessage;
+}
+
+function handleSkillText(target) {
+    let infoMessage = "아군 스킬 정보 (데이터 연결 필요)";
+    // ★ [수정] 복잡한 Indexing 싹 지우고 closest로 직관적으로 찾음!
+    const uIndex = parseInt(target.closest('.skill-column').dataset.unitIndex, 10);
+    const sIndex = parseInt(target.dataset.skillSlot, 10);
+
+    // ★ 아군 스킬이므로 아군 캐시에서 꺼냄
+    const charData = allyTeamInfo[uIndex];
+
+    if (charData && charData.skills && charData.skills[sIndex]) {
+        const skill = charData.skills[sIndex];
+
+        // toData() 에서 보낸 변수명(basePower, coinPower 등) 그대로 사용
+        infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
+
+        if (skill.coinPower) {
+            infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
+        }
+        infoMessage += `\n\n${skill.desc || ''}`;
+
+        if (skill.coinDescs && skill.coinDescs.length > 0) {
+            skill.coinDescs.forEach((desc, idx) => {
+                // 코인 효과 설명 출력
+                infoMessage += `\n🪙${idx + 1}: ${desc}`;
+            });
+        }
+    } else {
+        infoMessage = "스킬 정보 없음 (데이터 누락)";
+    }
+    return infoMessage;
+}
+
+function handleAllySlot() {
+    let infoMessage = "아군 스킬 정보 (데이터 연결 필요)";
+    
 }
 
 // 3. 캐릭터 툴팁 전담 로직
@@ -376,7 +405,7 @@ function handleMouseEnter_Character(target, team) {
         charData = enemyTeamInfo[uIndex]; // ★ 적군 캐시에서 꺼냄
 
         if (charData) {
-           charTextSetting(charData);
+            charTextSetting(charData);
         } else {
             charText.innerText = `[적군 정보 - 자리 번호: ${uIndex}]\n\n...`;
         }
@@ -386,27 +415,27 @@ function handleMouseEnter_Character(target, team) {
 function charTextSetting(charData) {
     const staggerText = charData.stagger.length > 0 ? charData.stagger.join(', ') : "없음";
 
-        // 2. 물리 내성 번역 및 조립
-        let resistPText = "";
-        if (charData.resistP) {
-            resistPText = Object.entries(charData.resistP)
-                // ★ 딕셔너리를 통해 영문 키값을 한국어로 바꿉니다. (사전에 없으면 원래 영문 출력)
-                .map(([key, value]) => `${translateP[key] || key}: ${value}`)
-                .join(' / '); 
-        }
+    // 2. 물리 내성 번역 및 조립
+    let resistPText = "";
+    if (charData.resistP) {
+        resistPText = Object.entries(charData.resistP)
+            // ★ 딕셔너리를 통해 영문 키값을 한국어로 바꿉니다. (사전에 없으면 원래 영문 출력)
+            .map(([key, value]) => `${translateP[key] || key}: ${value}`)
+            .join(' / ');
+    }
 
-        // 3. 속성 내성 번역 및 조립
-        let resistSText = "";
-        if (charData.resistS) {
-            resistSText = Object.entries(charData.resistS)
-                // ★ 속성 내성도 마찬가지로 번역 딕셔너리 통과
-                .map(([key, value]) => `${translateS[key] || key}: ${value}`)
-                .join(' / ');
-        }
+    // 3. 속성 내성 번역 및 조립
+    let resistSText = "";
+    if (charData.resistS) {
+        resistSText = Object.entries(charData.resistS)
+            // ★ 속성 내성도 마찬가지로 번역 딕셔너리 통과
+            .map(([key, value]) => `${translateS[key] || key}: ${value}`)
+            .join(' / ');
+    }
 
-        // 4. 최종 텍스트 조립
-        charText.innerText = 
-`[${charData.name}] (LV. ${charData.lv})
+    // 4. 최종 텍스트 조립
+    charText.innerText =
+        `[${charData.name}] (LV. ${charData.lv})
 
 체력: ${charData.hp} / ${charData.maxHp}
 흐트러짐 구간: ${staggerText}
@@ -450,7 +479,9 @@ function handleMouseLeave(event) {
         case 'orange':
         case 'white':
         case 'violet':
-            charTooltip.classList.add('hidden');
+            if (!isCharTooltipLocked) {
+                charTooltip.classList.add('hidden');
+            }
             break;
 
         default:
