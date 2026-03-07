@@ -72,7 +72,7 @@ export class GameRoom {
                 io.to(this.roomId).emit('anim_attack_start', {
                     attacker: {
                         role: atkRole,
-                        id: attacker.id,      // 식별용
+                        id: attacker.id,      // 이거 캐릭터 ID보다 player.party.getIndex하는게 나아
                         name: attacker.name,  // UI 표시용
                         skill: {
                             name: skill.name,
@@ -143,6 +143,7 @@ export class GameRoom {
                 io.to(this.roomId).emit('individual_coin_result', {
                     role: role,
                     isHead: isHeads
+                    // 이거 나중에 코인위력이 갱신될 수 있어서 봐야됨
                 });
 
                 // 원래는 요게 시간이 상수로 딱 정해져있고 코인개수에 따른 함수식으로 각 코인별 딜레이가 달라지긴 하는 것 같은데 잘 모르겠네
@@ -169,6 +170,7 @@ export class GameRoom {
                 io.to(this.roomId).emit('individual_coin_result', {
                     role: role,
                     isHead: isHeads
+                    // 여기도 코인위력 생각
                 });
 
                 await sleep(1000); // 연출 딜레이: 사실 coinToss랑 똑같지만 콜백 따로쓰기
@@ -417,9 +419,8 @@ export class GameRoom {
 
             let tTarget = uTarget.targetSlot
             console.log(`${user.owner.name}의 타겟: ${uTarget.owner.name}, ${uTarget.owner.name}의 타겟: ${tTarget?.owner.name || "없음"}`);
-            if (tTarget && tTarget === user && tTarget.readySkill && uTarget.readySkill){
+            if (tTarget && tTarget === user && tTarget.readySkill && uTarget.readySkill) {
                     await this.battleManager.Clash(user, uTarget); 
-                    console.log(`${tTarget.owner.name}, ${tTarget.readySkill.name}`);
                 }// await this.battleManager.handleskillActions() 나중에는 스킬의 종류에 따라 합이 가능한지 따지는 로직 
             else
                 await this.battleManager.Attack(user, uTarget, user.readySkill?.coinlist);

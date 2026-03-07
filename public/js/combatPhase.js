@@ -395,10 +395,8 @@ function removeSkillUI(bundleId) {
         container.style.opacity = '0';
         container.style.transform = 'scale(0.9)';
 
-        // 0.3초 뒤에 DOM에서 완전히 제거
-        setTimeout(() => {
-            if (container) container.remove();
-        }, 30);
+        // 이거를 싱크 맞게 하려면 전체 함수랑 호출 함수, 이벤트에 async 달아주고 await으로 호출하고 해줘야 함 ㅇㅇ
+        container.remove();
     }
 }
 
