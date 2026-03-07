@@ -32,13 +32,29 @@ let phaseSelect, phaseBattle;
 
 // 상태 변수
 let myRole = null;
-let allyTeamInfo = null;
-let enemyTeamInfo = null;
+let allyTeamInfo = [];
+let enemyTeamInfo = [];
 let selectedUnitIndex = null;
 let selectedSkillSlot = null;
-let skillDataCache = [];
 let targetingData = {};
 let isSkillTooltipLocked = false;
+
+// 로컬라이즈?
+const translateP = {
+    'Slash': '참격',
+    'Penetrate': '관통',
+    'Blunt': '타격'
+};
+
+const translateS = {
+    'red': '분노',
+    'orange': '색욕',
+    'yellow': '나태',
+    'green': '탐식',
+    'blue': '우울',
+    'indigo': '오만',
+    'violet': '질투'
+};
 
 export function initBattleSelect() {
     // DOM 요소 할당
@@ -58,10 +74,10 @@ export function initBattleSelect() {
     skillButtons.forEach((btn) => {
         btn.addEventListener('click', (event) => {
             if (!myRole) return;
-            
+
             const targetBtn = event.currentTarget;
             const parentCol = targetBtn.closest('.skill-column');
-            
+
             // ★ 수학 계산 필요 없이 속성에서 바로 꺼내옴!
             const uIndex = parseInt(parentCol.dataset.unitIndex, 10);
             const sIndex = parseInt(targetBtn.dataset.skillSlot, 10);
@@ -139,11 +155,11 @@ export function initBattleSelect() {
 
             // 해당 캐릭터 기둥 찾기
             const parentCol = document.querySelector(`.skill-column[data-unit-index="${data.srcIndex}"]`);
-            
+
             if (parentCol) {
                 // 내 기둥에 있는 모든 스킬 선택/사용 해제
                 parentCol.querySelectorAll('.type-red').forEach(b => b.classList.remove('used', 'selected'));
-                
+
                 // 선택했던 스킬에만 'used' 달아주기
                 const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0;
                 const targetBtn = parentCol.querySelector(`.type-red[data-skill-slot="${sSlot}"]`);
@@ -206,9 +222,6 @@ function initDOMs_BattleSelect() {
 
     skillButtons = document.querySelectorAll('.type-red');
     targetButtons = document.querySelectorAll('.right-team .circle');
-
-    allyCharBoxes = document.querySelectorAll('.type-orange');
-    enemyCharBoxes = document.querySelectorAll('.type-violet');
 }
 
 // 마우스가 객체 위에 올라갔을 때 실행되는 함수
@@ -294,14 +307,14 @@ function handleMouseEnter_SkillIcon(target, type) {
         const sIndex = parseInt(target.dataset.skillSlot, 10);
 
         // ★ 아군 스킬이므로 아군 캐시에서 꺼냄
-        const charData = allyDataCache[uIndex];
+        const charData = allyTeamInfo[uIndex];
 
         if (charData && charData.skills && charData.skills[sIndex]) {
             const skill = charData.skills[sIndex];
 
             // toData() 에서 보낸 변수명(basePower, coinPower 등) 그대로 사용
             infoMessage = `[${skill.name}]\n위력: ${skill.basePower}`;
-            
+
             if (skill.coinPower) {
                 infoMessage += ` (+${skill.coinPower} x ${skill.coinNum}) [${skill.basePower} ~ ${skill.basePower + skill.coinPower * skill.coinNum}]`;
             }
@@ -310,7 +323,7 @@ function handleMouseEnter_SkillIcon(target, type) {
             if (skill.coinDescs && skill.coinDescs.length > 0) {
                 skill.coinDescs.forEach((desc, idx) => {
                     // 코인 효과 설명 출력
-                    infoMessage += `\n🪙${idx + 1}: ${desc}`; 
+                    infoMessage += `\n🪙${idx + 1}: ${desc}`;
                 });
             }
         } else {
@@ -319,7 +332,7 @@ function handleMouseEnter_SkillIcon(target, type) {
 
         // 이 버튼이 'used'(확정된 스킬) 상태라면, 누구를 때리는지 적에게 표시
         if (target.classList.contains('used')) {
-            const targetEnemyIdx = targetingData[uIndex]; 
+            const targetEnemyIdx = targetingData[uIndex];
             if (targetEnemyIdx !== undefined) {
                 const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${targetEnemyIdx}"] .circle`);
                 if (targetEl) {
@@ -352,23 +365,59 @@ function handleMouseEnter_Character(target, team) {
     if (team === 'ally') {
         charTooltip.classList.add('tooltip-ally');
         charData = allyTeamInfo[uIndex]; // ★ 아군 캐시에서 꺼냄
-        
+
         if (charData) {
-            charText.innerText = `[${charData.name}]\nLV. ${charData.lv}\n\n체력: ${charData.hp} / ${charData.maxHp}\n정신력: ${charData.sp}\n속도: ${charData.speed}`;
+            charTextSetting(charData);
         } else {
             charText.innerText = `[아군 정보 - 자리 번호: ${uIndex}]\n\n...`;
-
         }
     } else {
         charTooltip.classList.add('tooltip-enemy');
         charData = enemyTeamInfo[uIndex]; // ★ 적군 캐시에서 꺼냄
-        
+
         if (charData) {
-            charText.innerText = `[${charData.name}]\nLV. ${charData.lv}\n\n체력: ${charData.hp} / ${charData.maxHp}\n정신력: ${charData.sp}\n속도: ${charData.speed}`;
+           charTextSetting(charData);
         } else {
             charText.innerText = `[적군 정보 - 자리 번호: ${uIndex}]\n\n...`;
         }
     }
+}
+// 3-1. 캐릭터 툴팁 텍스트
+function charTextSetting(charData) {
+    const staggerText = charData.stagger.length > 0 ? charData.stagger.join(', ') : "없음";
+
+        // 2. 물리 내성 번역 및 조립
+        let resistPText = "";
+        if (charData.resistP) {
+            resistPText = Object.entries(charData.resistP)
+                // ★ 딕셔너리를 통해 영문 키값을 한국어로 바꿉니다. (사전에 없으면 원래 영문 출력)
+                .map(([key, value]) => `${translateP[key] || key}: ${value}`)
+                .join(' / '); 
+        }
+
+        // 3. 속성 내성 번역 및 조립
+        let resistSText = "";
+        if (charData.resistS) {
+            resistSText = Object.entries(charData.resistS)
+                // ★ 속성 내성도 마찬가지로 번역 딕셔너리 통과
+                .map(([key, value]) => `${translateS[key] || key}: ${value}`)
+                .join(' / ');
+        }
+
+        // 4. 최종 텍스트 조립
+        charText.innerText = 
+`[${charData.name}] (LV. ${charData.lv})
+
+체력: ${charData.hp} / ${charData.maxHp}
+흐트러짐 구간: ${staggerText}
+정신력: ${charData.sp}
+속도: ${charData.speed}
+
+[물리 내성]
+${resistPText}
+
+[속성 내성]
+${resistSText}`;
 }
 
 // 4. 마우스 이동 핸들러 수정 (따라다니기 해제)
@@ -466,5 +515,5 @@ function OnTurnStart(data) {
     targetButtons.forEach(btn => {
         btn.classList.remove('locked');
     });
-    targetingData = {}; 
+    targetingData = {};
 }

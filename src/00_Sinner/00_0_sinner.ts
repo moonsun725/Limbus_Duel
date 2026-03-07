@@ -190,9 +190,14 @@ export class Character {
             lv: this.Stats.lv,
             name: this.name,
             hp: this.Stats.hp,
-            maxHp: this.Stats.maxHp, // (주의: Stats 내부 변수명이 maxhp인지 maxHp인지 확인 필요)
+            maxHp: this.Stats.maxHp, 
             sp: this.Stats.sp,
             speed: this.speed,
+            
+            // 흐트랑 내성
+            stagger: [...this.Stats.stagger], 
+            resistP: { ...this.Stats.resistP }, 
+            resistS: { ...this.Stats.resistS },
 
             // [핵심] 객체 배열은 반드시 .map()을 통해 새로 만들어야 함
             skills: this.deck.map(skill => {
