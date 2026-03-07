@@ -29,11 +29,11 @@ let floatingText, skillText, charText;
 let interactableElements;
 let buttons, skillButtons, targetButtons, goButton;
 let phaseSelect, phaseBattle;
-let allyCharBoxes, enemyCharBoxes;
-
 
 // 상태 변수
 let myRole = null;
+let allyTeamInfo = null;
+let enemyTeamInfo = null;
 let selectedUnitIndex = null;
 let selectedSkillSlot = null;
 let skillDataCache = [];
@@ -334,14 +334,9 @@ function handleMouseEnter_SkillIcon(target, type) {
         infoMessage = "수비 스킬 정보";
     }
 
-    // 3. [핵심] 텍스트를 skillText에 꽂아넣기!
     skillText.innerText = infoMessage;
 }
-// 2-1. 스킬버튼 헬퍼 함수
-function findSkillDesc() {
-    let skillDesc = ""
-    return skillDesc;
-}
+
 // 3. 캐릭터 툴팁 전담 로직
 function handleMouseEnter_Character(target, team) {
     // 1. [핵심] 툴팁의 숨김 상태를 해제해서 화면에 보이게 함!
@@ -351,15 +346,28 @@ function handleMouseEnter_Character(target, team) {
     // (이게 없으면 아군 봤다가 적군 보면 클래스가 2개 겹쳐서 UI가 고장 납니다)
     charTooltip.classList.remove('tooltip-ally', 'tooltip-enemy');
 
-    // ★ [핵심 통합] 아군이든 적군이든 무조건 부모(unit-column)한테 번호표 내놓으라고 함!
-    const uIndex = target.closest('.unit-column').dataset.unitIndex;
+    const uIndex = parseInt(target.closest('.unit-column').dataset.unitIndex, 10);
+    let charData; // 데이터를 담을 변수
 
     if (team === 'ally') {
         charTooltip.classList.add('tooltip-ally');
-        charText.innerText = `[아군 정보 - 자리 번호: ${uIndex}]\n\n...`;
+        charData = allyTeamInfo[uIndex]; // ★ 아군 캐시에서 꺼냄
+        
+        if (charData) {
+            charText.innerText = `[${charData.name}]\nLV. ${charData.lv}\n\n체력: ${charData.hp} / ${charData.maxHp}\n정신력: ${charData.sp}\n속도: ${charData.speed}`;
+        } else {
+            charText.innerText = `[아군 정보 - 자리 번호: ${uIndex}]\n\n...`;
+
+        }
     } else {
         charTooltip.classList.add('tooltip-enemy');
-        charText.innerText = `[적군 정보 - 자리 번호: ${uIndex}]\n\n...`;
+        charData = enemyTeamInfo[uIndex]; // ★ 적군 캐시에서 꺼냄
+        
+        if (charData) {
+            charText.innerText = `[${charData.name}]\nLV. ${charData.lv}\n\n체력: ${charData.hp} / ${charData.maxHp}\n정신력: ${charData.sp}\n속도: ${charData.speed}`;
+        } else {
+            charText.innerText = `[적군 정보 - 자리 번호: ${uIndex}]\n\n...`;
+        }
     }
 }
 
@@ -430,11 +438,13 @@ function getElementType(element) {
 @param {Object} data  - 서버에서 받은 턴 시작 데이터 (p1, p2 정보 포함)
 */
 function OnTurnStart(data) {
-    // 맨 처음 init: 이거는 따로 분리를 해야되나?
+    // 1. 아군 데이터와 적군 데이터 분리
     const myData = (myRole === 'p1') ? data.p1 : data.p2;
-    if (myData && myData.active) {
-        skillDataCache = myData.active;
-    }
+    const oppData = (myRole === 'p1') ? data.p2 : data.p1;
+
+    // 2. 각각의 캐시에 할당 (toData() 형식 그대로 저장됨)
+    if (myData && myData.active) allyTeamInfo = myData.active;
+    if (oppData && oppData.active) enemyTeamInfo = oppData.active;
 
     // 선택 페이즈 레이어는 드러내기
     phaseSelect.classList.remove('hidden');
@@ -456,5 +466,5 @@ function OnTurnStart(data) {
     targetButtons.forEach(btn => {
         btn.classList.remove('locked');
     });
-    targetingData = {}; // 
+    targetingData = {}; 
 }
