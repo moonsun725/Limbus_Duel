@@ -571,8 +571,11 @@ function updateAllSanityUI() {
         
         // 상단 배틀 필드의 아군 속도치 찾기
         const topAllyUI = document.querySelector(`.left-team .unit-column[data-unit-index="${idx}"] .type-sanity`);
-        if (topAllyUI) topAllyUI.innerText = charData.sp;
-        topAllyUI.classList.add('maxsp')
+        if (topAllyUI) {
+            topAllyUI.innerText = charData.sp;
+            if(charData.sp === 45) topAllyUI.classList.add('maxsp');
+            if(charData.sp === -45) topAllyUI.classList.add('minsp');
+        }
 
         // 하단 스킬 패널의 아군 동그라미 찾기
         const bottomAllyUI = document.querySelector(`.skill-panel .skill-column[data-unit-index="${idx}"] .type-sanity`);
@@ -585,8 +588,11 @@ function updateAllSanityUI() {
         
         // 상단 배틀 필드의 적군 동그라미 찾기
         const topEnemyUI = document.querySelector(`.right-team .unit-column[data-unit-index="${idx}"] .type-sanity`);
-        if (topEnemyUI) topEnemyUI.innerText = charData.sp;
-        topEnemyUI.classList.add('minsp')
+        if (topEnemyUI) {
+            topEnemyUI.innerText = charData.sp;
+            if(charData.sp === 45) topEnemyUI.classList.add('maxsp');
+            if(charData.sp === -45) topEnemyUI.classList.add('minsp');
+        }
     });
 }
 
