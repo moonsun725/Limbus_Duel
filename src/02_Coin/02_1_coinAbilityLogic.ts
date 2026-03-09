@@ -1,6 +1,7 @@
 import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { Coin } from "./02_0_coin.js";
 import { AbilityRegistry } from "../05_Ability/03_Abilities.js";
+import { CondRegistry } from "../05_Ability/05_conditions.js";
 
 // 트리거 타입 정의: 언제 호출되었는가?
 export type CoinEffectTrigger = 'OnToss' | 'OnHit' | 'OnBasePower' | 'OnHeadsHit' | 'OnTailsHit';
@@ -44,6 +45,7 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
         }
 
         // 3. 조건 판단
+        const cond = CondRegistry[abilitiy.condition]
 
         // 4. 로직 실행
         const logic = AbilityRegistry[abilitiy.Type];

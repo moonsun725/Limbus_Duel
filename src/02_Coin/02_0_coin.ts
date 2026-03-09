@@ -20,7 +20,8 @@ export interface CoinAbility {
   target: EffectTarget;
 
   data?: any;
-  condition?: boolean;
+  condType?: string;
+  condition?: any
   
 }
 
