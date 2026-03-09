@@ -422,7 +422,7 @@ function handleMouseEnter_Character(target, team) {
 }
 // 3-1. 캐릭터 툴팁 텍스트
 function charTextSetting(charData) {
-    const staggerText = charData.stagger.length > 0 ? charData.stagger.join(', ') : "없음";
+    const staggerText = charData.stagger.length > 0 ? charData.stagger.join('/ ') : "없음";
 
     // 2. 물리 내성 번역 및 조립
     let resistPText = "";
@@ -447,7 +447,7 @@ function charTextSetting(charData) {
         `[${charData.name}] (LV. ${charData.lv})
 
 체력: ${charData.hp} / ${charData.maxHp}
-흐트러짐 구간: ${staggerText}
+흐트러짐: ${staggerText}
 정신력: ${charData.sp}
 속도: ${charData.speed}
 
@@ -535,6 +535,11 @@ function OnTurnStart(data) {
     if (myData && myData.active) allyTeamInfo = myData.active;
     if (oppData && oppData.active) enemyTeamInfo = oppData.active;
 
+    // 정신력 갱신
+    updateAllSanityUI();
+    // 속도 갱신
+    updateAllSpeedUI();
+
     // 선택 페이즈 레이어는 드러내기
     phaseSelect.classList.remove('hidden');
     // 전투 페이즈 레이어는 숨기기
@@ -556,4 +561,53 @@ function OnTurnStart(data) {
         btn.classList.remove('locked');
     });
     targetingData = {};
+}
+
+// 정신력 갱신
+function updateAllSanityUI() {
+    // 1. 아군 정신력 업데이트 (상단 필드 & 하단 스킬 패널)
+    allyTeamInfo.forEach((charData, idx) => {
+        if (!charData) return; // 죽었거나 없는 슬롯이면 스킵
+        
+        // 상단 배틀 필드의 아군 속도치 찾기
+        const topAllyUI = document.querySelector(`.left-team .unit-column[data-unit-index="${idx}"] .type-sanity`);
+        if (topAllyUI) topAllyUI.innerText = charData.sp;
+        topAllyUI.classList.add('maxsp')
+
+        // 하단 스킬 패널의 아군 동그라미 찾기
+        const bottomAllyUI = document.querySelector(`.skill-panel .skill-column[data-unit-index="${idx}"] .type-sanity`);
+        if (bottomAllyUI) bottomAllyUI.innerText = charData.sp;
+    });
+
+    // 2. 적군 정신력 업데이트 (상단 필드)
+    enemyTeamInfo.forEach((charData, idx) => {
+        if (!charData) return;
+        
+        // 상단 배틀 필드의 적군 동그라미 찾기
+        const topEnemyUI = document.querySelector(`.right-team .unit-column[data-unit-index="${idx}"] .type-sanity`);
+        if (topEnemyUI) topEnemyUI.innerText = charData.sp;
+        topEnemyUI.classList.add('minsp')
+    });
+}
+
+function updateAllSpeedUI() {
+    allyTeamInfo.forEach((charData, idx) => {
+        if (!charData) return; // 죽었거나 없는 슬롯이면 스킵
+        
+        // 상단 배틀 필드의 아군 속도 박스 찾기
+        const topAllyUI = document.querySelector(`.left-team .unit-column[data-unit-index="${idx}"] .type-speed`);
+        if (topAllyUI) topAllyUI.innerText = charData.speed;
+
+        // 하단 스킬 패널의 아군 속도 박스 찾기
+        const bottomAllyUI = document.querySelector(`.skill-panel .skill-column[data-unit-index="${idx}"] .type-speed`);
+        if (bottomAllyUI) bottomAllyUI.innerText = charData.speed;
+    });
+    
+    enemyTeamInfo.forEach((charData, idx) => {
+        if (!charData) return;
+        
+        // 상단 배틀 필드의 적군 속도 박스 찾기
+        const topEnemyUI = document.querySelector(`.right-team .unit-column[data-unit-index="${idx}"] .type-speed`);
+        if (topEnemyUI) topEnemyUI.innerText = charData.speed;
+    });
 }
