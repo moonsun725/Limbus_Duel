@@ -1,9 +1,9 @@
 // npx tsx src/04_Game/000_NEWTEST.ts
 
-import { Character, createSinnerFromData, } from '../00_Sinner/00_0_sinner.js'
-import { LoadSkillData } from '../01_Skill/01_2_skillLoader.js';
-import { BattleManager } from '../03_BattleSystem/BattleManager.js'; // 새로 만든 매니저
-import { BattleSlot } from '../00_Sinner/00_4_Slot.js'; // 슬롯 클래스
+import { Character, createSinnerFromData, } from '../../00_Sinner/00_0_sinner.js'
+import { LoadSkillData } from '../../01_Skill/01_2_skillLoader.js';
+import { BattleManager } from '../../03_BattleSystem/BattleManager.js'; // 새로 만든 매니저
+import { BattleSlot } from '../../00_Sinner/00_4_Slot.js'; // 슬롯 클래스
 
 // 비동기 함수(async) 안에서 실행해야 await를 쓸 수 있습니다.
 async function runTest() {
@@ -20,8 +20,8 @@ async function runTest() {
 
     // 슬롯 초기화 (Character 클래스 내부에서 자동으로 안 한다면 수동으로 생성)
     // 테스트를 위해 0번 스킬을 장착한 슬롯을 생성합니다.
-    yisang.Slots[0] = new BattleSlot(yisang, yisang.Skill(0), 0);
-    faust.Slots[0] = new BattleSlot(faust, faust.Skill(0), 0);
+    yisang.Slots[0] = new BattleSlot(yisang); // 생성자에서 하나 만들어주긴 하는데  
+    faust.Slots[0] = new BattleSlot(faust); // 테스트니까 명시적으로 하나 만들자고요
 
     /*
     // ==========================================

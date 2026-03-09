@@ -1,8 +1,8 @@
-import { BattleManager } from "../03_BattleSystem/BattleManager.js";
-import { ActManager } from "../03_BattleSystem/ActManager.js";
-import { BattleSlot } from "../00_Sinner/00_4_Slot.js";
-import { Character, createSinnerFromData } from "../00_Sinner/00_0_sinner.js";
-import { LoadSkillData } from "../01_Skill/01_2_skillLoader.js";
+import { BattleManager } from "../../03_BattleSystem/BattleManager.js";
+import { ActManager } from "../../03_BattleSystem/ActManager.js";
+import { BattleSlot } from "../../00_Sinner/00_4_Slot.js";
+import { Character, createSinnerFromData } from "../../00_Sinner/00_0_sinner.js";
+import { LoadSkillData } from "../../01_Skill/01_2_skillLoader.js";
 
 // 너는 이제 더 안 쓴다 ㅅㄱ
 
@@ -44,4 +44,4 @@ TestManager.SkillSelect(actor1, 1);
 TestManager.TargetLock(actor1, actor2);
 
 TestManager.orderSort();
-// await TestManager.StartCombat(); 
+await TestManager.StartCombat(); 
