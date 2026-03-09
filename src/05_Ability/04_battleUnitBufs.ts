@@ -1,10 +1,9 @@
-import type cluster from "cluster";
 import type { Character } from "../00_Sinner/00_0_sinner.js";
 
 /*
  * 키워드 버프 효과 (예: 침잠) - JSON상 배열로 존재
  */
-type KeyWords = 'BURN' | 'BLEEDING' | 'TREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE'
+export type KeyWords = 'BURN' | 'BLEEDING' | 'TREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE';
 export interface BattleUnitBuf {
    typeId: string;
     stack: number;
@@ -45,25 +44,28 @@ export interface TriggerEvents {
     GetDamageReductionRate?(owner: Character, BufData: any): number
 
     // 마비 매커니즘
-    ParalyzeMechanic?(): boolean
+    ParalyzeMechanic?(owner: Character, BufData: any) : 0 | 1 // 여기는 boolean하고 산술연산 안 될 거 아냐 
     
     // 합 위력 보너스 반환
-    GetClashPowerBonus?() : number
+    GetClashPowerBonus?(owner: Character, BufData: any) : number
 
     // 최종 위력 보너스 반환
-    GetFinalPowerBonus?(): number
+    GetFinalPowerBonus?(owner: Character, BufData: any) : number
 
     // 공격 위력 보너스 반환
-    GetAtkPowerBonus?(): number
+    GetAtkPowerBonus?(owner: Character, BufData: any) : number
     
     // 수비 위력 보너스 반환
-    GetDefPowerBonus?(): number
+    GetDefPowerBonus?(owner: Character, BufData: any) : number
 
     // 공격 레벨 증감 반환
-    GetAtkLvBonus?(): number
+    GetAtkLvBonus?(owner: Character, BufData: any) : number
 
     // 방어 레벨 증감 반환
-    GetDefLvBonus?() : number
+    GetDefLvBonus?(owner: Character, BufData: any) : number
+
+    // 속도값 증감 반환(신속, 속박)
+    GetSpeedBoost?(owner: Character, BufData: any) : number
 
 }
 
@@ -101,9 +103,19 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
     },
     "Themor":
     {
-        Activate: () => {},
+        Activate: (owner, data) => {
+            owner.takeStagger(data.stack);
+        },
         OnAddBuf: (owner, data) => {
             data.isNegative = true;
+        },
+        UseCount: (owner, data, amount) => {
+            // 진동 횟수 소모 가능한지 따지는 경우가 있고, 안 따지는 경우가 있잖음 ㅇㅇ
+            let posible
+            data.count -= amount;
+            if (data.count <= 0)
+                owner.bufList.RemoveBuf("Themor");
+            return false; // >< 임시
         },
     },
     "Rupture":
@@ -208,12 +220,18 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         OnAddBuf: (owner, data) =>
         {
             data.isNegative = false;
-        }
+        },
+        GetDamageMultiplier: (owner, data) => {
+            return data.stack;
+        },
     },
     "DmgDown":
     {
         OnAddBuf: (owner, data) => {
             data.isNegative = true;
+        },
+        GetDamageMultiplier: (owner, data) => {
+            return -data.stack;
         },
     },
     "AtkLvUp":
@@ -221,12 +239,18 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         OnAddBuf: (owner, data) =>
         {
             data.isNegative = false;
-        }
+        },
+        GetAtkLvBonus: (owner, data) => {
+            return data.stack;
+        },
     },
     "AtkLvDown":
     {
         OnAddBuf: (owner, data) => {
             data.isNegative = true;
+        },
+        GetAtkLvBonus: (owner, data) => {
+            return -data.stack;
         },
     },
     "DefLvUp":
@@ -234,6 +258,9 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         OnAddBuf: (owner, data) =>
         {
             data.isNegative = false;
+        },
+        GetDefLvBonus(owner, data) {
+            return data.stack
         }
     },
     "DefLvDown":
@@ -241,6 +268,27 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         OnAddBuf: (owner, data) => {
             data.isNegative = true;
         },
+        GetDefLvBonus(owner, data) {
+            return -data.stack
+        }
     },  
+    "Agility":
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = false;
+        },
+        GetSpeedBoost: (owner, data) => {
+            return data.stack;
+        }
+    },
+    "Binding":
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        },
+        GetSpeedBoost: (owner, data) => {
+            return -data.stack;
+        }
+    }
 }
 

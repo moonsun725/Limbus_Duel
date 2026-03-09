@@ -18,7 +18,8 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
                 count: data.count,
                 keyword: data.KeywordBuf
             };
-            target.bufList.AddKeyWordBuf(status.keyword!, status); // 얘도 임시처리니까 나중에 체크해야한다~~
+            if (!status.keyword) return;
+            target.bufList.AddKeyWordBuf(status.keyword, status); // 얘도 임시처리니까 나중에 체크해야한다~~
         }
     },
     "AddBuf": { // 이새끼는 당분간 보류다

@@ -172,4 +172,34 @@ export class BattleUnitBufList
         return Bmultipler;
     }
 
+    GetAtkLvBonus() : number
+    {
+        let atkB = 0;
+        for (const [id, status] of this.BufList)
+        {
+            const logic = BufRegistry[id];
+            console.log(id);
+            console.log(`[BufList]/[GetGetDamageReduction]: `);
+            if (logic && logic.GetAtkLvBonus) {
+                atkB += logic.GetAtkLvBonus(this.owner, status);
+            }
+        }
+        return atkB;
+    }
+
+    GetDefLvBonus() : number
+    {
+        let defB = 0;
+        for (const [id, status] of this.BufList)
+        {
+            const logic = BufRegistry[id];
+            console.log(id);
+            console.log(`[BufList]/[GetGetDamageReduction]: `);
+            if (logic && logic.GetDefLvBonus) {
+                defB += logic.GetDefLvBonus(this.owner, status);
+            }
+        }
+        return defB;
+    }
+
 }

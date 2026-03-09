@@ -31,11 +31,7 @@ export function ProcessMoveEffects(move: Skill, defender: Character, attacker: C
         const entryTiming = ability.timing || 'OnHit'; // 기본값은 상황에 따라
         if (entryTiming !== currentTiming) continue;
 
-        // 2. 확률 체크
-        // const chance = entry.chance ?? 100; // 이거 컨디션으로 바꾼다음에 콜백을 써야겠다
-        // if (Math.random() * 100 > chance) continue;
-
-        // 3. 타겟 결정 (JSON 데이터 기반)
+        // 2. 타겟 결정 (JSON 데이터 기반)
         // entry.target이 'Self'면 attacker, 'Enemy'면 defender
         // 기본값: OnUse는 Self, OnHit은 Enemy로 설정하면 편함
         let actualTarget = defender; 
@@ -49,6 +45,13 @@ export function ProcessMoveEffects(move: Skill, defender: Character, attacker: C
              console.log("[ProcessMoveEffects]: 부가효과의 타겟이 명시되어 있지 않음.")
         }
 
+        // 3. 조건 판단
+        /*
+            const cond = 
+            if (cond)
+                cond.Execute(); // 이게 이제 boolean이나 number형일거란 말이야 
+        */ 
+            
         // 4. 로직 실행
         const logic = AbilityRegistry[ability.type];
         if (logic) {

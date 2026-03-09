@@ -85,11 +85,11 @@ export class BattleManager
         // 승자 판별 및 공격 이행
         if (coins1.length > 0) {
             this.ApplyClashResult(char1, char2, "WIN", clashCount);
-            await this.Attack(slot1, slot2, coins1); // 남은 코인으로 공격
+            await this.Attack(slot1, slot2, coins1, clashCount); // 남은 코인으로 공격
             slot2.consumeSkill(); // 패배한 스킬 소멸
         } else {
             this.ApplyClashResult(char2, char1, "WIN", clashCount);
-            await this.Attack(slot2, slot1, coins2);
+            await this.Attack(slot2, slot1, coins2, clashCount);
             slot1.consumeSkill();
         }
     }
@@ -127,7 +127,7 @@ export class BattleManager
     /**
      * 일방 공격 또는 합 승리 후 공격을 수행합니다.
      */
-    public async Attack(skillSlot: BattleSlot, targetSlot: BattleSlot, activeCoins: Coin[])
+    public async Attack(skillSlot: BattleSlot, targetSlot: BattleSlot, activeCoins: Coin[], clashCnt: number = 0)
     {
         let attacker = skillSlot.owner;
         let target = targetSlot.owner;
@@ -159,7 +159,7 @@ export class BattleManager
             await this.callbacks.onCoinResult(attacker, isHeads);
 
             // 데미지 계산 및 적용
-            const damage = calculateDamage(attacker, target, skill, coin, currentPower);
+            const damage = calculateDamage(attacker, target, skill, coin, currentPower, clashCnt);
             target.takeDamage(damage);
             this.callbacks.onGetHit(target); // UI 처리(공격 적중시 경직)
             this.callbacks.onDamage(target, damage); // 대미지 표기 

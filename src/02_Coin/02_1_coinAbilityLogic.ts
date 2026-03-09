@@ -43,7 +43,9 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
              console.log("[ProcessCoinEffects]: 부가효과의 타겟이 명시되어 있지 않음.")
         }
 
-        // 3. 로직 실행
+        // 3. 조건 판단
+
+        // 4. 로직 실행
         const logic = AbilityRegistry[abilitiy.Type];
         console.log(logic);
         if (logic) {

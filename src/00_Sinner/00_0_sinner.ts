@@ -110,6 +110,10 @@ export class Character {
             this.BattleState.ChangeState("DEAD");
         }
     }
+    takeStagger(damage: number)
+    {
+
+    }
     SpeedSetting()
     {
         this.speed = Math.floor(Math.random()*(this.maxSpeed-this.minSpeed+1))+this.minSpeed; // 스피드 세팅
