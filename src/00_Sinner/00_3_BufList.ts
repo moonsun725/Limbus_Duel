@@ -38,9 +38,9 @@ export class BattleUnitBufList
         }
         else    
         {
+            if (!data.stack) data.stack = 1; // 버프가 없는 상태에서 [출혈 횟수 1 부여] 효과 받음 -> 위력은 1로 고정
+            if (!data.count) data.count = 1; // 버프가 없는 상태에서 [출혈 1 부여] 효과 받음 -> 횟수는 1로 고정
 
-            if (!data.stack) data.stack = 1;
-            if (!data.count) data.count = 1; 
             else if (data.stack) data.count++; 
             this.BufList.set(keyword, data);
             const logic = BufRegistry[keyword];

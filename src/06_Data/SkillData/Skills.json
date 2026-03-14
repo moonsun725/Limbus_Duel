@@ -151,6 +151,12 @@
               "Type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
+              "condition": {
+                "id": "spCheck",
+                "target": "opponent",
+                "threshold": 0,
+                "isInclusive": false
+              },
               "data": {
                 "BattleUnitBuf": "Fragile",
                 "stack": 1

@@ -20,9 +20,10 @@ export interface CoinAbility {
   target: EffectTarget;
 
   data?: any;
-  condType?: string;
-  condition?: any
-  
+
+  condition?: any; // 사실 얘 꺼 형태가 어느 정도 다이나믹하긴 해서 any를 써야하나 싶기도 함 ㅇㅇ
 }
+
+
 
 

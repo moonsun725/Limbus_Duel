@@ -9,7 +9,7 @@ export type CoinEffectTrigger = 'OnToss' | 'OnHit' | 'OnBasePower' | 'OnHeadsHit
 interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
     Execute(target: Character, data: any, damage?: number, source?: Character): void;
-    // 나중에 군루 생각하면 쌍방 검사해야됨 이 시벌롬
+    // 나중에 군루 생각하면(대상의 파열과 자신의 호흡의 합 ㅇㅈㄹ...) 쌍방 검사해야됨 이 시벌롬
     GetPowerMultiplier?(target: Character, user: Character, data: any) : number;
 }
 
@@ -39,13 +39,33 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
         } else if (abilitiy.target === 'opponent') {
             actualTarget = defender;
         } else {
-             // 타겟 명시가 없으면 타이밍에 따라 관례적으로 처리 (일단 무조건 포함하도록 짜긴 했는데 )
-             actualTarget = (currentTiming === 'OnHit') ? attacker : defender; 
-             console.log("[ProcessCoinEffects]: 부가효과의 타겟이 명시되어 있지 않음.")
+            // 타겟 명시가 없으면 타이밍에 따라 관례적으로 처리 (일단 무조건 포함하도록 짜긴 했는데 )
+            actualTarget = (currentTiming === 'OnHit') ? attacker : defender; 
+            console.log("[ProcessCoinEffects]: 부가효과의 타겟이 명시되어 있지 않음.");
         }
 
+        let res: boolean | number = true;
         // 3. 조건 판단
-        const cond = CondRegistry[abilitiy.condition]
+        const cond = CondRegistry[abilitiy.condition.id]; // any 박았으니까 타입체킹을 안한다고요 좋아요
+        // 3-1. 판단 타겟 정하기
+        let condTarget = abilitiy.condition.target;
+        switch (condTarget)
+        {
+            case "self":
+
+            case "opponent":
+
+            case "both":
+            
+            case 
+        }
+
+
+        console.log(abilitiy.condition.id);
+        if (cond) {
+            res = cond.Execute(attacker, abilitiy.condition)
+        }
+        if (res === false) continue; // 
 
         // 4. 로직 실행
         const logic = AbilityRegistry[abilitiy.Type];

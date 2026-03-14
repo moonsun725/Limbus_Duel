@@ -1,16 +1,20 @@
 import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { BattleUnitBuf } from "./04_battleUnitBufs.js";
+import type { BattleContext } from "./00_BattleContext.js";
 
-export interface AbilityLogic {
+export interface AbilityLogic { // 아니시발 인터페이스니까 여기에 needSource 변수 박으면 되잖아?
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
-    Execute(target: Character, data: any, damage?: number, source?: Character): void;
+
+    Execute?(context: BattleContext, data: any): void;
     
-    GetPowerMultiplier?(target: Character, user: Character, data: any) : number;
+    GetPowerMultiplier?(context: BattleContext, data: any) : number;
 }
 
 export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     "AddKeywordBuf": {
-        Execute: (target, data, damage) => {
+        Execute: (context, data) => {
+
+            const target = context.target;
             const status: BattleUnitBuf = {
                 typeId: data.KeywordBuf,
                 Owner: target,
@@ -23,8 +27,10 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
         }
     },
     "AddBuf": { // 이새끼는 당분간 보류다
-        Execute: (target, data, damage, user) => {
-                
+        Execute: (context, data) => {
+            
+            const user = context.user;
+            const target = context.target;
             const status: BattleUnitBuf = {
                 typeId: data.BattleUnitBuf,
                 source: user,
@@ -36,8 +42,10 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
         }
     },
     "AddBufNextTurn": {
-        Execute: (target, data, damage, user) => {
-                
+        Execute: (context, data) => {
+            
+            const user = context.user;
+            const target = context.target;
             const status: BattleUnitBuf = {
                 typeId: data.BattleUnitBuf,
                 source: user,
