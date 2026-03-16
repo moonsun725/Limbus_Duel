@@ -238,7 +238,7 @@ export class Character {
     }
 }
 
-export function createSinnerFromData(id: number, partyID: number): Character {
+export function createSinnerFromData(id: number, partyID: number = 0): Character {
     // 데이터에서 해당 수감자 정보 찾기
     const sinnerData = data.Identities.find(sinner => sinner.id === id);
     if (!sinnerData) {
