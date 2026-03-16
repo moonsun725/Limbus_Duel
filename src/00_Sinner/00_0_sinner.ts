@@ -16,7 +16,8 @@ type skilltype = 'atk' | 'def';
 
 export class Character {
     public name: string; // 인격 이름
-    public id: number;
+    public id: number; // 인격 id(데이터 식별용)
+    public partyID: number;
     public minSpeed;
     public maxSpeed;
     public speed: number;
@@ -25,7 +26,7 @@ export class Character {
 
     public Skills: SkillManager // 스킬 목록
 
-    public BattleState: BattleStateManager;
+    public BattleState: BattleStateManager; // 상태 판별/변경
 
     public bufList: BattleUnitBufList;
 
@@ -36,9 +37,10 @@ export class Character {
 
     public Slots: BattleSlot[] = [];
 
-    constructor(name: string, id: number, data: IsinnerData) {
+    constructor(name: string, id: number, data: IsinnerData, ptIdx: number) {
         this.name = name;
         this.id = id;
+        this.partyID = ptIdx;
         // 기본 능력치
         this.Stats = new SinnerInfo(data, data.lv, this);
         this.BattleState = new BattleStateManager(this);
@@ -236,12 +238,12 @@ export class Character {
     }
 }
 
-export function createSinnerFromData(id: number): Character {
+export function createSinnerFromData(id: number, partyID: number): Character {
     // 데이터에서 해당 수감자 정보 찾기
     const sinnerData = data.Identities.find(sinner => sinner.id === id);
     if (!sinnerData) {
         throw new Error(`수감자 ID ${id}에 해당하는 데이터를 찾을 수 없습니다.`);
     }
-    return new Character(sinnerData.name, sinnerData.id, sinnerData);
+    return new Character(sinnerData.name, sinnerData.id, sinnerData, partyID);
 }
 

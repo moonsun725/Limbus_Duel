@@ -8,8 +8,8 @@ export function buildParty(data?: any[]): Character[]
         for (const p of data) {
             try {
                 // createPokemon 옵션으로 moves, item 전달
-                const newPoke = createSinnerFromData(p.id);
-                party.push(newPoke);
+                const newCharacter = createSinnerFromData(p.id, p.pIdx);
+                party.push(newCharacter);
             } catch (e) {
                 console.error(`[Room] 수감자 생성 실패 (${p.name}):`, e);
             }
@@ -19,8 +19,9 @@ export function buildParty(data?: any[]): Character[]
     // 만약 생성된 게 없으면 (데이터 오류 or 빈 팀) -> 기본 렌탈팀 제공
     if (party.length === 0) {
         console.log("[Room] 렌탈팀을 제공합니다.");
+        let pIdx = 1;
         for (var i = 10101; i <= 11201; i +=100)
-            party.push(createSinnerFromData(i)); // 10101, 10201, ..., 11201 (총 12명)
+            party.push(createSinnerFromData(i, pIdx++)); // 10101, 10201, ..., 11201 (총 12명)
     }
     
     return party;

@@ -473,8 +473,14 @@ export class GameRoom {
             }
         }
         // 위의 과정에서 개별 속도 정리는 했을거고
-        this.p1.battleEntry.sort((a,b) => b.speed - a.speed);
-        this.p2.battleEntry.sort((a,b) => b.speed - a.speed);
+        this.p1.battleEntry.sort((a,b) => {
+            if(b.speed === a.speed) return a.partyID - b.partyID;
+            return b.speed - a.speed;
+        });
+        this.p2.battleEntry.sort((a,b) => {
+            if(b.speed === a.speed) return a.partyID - b.partyID;
+            return b.speed - a.speed;
+        });
 
         this.broadcastState(io);
     }
