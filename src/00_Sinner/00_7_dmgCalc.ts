@@ -23,11 +23,11 @@ export function calculateDamage(attacker: Character, target: Character, atkSkill
 
     let Bmultiplier = 0
     Bmultiplier += attacker.bufList.GetDamageMultiplier() - target.bufList.GetDamageReduction(); 
-    console.log(`[calculateDamage]: 버프 배율: ${Bmultiplier}`);
+    console.log(`[calculateDamage]: 버프 배율: ${Bmultiplier+1}`);
     let Smultiplier = 0;
-    console.log(`[calculateDamage]: 스킬/코인 배율: ${Smultiplier}`);
+    console.log(`[calculateDamage]: 스킬/코인 배율: ${Smultiplier+1}`);
     let Pmultiplier = 0;
-    console.log(`[calculateDamage]: 패시브 배율: ${Pmultiplier}`);
+    console.log(`[calculateDamage]: 패시브 배율: ${Pmultiplier+1}`);
 
     let ex = 0;
     

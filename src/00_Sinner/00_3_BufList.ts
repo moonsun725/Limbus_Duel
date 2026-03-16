@@ -59,6 +59,11 @@ export class BattleUnitBufList
         this.BufList.forEach(element => {
             console.log("부여된 버프", element.typeId, "위력", element.stack, "횟수", element.count);
         });
+        console.log("다음 턴 버프 리스트:");
+        this.ReadyBufList.forEach(element =>{
+            console.log("부여된 버프", element.typeId, "위력", element.stack, "횟수", element.count);
+        })
+
     }
 
     // 존재 여부 확인
@@ -86,21 +91,24 @@ export class BattleUnitBufList
     // 이벤트
     OnTurnEnd() : void
     {
+        // 1. 버프리스트에서 TurnEnd가 있는 친구들은 먼저 처리한다
         for (const [id, status] of this.BufList) {
             const logic = BufRegistry[id];
             if (logic && logic.OnTurnEnd) {
                 logic.OnTurnEnd(this.owner, status);
             }
         }
-        // 1. 버프리스트에서 TurnEnd인 친구들은 먼저 처리한다
+        
         // 2. 횟수나 위력이 0인 버프들은 날린다
         for (const [id, status] of this.BufList) {
             if (status.count && status.count <= 0) {
                 this.RemoveBuf(id);
             }
         }
-    
+        
+        // 이러면 이전에 있던 버프도 싹 날리는거잖아...
         this.BufList = new Map(this.ReadyBufList);
+        this.BufList.set
     }
     OnTurnStart() : void 
     {
@@ -112,9 +120,8 @@ export class BattleUnitBufList
     {
         for (const [id, status] of this.BufList) {
             const logic = BufRegistry[id];
-            console.log(id);
-            
-            console.log(`[CheckOnHit]: `);
+
+            console.log(`[BufList]/[CheckOnHit]: `, id);
             if (logic && logic.OnBeingHit) {
                 logic.OnBeingHit(this.owner, status, attacker, damage);
             }
@@ -124,8 +131,7 @@ export class BattleUnitBufList
     {
         for (const [id, status] of this.BufList) {
             const logic = BufRegistry[id];
-            console.log(id);
-            console.log(`[CheckOnToss]: `);
+            console.log(`[BufList]/[CheckOnToss]: `, id);
             if (logic && logic.OnCoinToss) {
                 logic.OnCoinToss(this.owner, status);
             }
@@ -163,8 +169,8 @@ export class BattleUnitBufList
         let Bmultipler = 0;
         for (const [id, status] of this.BufList) {
             const logic = BufRegistry[id];
-            console.log(id);
-            console.log(`[BufList]/[GetGetDamageReduction]: `);
+            console.log("[BufList]: 부여된 버프", id);
+            console.log(`[BufList]/[GetDamageReduction]: `);
             if (logic && logic.GetDamageReductionRate) {
                 Bmultipler += logic.GetDamageReductionRate(this.owner, status);
             }
@@ -179,7 +185,7 @@ export class BattleUnitBufList
         {
             const logic = BufRegistry[id];
             console.log(id);
-            console.log(`[BufList]/[GetGetDamageReduction]: `);
+            console.log(`[BufList]/[GetAtkLvBonus]: `);
             if (logic && logic.GetAtkLvBonus) {
                 atkB += logic.GetAtkLvBonus(this.owner, status);
             }
@@ -194,7 +200,7 @@ export class BattleUnitBufList
         {
             const logic = BufRegistry[id];
             console.log(id);
-            console.log(`[BufList]/[GetGetDamageReduction]: `);
+            console.log(`[BufList]/[GetDefLvBonus]: `);
             if (logic && logic.GetDefLvBonus) {
                 defB += logic.GetDefLvBonus(this.owner, status);
             }

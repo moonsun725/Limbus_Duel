@@ -148,14 +148,14 @@
           ],
           "abilities": [
             {
-              "Type": "AddBufNextTurn",
+              "Type": "AddBuf",
               "timing": "OnHit",
               "target": "opponent",
               "condition": {
-                "id": "spCheck",
+                "id": "CheckSP",
                 "target": "opponent",
-                "threshold": 0,
-                "isInclusive": false
+                "operator": "<",
+                "value": "0"
               },
               "data": {
                 "BattleUnitBuf": "Fragile",

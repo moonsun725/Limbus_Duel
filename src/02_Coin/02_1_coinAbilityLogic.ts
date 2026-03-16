@@ -2,16 +2,10 @@ import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { Coin } from "./02_0_coin.js";
 import { AbilityRegistry } from "../05_Ability/03_Abilities.js";
 import { CondRegistry } from "../05_Ability/05_conditions.js";
+import type { BattleContext } from "../05_Ability/00_BattleContext.js";
 
 // 트리거 타입 정의: 언제 호출되었는가?
 export type CoinEffectTrigger = 'OnToss' | 'OnHit' | 'OnBasePower' | 'OnHeadsHit' | 'OnTailsHit';
-
-interface AbilityLogic {
-    // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
-    Execute(target: Character, data: any, damage?: number, source?: Character): void;
-    // 나중에 군루 생각하면(대상의 파열과 자신의 호흡의 합 ㅇㅈㄹ...) 쌍방 검사해야됨 이 시벌롬
-    GetPowerMultiplier?(target: Character, user: Character, data: any) : number;
-}
 
 // =========================================================
 // 메인 실행 함수 (Dispatcher)
@@ -21,59 +15,40 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
 {
     if (!coin.abilities) return;
 
-    for (const abilitiy of coin.abilities) // abilities가 ability의 배열이니 for...of로 내용물 확인
+    // 1. [핵심] 만능 가방(Context) 생성!
+    // 스킬 참조가 당장 없다면 as any 처리를 하거나 인터페이스에서 ?(옵셔널) 처리해도 됩니다.
+    const context: BattleContext = {
+        user: attacker,
+        target: defender, 
+        damage: damage
+        // 스킬은 나중에
+    };
+
+    for (const ability of coin.abilities) 
     { 
-        // 1. [필터링] 타이밍 체크
-        // JSON에 타이밍이 적혀있는데, 지금 시점과 다르면 스킵!
-        // (타이밍이 안 적혀있으면 '항상 발동'으로 간주하거나, 기본값 설정)
-        const entryTiming = abilitiy.timing || 'OnHit'; // 기본값은 상황에 따라
-        console.log("[ProcessCoinEffects]: 타이밍:", currentTiming, entryTiming);
-        console.log("[ProcessCoinEffects]: 부가효과:", abilitiy);
+        // 2. 타이밍 체크
+        const entryTiming = ability.timing || 'OnHit'; 
         if (entryTiming !== currentTiming) continue;
 
-        // 2. 타겟 결정
-        // entry.target이 'self'면 attacker, 'opponent'면 defender
-        let actualTarget = defender; 
-        if (abilitiy.target === 'self') {
-            actualTarget = attacker;
-        } else if (abilitiy.target === 'opponent') {
-            actualTarget = defender;
-        } else {
-            // 타겟 명시가 없으면 타이밍에 따라 관례적으로 처리 (일단 무조건 포함하도록 짜긴 했는데 )
-            actualTarget = (currentTiming === 'OnHit') ? attacker : defender; 
-            console.log("[ProcessCoinEffects]: 부가효과의 타겟이 명시되어 있지 않음.");
+        // 3. 조건 판단 (Switch문 싹 삭제!)
+        if (ability.condition) {
+            console.log("[processCoinEffects]: 효과 조건 판단");
+            const cond = CondRegistry[ability.condition.id];
+            if (cond) {
+                // 가방(context)과 조건 데이터(ability.condition)를 던집니다.
+                // 주의: 05_conditions.ts 에서 Execute가 boolean을 반환하게 고쳐야 합니다!
+                const isPassed = cond.Execute(context, ability.condition);
+                console.log(isPassed);
+                if (!isPassed) continue; // 조건 불만족 시 아래 로직 스킵!
+            }
         }
-
-        let res: boolean | number = true;
-        // 3. 조건 판단
-        const cond = CondRegistry[abilitiy.condition.id]; // any 박았으니까 타입체킹을 안한다고요 좋아요
-        // 3-1. 판단 타겟 정하기
-        let condTarget = abilitiy.condition.target;
-        switch (condTarget)
-        {
-            case "self":
-
-            case "opponent":
-
-            case "both":
-            
-            case 
-        }
-
-
-        console.log(abilitiy.condition.id);
-        if (cond) {
-            res = cond.Execute(attacker, abilitiy.condition)
-        }
-        if (res === false) continue; // 
 
         // 4. 로직 실행
-        const logic = AbilityRegistry[abilitiy.Type];
-        console.log(logic);
+        // 여기서도 타겟을 밖에서 찾지 않고, 'ability 전체'를 data로 넘겨버립니다.
+        const logic = AbilityRegistry[ability.Type]; 
         if (logic) {
-            // 이제 로직에게 "누구한테(actualTarget)" 할지만 알려주면 됨
-            logic.Execute(actualTarget, abilitiy.data, damage); 
-            // console.log(logic, actualTarget.name, abilitiy.data, damage)
+            console.log("[processCoinEffects]: 코인 효과 발동:", ability.Type);
+            logic.Execute(context, ability.data); 
         }
     }
 }

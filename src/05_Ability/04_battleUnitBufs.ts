@@ -3,7 +3,7 @@ import type { Character } from "../00_Sinner/00_0_sinner.js";
 /*
  * 키워드 버프 효과 (예: 침잠) - JSON상 배열로 존재
  */
-export type KeyWords = 'BURN' | 'BLEEDING' | 'TREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE';
+export type KeyWords = 'BURN' | 'BLEEDING' | 'TREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE'; // 이건 언제 고치냐
 export interface BattleUnitBuf {
    typeId: string;
     stack: number;
@@ -11,7 +11,7 @@ export interface BattleUnitBuf {
     Owner: Character;
     source?: Character | undefined;
     isNegative?: boolean; // 
-    keyword?: KeyWords;
+    keyword?: string;
     usage?: number;
 }
 
@@ -212,7 +212,7 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         },
         GetDamageReductionRate: (owner, data) =>
         {
-            return -data.stack;
+            return -data.stack*0.1;
         }
     },
     "DmgUp":

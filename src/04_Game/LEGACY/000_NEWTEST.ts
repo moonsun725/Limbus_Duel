@@ -1,9 +1,10 @@
-// npx tsx src/04_Game/000_NEWTEST.ts
+// npx tsx src/04_Game/LEGACY/000_NEWTEST.ts
 
 import { Character, createSinnerFromData, } from '../../00_Sinner/00_0_sinner.js'
 import { LoadSkillData } from '../../01_Skill/01_2_skillLoader.js';
 import { BattleManager } from '../../03_BattleSystem/BattleManager.js'; // 새로 만든 매니저
 import { BattleSlot } from '../../00_Sinner/00_4_Slot.js'; // 슬롯 클래스
+import { type CheckLogic } from '../../05_Ability/05_conditions.js';
 
 // 비동기 함수(async) 안에서 실행해야 await를 쓸 수 있습니다.
 async function runTest() {
@@ -23,24 +24,27 @@ async function runTest() {
     yisang.Slots[0] = new BattleSlot(yisang); // 생성자에서 하나 만들어주긴 하는데  
     faust.Slots[0] = new BattleSlot(faust); // 테스트니까 명시적으로 하나 만들자고요
 
-    /*
+    
     // ==========================================
     // 테스트 1: 일방 공격 (One-Sided Attack)
     // ==========================================
     console.log("\n========== TEST 1: 일방 공격 테스트 ==========");
     // 이상이 파우스트를 공격 (스킬 2번 사용 가정)
-    const attackSkill = yisang.Skill(2);
+    yisang.Slots[0].readySkill = yisang.Skill(2);
     
     // 일방 공격은 코인이 깨지지 않으므로 원본 리스트 복사해서 전달
     // yisang.Attack() 대신 BattleManager 사용!
-    await BattleManager.Attack(yisang, faust, attackSkill, [...attackSkill.coinlist]);
+    await TestManager.Attack(yisang.Slots[0], faust.Slots[0], [...yisang.Slots[0].readySkill.coinlist]);
     
     faust.Stats.ShowStats(); // 맞은 후 체력 확인
-    */
+    faust.bufList.Show();
+    yisang.Slots[0].readySkill = yisang.Skill(1);
+    await TestManager.Attack(yisang.Slots[0], faust.Slots[0], [...yisang.Slots[0].readySkill.coinlist]);
 
     // ==========================================
     // 테스트 2: 합 (Clash)
     // ==========================================
+    /*
     console.log("\n========== TEST 2: 합(Clash) 테스트 ==========");
     
     // 테스트를 위해 양쪽 슬롯에 스킬 장전
