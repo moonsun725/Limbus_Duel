@@ -114,7 +114,8 @@ export class Character {
     }
     takeStagger(damage: number)
     {
-
+        const result = this.Stats.takeStaggerDamage(damage);
+        
     }
     SpeedSetting()
     {
