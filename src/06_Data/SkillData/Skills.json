@@ -434,7 +434,17 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "abilities": []
+          "abilities": [
+            {
+              "Type": "AddKeywordBuf",
+              "timing": "OnHeadsHit",
+              "target": "opponent",
+              "data": {
+                "BattleUnitBuf": "Bleeding",
+                "stack": 1
+              }
+            }
+          ]
         },
         {
           "Type": "Penetrate",
@@ -445,7 +455,17 @@
               "desc": "[OnSucceedAttackHead] 출혈 1 부여"
             }
           ],
-          "abilities": []
+          "abilities": [
+            {
+              "Type": "AddKeywordBuf",
+              "timing": "OnHeadsHit",
+              "target": "opponent",
+              "data": {
+                "BattleUnitBuf": "Bleeding",
+                "stack": 1
+              }
+            }
+          ]
         },
         {
           "Type": "Penetrate",
@@ -456,7 +476,17 @@
               "desc": "[OnSucceedAttack] 출혈 횟수 2 부여"
             }
           ],
-          "abilities": []
+          "abilities": [
+            {
+              "Type": "AddKeywordBuf",
+              "timing": "OnHit",
+              "target": "opponent",
+              "data": {
+                "BattleUnitBuf": "Bleeding",
+                "count": 2
+              }
+            }
+          ]
         }
       ]
     },
@@ -503,7 +533,17 @@
               "desc": "[OnSucceedAttack] 다음 턴에 호흡 2 얻음"
             }
           ],
-          "abilities": []
+          "abilities": [
+            {
+              "Type": "AddKeywordBuf",
+              "timing": "OnHit",
+              "target": "self",
+              "data": {
+                "BattleUnitBuf": "Poise",
+                "stack": 2
+              }
+            }
+          ]
         }
       ]
     },
@@ -528,7 +568,20 @@
               "desc": "대상이 이번 턴에 피해를 받은 상태면 피해량 +30%"
             }
           ],
-          "abilities": []
+          "abilities": [
+            {
+              "Type": "DamageMultiplier",
+              "timing": "OnHit",
+              "target": "opponent",
+              "condition": {
+                "id": "IsDamaged",
+                "target": "opponent"
+              },
+              "data": {
+                "multiplier": 0.2
+              }
+            }
+          ]
         },
         {
           "Type": "Slash",
@@ -840,7 +893,9 @@
               "desc": "[OnSucceedAttack] 파열 2 부여\n"
             }
           ],
-          "abilities": []
+          "abilities": [
+            
+          ]
         }
       ]
     },
@@ -1506,7 +1561,7 @@
     },
     {
       "id": 1120103,
-      "level": 3,
+      "level": 30,
       "name": "썰어내기",
       "desc": "",
       "category": "",
@@ -1559,6 +1614,56 @@
           "Type": "",
           "Color": "",
           "CoinPower": 0
+        }
+      ]
+    },
+
+
+
+    {
+      "id": 1080602,
+      "level": 20,
+      "name": "정면 돌파",
+      "desc": "대상의 화상 6 당, 코인 위력 +1 (최대 2)",
+      "category": "",
+      "color": "",
+      "keywords": [],
+      "BasePower": 4,
+      "AtkLv": 0,
+      "Weight": 1,
+      "coinlist": [
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 화상 1 부여"
+            }
+          ],
+          "abilities": [
+
+          ]
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 화상 1 부여"
+            }
+          ]
+        },
+        {
+          "Type": "",
+          "Color": "",
+          "CoinPower": 0,
+          "coindescs": [
+            {
+              "desc": "[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 화상 횟수 2 부여"
+            }
+          ]
         }
       ]
     }
