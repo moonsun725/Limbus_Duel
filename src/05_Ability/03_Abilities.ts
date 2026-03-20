@@ -7,11 +7,28 @@ export interface AbilityLogic { // 아니시발 인터페이스니까 여기에 
 
     Execute(context: BattleContext, data: any): void;
     
-    GetPowerMultiplier?(context: BattleContext, data: any) : number;
+    GetPowerBonus?(context: BattleContext, data: any) : number;
+    GetCoinPowerBonus?(context: BattleContext, data: any): number;
 }
 
 export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     "AddKeywordBuf": {
+        Execute: (context, data) => {
+            
+            const target = context.target;
+            const status: BattleUnitBuf = {
+                typeId: data.KeywordBuf,
+                Owner: target,
+                stack: data.stack,
+                count: data.count,
+                keyword: data.KeywordBuf
+            };
+            target.bufList.AddKeyWordBuf(status.keyword!, status); // 얘도 임시처리니까 나중에 체크해야한다~~
+            console.log("AddKeyWordBuf 실행:",JSON.stringify(data), "대상:", target.name, "키워드버프", status.keyword);
+            console.log("버프 추가 완료.", data.KeywordBuf);
+        }
+    },
+    "AddKeywordBufNextTurn": {
         Execute: (context, data) => {
             
             const target = context.target;
@@ -59,13 +76,21 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
         }
     },
 
-    "PowerMultiplier": {
-        Execute: () => {}
+    "PowerBonus": { // 위력 보너스
+        Execute: () => {},
+        GetPowerBonus: (context, data) => {
+            let multiplier = data.amount;
+            return multiplier;
+        },
     },
-    "CoinPowerMultiplier": {
-        Execute: () => {}
+    "CoinPowerBonus": { // 코인 위력 보너스
+        Execute: () => {},
+        GetCoinPowerBonus: (context, data) => {
+            let multiplier = data.amount;
+            return multiplier;
+        }
     },
-    "ClashPowerMultiplier": {
+    "ClashPowerBonus": {
         Execute: () => {}
     },
     
@@ -73,4 +98,14 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
         Execute: () => {}
     },
     
+    "TremorBurst": {
+        Execute: (context, data) => {
+            const user = context.user;
+            const target = context.target;
+            const cost = data.cost; // 있으면 값 넣고 없으면 0 넣어라 근데 지금은 any라서 판단을 안 하지 않나
+
+            if(cost) target.bufList.TremorBurst(cost);
+            else target.bufList.TremorBurst();
+        }
+    }
 }
