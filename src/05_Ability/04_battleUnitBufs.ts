@@ -1,4 +1,5 @@
 import type { Character } from "../00_Sinner/00_0_sinner.js";
+import type { BattleContext } from "./00_BattleContext.js";
 
 /*
  * 키워드 버프 효과 (예: 침잠) - JSON상 배열로 존재
@@ -9,7 +10,7 @@ export interface BattleUnitBuf {
     stack: number;
     count: number | null;
     Owner: Character;
-    source?: Character | undefined;
+    source?: Character | undefined; // 결투 선포: 돈키호테, 싱클레어 등등...
     isNegative?: boolean; // 
     keyword?: string;
     usage?: number;
@@ -30,6 +31,9 @@ export interface TriggerEvents {
     
     // 턴 종료 시 효과 
     OnTurnEnd?(owner: Character, BufData: any): void;
+
+    // 턴 시작 시 효과
+    OnTurnStart?(owner: Character, BufData: any): void;
     
     // 맞았을 때 발동 
     OnBeingHit?(owner: Character, BufData: any, attacker?: Character, damage?: number): void;
@@ -50,7 +54,7 @@ export interface TriggerEvents {
     GetClashPowerBonus?(owner: Character, BufData: any) : number
 
     // 최종 위력 보너스 반환
-    GetFinalPowerBonus?(owner: Character, BufData: any) : number
+    GetFinalPowerBonus?(context: BattleContext, BufData: any) : number
 
     // 공격 위력 보너스 반환
     GetAtkPowerBonus?(owner: Character, BufData: any) : number
@@ -101,7 +105,7 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
                 owner.bufList.RemoveBuf("Bleeding");
         }
     },
-    "Themor":
+    "Tremor":
     {
         Activate: (owner, data) => {
             owner.takeStagger(data.stack);
@@ -289,6 +293,37 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         GetSpeedBoost: (owner, data) => {
             return -data.stack;
         }
+    },
+    "Nail":
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
+        },
+        OnTurnEnd: (owner, data) => {
+            data.stack = Math.floor(data.stack*0.5);
+        },
+        OnTurnStart: (owner, data) => {
+            const status: BattleUnitBuf = {
+                typeId: "Bleeding",
+                Owner: owner,
+                stack: 1,
+                count: data.stack,
+                keyword: "Bleeding"
+            };
+            owner.bufList.AddKeyWordBuf("Bleeding", status);
+        }
+    },
+    "Assemble": // 광신 얘는 target도 알아야 하네...
+    {
+        OnAddBuf: (owner, data) => {
+            data.isNegative = false;
+        },
+        GetFinalPowerBonus: (context, data) => {
+            const target = context.target;
+            let adder = 0;
+            if (target.bufList.hasBuf("Nail")) adder = data.stack;
+            return adder;
+        },
     }
 }
 
