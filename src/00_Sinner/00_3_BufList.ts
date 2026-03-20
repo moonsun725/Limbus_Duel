@@ -48,6 +48,27 @@ export class BattleUnitBufList
                 logic.OnAddBuf(this.owner, data);
         }
     }
+    AddKeyWordBufNextTurn(keyword: string, data: BattleUnitBuf) : void // keywordBuf는 위력, 횟수 모두 무조건 존재하므로
+    {
+        if(this.hasBuf(keyword))
+        {
+            if (data.stack)
+                this.BufList.get(keyword)!.stack += data.stack;
+            if (data.count)
+                this.BufList.get(keyword)!.count! += data.count;
+        }
+        else    
+        {
+            if (!data.stack) data.stack = 1; // 버프가 없는 상태에서 [출혈 횟수 1 부여] 효과 받음 -> 위력은 1로 고정
+            if (!data.count) data.count = 1; // 버프가 없는 상태에서 [출혈 1 부여] 효과 받음 -> 횟수는 1로 고정
+
+            else if (data.stack) data.count++; 
+            this.BufList.set(keyword, data);
+            const logic = BufRegistry[keyword];
+            if (logic)
+                logic.OnAddBuf(this.owner, data);
+        }
+    }
     RemoveBuf(id: string) {
         if (this.BufList.delete(id)) {
             console.log(`✨ ${this.owner.name}의 [${id}] 상태 해제`);
@@ -108,13 +129,19 @@ export class BattleUnitBufList
         
         // 이러면 이전에 있던 버프도 싹 날리는거잖아...
         this.BufList = new Map(this.ReadyBufList);
-        this.BufList.set
+        // ReadyBufList 순회하면서 일일이 추가해줘야되나...
     }
     OnTurnStart() : void 
     {
         // readyBufList에 있는 친구들을 옮겨온다
-        // 버프리스트에서 TurnStart인 친구들은 먼저 처리한다
+        // 버프리스트에서 TurnStart인 친구들을 처리한다
         // 나머진 모르겠음
+        for (const [id, status] of this.BufList) {
+            const logic = BufRegistry[id];
+            if (logic && logic.OnTurnStart) {
+                logic.OnTurnStart(this.owner, status);    
+            }
+        }
     }
     OnHit(attacker?: Character, damage?: number)
     {
@@ -149,6 +176,22 @@ export class BattleUnitBufList
         }
         
         return 0;
+    }
+    TremorBurst(amount?: number) 
+    {
+        for (const [id, status] of this.BufList) {
+            // 너 일단은 보류야 
+        }
+
+        if (this.hasBuf("Tremor"))
+        {
+            const logic = BufRegistry["Tremor"];
+            if (logic && logic.Activate) {
+                logic.Activate(this.owner, this.BufList.get("Tremor")); // 나중에 진동 - XXX 이거는 어떻게 처리해야되나 
+                if (logic.UseCount && amount)
+                    logic.UseCount(this.owner, this.BufList.get("Tremor"), amount);
+            }
+        }
     }
     GetDamageMultiplier() : number
     {
