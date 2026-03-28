@@ -1,10 +1,12 @@
 import type { Character } from "../00_Sinner/00_0_sinner.js";
+import { type BattleContext } from "../05_Ability/00_BattleContext.js";
+import { CondRegistry } from "../05_Ability/05_conditions.js";
 import type { Skill } from "./01_0_skill.js";
 import { AbilityRegistry } from "../05_Ability/03_Abilities.js";
 
 
 // 트리거 타입 정의: 언제 호출되었는가?
-export type EffectTrigger = 'OnUse' | 'OnHit' | 'OnBasePower' | 'OnHeadsHit' | 'OnTailsHit' | 'OnParryWin';
+export type EffectTrigger = 'OnUse' | 'OnHit' | 'OnBasePower' | 'OnParryWin';
 
 interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
@@ -17,79 +19,94 @@ interface AbilityLogic {
 // 메인 실행 함수 (Dispatcher)
 // =========================================================
 
-export function ProcessMoveEffects(move: Skill, defender: Character, attacker: Character, currentTiming: EffectTrigger, damage: number = 0): void 
-{
+export function ProcessMoveEffects(
+    move: Skill, 
+    defender: Character, 
+    attacker: Character, 
+    currentTiming: EffectTrigger, 
+    damage: number = 0
+): void {
     
     if (!move.abilities) return;
 
-    for (const ability of move.abilities) // effects가 effect의 배열이니 for...of로 내용물 확인
-    { 
+    // 1. [핵심] 만능 가방(Context) 생성!
+    const context: BattleContext = {
+        user: attacker,
+        target: defender,
+        skill: move,
+        damage: damage
+    };
+
+    for (const ability of move.abilities) { 
         
-        // 1. 타이밍 체크
-        // JSON에 타이밍이 적혀있는데, 지금 시점과 다르면 스킵
-        // (타이밍이 안 적혀있으면 '항상 발동'으로 간주하거나, 기본값 설정)
-        const entryTiming = ability.timing || 'OnHit'; // 기본값은 상황에 따라
+        // 2. 타이밍 체크
+        const entryTiming = ability.timing || 'OnHit';
         if (entryTiming !== currentTiming) continue;
 
-        // 2. 타겟 결정 (JSON 데이터 기반)
-        // entry.target이 'Self'면 attacker, 'Enemy'면 defender
-        // 기본값: OnUse는 Self, OnHit은 Enemy로 설정하면 편함
-        let actualTarget = defender; 
-        if (ability.target === 'Self') {
-            actualTarget = attacker;
-        } else if (ability.target === 'Enemy') {
-            actualTarget = defender;
-        } else {
-             // 타겟 명시가 없으면 타이밍에 따라 관례적으로 처리 (일단 무조건 포함하도록 짜긴 했는데 )
-             actualTarget = (currentTiming === 'OnUse') ? attacker : defender; 
-             console.log("[ProcessMoveEffects]: 부가효과의 타겟이 명시되어 있지 않음.")
-        }
+        // ★ 기존의 복잡했던 actualTarget(타겟 결정 로직)은 완전히 삭제되었습니다! ★
 
-        // 3. 조건 판단
-        /*
-            const cond = 
-            if (cond)
-                cond.Execute(); // 이게 이제 boolean이나 number형일거란 말이야 
-        */ 
+        // 3. 조건 판단 (Gate)
+        if (ability.condition) {
+            const cond = CondRegistry[ability.condition.id];
+            if (cond && cond.Execute) {
+                // 조건 레지스트리에게 가방과 조건 데이터를 넘겨서 통과(T/F) 여부만 받음
+                const isPassed = cond.Execute(context, ability.condition) as unknown as boolean;
+                if (!isPassed) continue; // 조건 불만족 시 효과 실행 스킵!
+            }
+        }
             
         // 4. 로직 실행
         const logic = AbilityRegistry[ability.type];
-        if (logic) {
-            // 이제 로직에게 "누구한테(actualTarget)" 할지만 알려주면 됨
-            logic.Execute(actualTarget, ability.data, damage); 
+        if (logic && logic.Execute) {
+            // 이제 Dispatcher는 "누구한테" 할지 고민하지 않고 가방(context)만 던집니다.
+            // 타겟 판별은 Registry 내부에서 알아서 처리합니다.
+            logic.Execute(context, ability); 
         }
     }
 }
 
 // =========================================================
-// 위력 보정 전용 함수 (number 반환)
+// 스킬 위력 보정 전용 함수 (number 반환)
 // =========================================================
 export function GetPowerMultiplier(
     move: Skill, 
     target: Character, 
     user: Character
 ): number {
-    let multiplier = 1.0;
+    // multiplier(1.0) 대신 bonus(0)로 변경하고 합연산을 준비합니다.
+    let bonus = 0;
     
-    if (!move.abilities) return multiplier;
+    if (!move.abilities) return bonus;
 
-    for (const entry of move.abilities) {
-        // 타이밍이 OnBasePower인 것만 찾음
-        if (entry.timing !== 'OnBasePower') continue;
+    // 1. 만능 가방(Context) 생성!
+    const context: BattleContext = {
+        user: user,
+        target: target,
+        skill: move,
+        damage: 0 
+    };
 
-        const logic = AbilityRegistry[entry.type];
-        // 해당 로직에 GetPowerMultiplier 메서드가 있으면 실행
-        if (logic && logic.GetPowerMultiplier) {
+    for (const ability of move.abilities) {
+        if (ability.timing !== 'OnBasePower') continue;
 
-            let subject = target; // 기본적으로는 target
-            if (entry.target === 'Self') {
-                subject = user;
+        // 2. 조건(Gate)이 있다면 먼저 검사!
+        if (ability.condition) {
+            const cond = CondRegistry[ability.condition.id];
+            if (cond && cond.Execute) {
+                // 주의: 05_conditions.ts의 Execute가 boolean을 반환하게 설정되어 있어야 합니다!
+                const isPassed = cond.Execute(context, ability.condition) as unknown as boolean;
+                if (!isPassed) continue; // 조건 불만족 시 아래 계산 로직 컷!
             }
+        }
 
-            // ★ 여기서 user와 target을 둘 다 넘겨줌
-            const result = logic.GetPowerMultiplier(subject, user, entry.data);
-            multiplier *= result;
+        // 3. 로직 실행 (가방만 던짐!)
+        const logic = AbilityRegistry[ability.type];
+        if (logic && logic.GetPowerBonus) {
+            // 이제 로직 안에서 context.user를 쓸지 context.target을 쓸지 알아서 결정함
+            const result = logic.GetPowerBonus(context, ability);
+            bonus += result; // ★ 곱하기(*=) 대신 더하기(+=)로 변경 완료!
         }
     }
-    return multiplier;
+    
+    return bonus;
 }

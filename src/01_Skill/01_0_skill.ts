@@ -26,7 +26,7 @@ export interface SkillAbility {
   timing: EffectTiming;
   target: EffectTarget;
 
-  condition?: boolean;
+  condition?: any;
   data?: any;
 }
 

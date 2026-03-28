@@ -52,3 +52,34 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
         }
     }
 }
+/*
+export function GetCoinBonus(
+    move: Skill, 
+    target: Character, 
+    user: Character
+): number {
+    let multiplier = 1.0;
+    
+    if (!move.abilities) return multiplier;
+
+    for (const entry of move.abilities) {
+        // 타이밍이 OnBasePower인 것만 찾음
+        if (entry.timing !== 'OnBasePower') continue;
+
+        const logic = AbilityRegistry[entry.type];
+        // 해당 로직에 GetPowerMultiplier 메서드가 있으면 실행
+        if (logic && logic.GetPowerMultiplier) {
+
+            let subject = target; // 기본적으로는 target
+            if (entry.target === 'Self') {
+                subject = user;
+            }
+
+            // ★ 여기서 user와 target을 둘 다 넘겨줌
+            const result = logic.GetPowerMultiplier(subject, user, entry.data);
+            multiplier *= result;
+        }
+    }
+    return multiplier;
+}
+*/

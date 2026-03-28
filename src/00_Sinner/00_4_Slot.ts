@@ -1,9 +1,5 @@
 import { Character } from './00_0_sinner.js';
 import { type Skill } from '../01_Skill/01_0_skill.js';
-import { type Coin } from '../02_Coin/02_0_coin.js';
-import { calculateDamage } from './00_7_dmgCalc.js';
-import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
-import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
 
 export class BattleSlot {
     // 읽기 전용으로 설정하여 원본 교체 방지

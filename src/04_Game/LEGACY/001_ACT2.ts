@@ -1,5 +1,5 @@
-import { BattleManager } from "../../03_BattleSystem/BattleManager.js";
-import { ActManager } from "../../03_BattleSystem/ActManager.js";
+import { BattleManager } from "../../03_BattleSystem/03_3_BattleManager.js";
+import { ActManager } from "../../03_BattleSystem/03_2_ActManager.js";
 import { BattleSlot } from "../../00_Sinner/00_4_Slot.js";
 import { Character, createSinnerFromData } from "../../00_Sinner/00_0_sinner.js";
 import { LoadSkillData } from "../../01_Skill/01_2_skillLoader.js";
