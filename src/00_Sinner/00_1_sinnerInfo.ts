@@ -14,6 +14,7 @@ export interface IsinnerData
     
     minSpeed: number; 
     maxSpeed: number; 
+    speed?: number; // 실제로는 쓰이지 않으므로 optional(?) 처리했따 ㅇㅇ
     staggerGauge: number[];
     ResistP: Resist1; // 참관타 
 }
@@ -71,8 +72,18 @@ export class SinnerInfo // 각종 스탯, 내성
     }
     Get(stat: keyof IsinnerData) : number
     {
-        if (stat !== 'ResistP' && stat !== 'name' && stat !== 'staggerGauge')
-            return this.baseInfo[stat];
+        switch(stat){
+            case 'name':
+            case 'ResistP':
+            case 'staggerGauge':
+                break;
+            case 'Def':
+                return this.baseInfo['Def'] + this.baseInfo['lv'];
+            case 'speed':
+                return this.speed; // 실제 속도를 반환하지만 일관성을 위해서 키 용도로는 넣어뒀다...
+            default:
+                return this.baseInfo[stat];
+        }
         return -1;
     }
     reset()

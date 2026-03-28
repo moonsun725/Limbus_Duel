@@ -1,76 +1,53 @@
 import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { BattleContext } from "./00_BattleContext.js";
 
-/*
- * 키워드 버프 효과 (예: 침잠) - JSON상 배열로 존재
- */
-export type KeyWords = 'BURN' | 'BLEEDING' | 'TREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE'; // 이건 언제 고치냐
+export type KeyWords = 'BURN' | 'BLEEDING' | 'TREMOR' | 'RUPTURE' | 'SINKING' | 'POISE' | 'CHARGE'; 
+
 export interface BattleUnitBuf {
-   typeId: string;
+    typeId: string;
     stack: number;
     count: number | null;
     Owner: Character;
-    source?: Character | undefined; // 결투 선포: 돈키호테, 싱클레어 등등...
-    isNegative?: boolean; // 
+    source?: Character | undefined; 
+    isNegative?: boolean; 
     keyword?: string;
     usage?: number;
 }
 
-export interface TriggerEvents {
-    // 강제 발동
-    Activate?(owner: Character, BufData: any) : void 
+// 🌟 새롭게 추가된 Modifier 객체 (스탯 증감치를 모두 담는 바구니)
+export interface StatModifier {
+    damageMultiplier: number;
+    damageReductionRate: number;
 
-    //횟수/위력 사용
+    powerBonus: number;
+    clashPowerBonus: number;
+    finalPowerBonus: number;
+    atkPowerBonus: number;
+    defPowerBonus: number;
+    coinPowerBonus: number;
+    coinPowerBonus_P: number;
+    coinPowerBonus_M: number;
+
+    atkLvBonus: number;
+    defLvBonus: number;
+    speedBoost: number;
+}
+
+export interface TriggerEvents {
+    Activate?(owner: Character, BufData: any) : void 
     UseStack?(owner: Character, BufData: any, amount: number) : boolean
     UseCount?(owner: Character, BufData: any, amount: number) : boolean
-
-    // 효과 부여 시점
     OnAddBuf(owner: Character, BufData: any): void
-
     OnCoinToss?(owner: Character, BufData: any): void; 
-    
-    // 턴 종료 시 효과 
     OnTurnEnd?(owner: Character, BufData: any): void;
-
-    // 턴 시작 시 효과
     OnTurnStart?(owner: Character, BufData: any): void;
-    
-    // 맞았을 때 발동 
     OnBeingHit?(owner: Character, BufData: any, attacker?: Character, damage?: number): void;
-    
-    // 데미지 계산 전에 발동
     IsCritical?(owner: Character, BufData: any) : boolean;
+    ParalyzeMechanic?(owner: Character, BufData: any) : 0 | 1;
 
-    // 내가 주는 피해 버프 
-    GetDamageMultiplier?(owner: Character, BufData: any): number
-
-    // 내가 받는 피해
-    GetDamageReductionRate?(owner: Character, BufData: any): number
-
-    // 마비 매커니즘
-    ParalyzeMechanic?(owner: Character, BufData: any) : 0 | 1 // 여기는 boolean하고 산술연산 안 될 거 아냐 
-    
-    // 합 위력 보너스 반환
-    GetClashPowerBonus?(owner: Character, BufData: any) : number
-
-    // 최종 위력 보너스 반환
-    GetFinalPowerBonus?(context: BattleContext, BufData: any) : number
-
-    // 공격 위력 보너스 반환
-    GetAtkPowerBonus?(owner: Character, BufData: any) : number
-    
-    // 수비 위력 보너스 반환
-    GetDefPowerBonus?(owner: Character, BufData: any) : number
-
-    // 공격 레벨 증감 반환
-    GetAtkLvBonus?(owner: Character, BufData: any) : number
-
-    // 방어 레벨 증감 반환
-    GetDefLvBonus?(owner: Character, BufData: any) : number
-
-    // 속도값 증감 반환(신속, 속박)
-    GetSpeedBoost?(owner: Character, BufData: any) : number
-
+    // 🌟 기존의 9개 Get~~ 함수들을 이거 하나로 통폐합!
+    // context는 스피드 굴림처럼 아직 타겟이 없는 상황일 수도 있으므로 옵셔널(?) 처리합니다.
+    OnModifyStats?(owner: Character, BufData: any, modifier: StatModifier, context?: BattleContext): void;
 }
 
 export const BufRegistry: { [key: string]: TriggerEvents } = {
@@ -79,6 +56,8 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         Activate: (owner, data) => {
             owner.takeDamage(data.stack);
             data.count--;
+            if (data.count <= 0)
+                owner.bufList.RemoveBuf("Bleeding");
         },
         OnAddBuf: (owner, data) => {
             data.isNegative = true;
@@ -86,6 +65,8 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         OnTurnEnd: (owner, data) => {
             owner.takeDamage(data.stack);
             data.count--;
+            if (data.count <= 0)
+                owner.bufList.RemoveBuf("Bleeding");
         }
     },
     "Bleeding":
@@ -113,6 +94,11 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
         OnAddBuf: (owner, data) => {
             data.isNegative = true;
         },
+        OnTurnEnd: (owner, data) => {
+            data.count--;
+            if (data.count <= 0)
+                owner.bufList.RemoveBuf("Themor");
+        },
         UseCount: (owner, data, amount) => {
             // 진동 횟수 소모 가능한지 따지는 경우가 있고, 안 따지는 경우가 있잖음 ㅇㅇ
             let posible
@@ -130,8 +116,8 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
             if (data.count <= 0)
                 owner.bufList.RemoveBuf("Rupture");
         },
-        OnAddBuf: () => {
-
+        OnAddBuf: (owner, data) => {
+            data.isNegative = true;
         },
         OnBeingHit: (owner, data) => {
             owner.takeDamage(data.stack);
@@ -198,132 +184,105 @@ export const BufRegistry: { [key: string]: TriggerEvents } = {
                 owner.bufList.RemoveBuf("Charge");
         },
     },
-    "Protection":
-    {
-        OnAddBuf: (owner, data) =>
-        {
-            data.isNegative = false;
-        },
-        GetDamageReductionRate: (owner, data) =>
-        {
-            return data.stack;
+    "Protection": {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.damageReductionRate += data.stack;
         }
     },
-    "Fragile":
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = true;
-        },
-        GetDamageReductionRate: (owner, data) =>
-        {
-            return -data.stack*0.1;
+    "Fragile": {
+        OnAddBuf: (owner, data) => { data.isNegative = true; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.damageReductionRate -= data.stack * 0.1;
         }
     },
-    "DmgUp":
-    {
-        OnAddBuf: (owner, data) =>
-        {
-            data.isNegative = false;
-        },
-        GetDamageMultiplier: (owner, data) => {
-            return data.stack;
-        },
-    },
-    "DmgDown":
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = true;
-        },
-        GetDamageMultiplier: (owner, data) => {
-            return -data.stack;
-        },
-    },
-    "AtkLvUp":
-    {
-        OnAddBuf: (owner, data) =>
-        {
-            data.isNegative = false;
-        },
-        GetAtkLvBonus: (owner, data) => {
-            return data.stack;
-        },
-    },
-    "AtkLvDown":
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = true;
-        },
-        GetAtkLvBonus: (owner, data) => {
-            return -data.stack;
-        },
-    },
-    "DefLvUp":
-    {
-        OnAddBuf: (owner, data) =>
-        {
-            data.isNegative = false;
-        },
-        GetDefLvBonus(owner, data) {
-            return data.stack
+    "DmgUp": {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.damageMultiplier += data.stack;
         }
     },
-    "DefLvDown":
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = true;
-        },
-        GetDefLvBonus(owner, data) {
-            return -data.stack
+    "DmgDown": {
+        OnAddBuf: (owner, data) => { data.isNegative = true; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.damageMultiplier -= data.stack;
+        }
+    },
+    "AtkLvUp": {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.atkLvBonus += data.stack;
+        }
+    },
+    "AtkLvDown": {
+        OnAddBuf: (owner, data) => { data.isNegative = true; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.atkLvBonus -= data.stack;
+        }
+    },
+    "DefLvUp": {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.defLvBonus += data.stack;
+        }
+    },
+    "DefLvDown": {
+        OnAddBuf: (owner, data) => { data.isNegative = true; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.defLvBonus -= data.stack;
         }
     },  
-    "Agility":
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = false;
-        },
-        GetSpeedBoost: (owner, data) => {
-            return data.stack;
+    "Agility": {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.speedBoost += data.stack;
         }
     },
-    "Binding":
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = true;
-        },
-        GetSpeedBoost: (owner, data) => {
-            return -data.stack;
+    "Binding": {
+        OnAddBuf: (owner, data) => { data.isNegative = true; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.speedBoost -= data.stack;
         }
     },
-    "Nail":
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = true;
-        },
-        OnTurnEnd: (owner, data) => {
-            data.stack = Math.floor(data.stack*0.5);
-        },
-        OnTurnStart: (owner, data) => {
-            const status: BattleUnitBuf = {
-                typeId: "Bleeding",
-                Owner: owner,
-                stack: 1,
-                count: data.stack,
-                keyword: "Bleeding"
-            };
-            owner.bufList.AddKeyWordBuf("Bleeding", status);
+    "Assemble": { // 광신
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier, context) => {
+            // Context가 있고, 타겟에게 Nail이 있는지 확인
+            if (context && context.target && context.target.bufList.hasBuf("Nail")) {
+                modifier.finalPowerBonus += data.stack;
+            }
         }
     },
-    "Assemble": // 광신 얘는 target도 알아야 하네...
-    {
-        OnAddBuf: (owner, data) => {
-            data.isNegative = false;
-        },
-        GetFinalPowerBonus: (context, data) => {
-            const target = context.target;
-            let adder = 0;
-            if (target.bufList.hasBuf("Nail")) adder = data.stack;
-            return adder;
-        },
+
+    "PowUp": { // 위력 증가 시리즈
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.powerBonus += data.stack;
+        }
+    },
+    "AtkPowUp": {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.atkPowerBonus += data.stack;
+        }
+    },
+    "DefPowUp": {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.defPowerBonus += data.stack;
+        }
+    },
+    "FinPowUp" : {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier) => {
+            modifier.finalPowerBonus += data.stack;
+        }
+    },
+    "TypePowUp" : {
+        OnAddBuf: (owner, data) => { data.isNegative = false; },
+        OnModifyStats: (owner, data, modifier, context) => {
+            modifier.powerBonus += data.stack;
+        }
     }
 }
 

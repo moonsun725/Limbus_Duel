@@ -1,5 +1,6 @@
 import type { Character } from "./00_0_sinner.js";
-import { type BattleUnitBuf, BufRegistry } from "../05_Ability/04_battleUnitBufs.js";
+import { type BattleUnitBuf, type StatModifier, BufRegistry } from "../05_Ability/04_battleUnitBufs.js";
+import type { BattleContext } from "../05_Ability/00_BattleContext.js";
 
 export class BattleUnitBufList 
 {
@@ -193,62 +194,41 @@ export class BattleUnitBufList
             }
         }
     }
-    GetDamageMultiplier() : number
+
+    GetCombinedModifier(context?: BattleContext): StatModifier 
     {
-        let Bmultipler = 0;
+        // 1. 깨끗한 일회용 바구니(Modifier) 준비
+        const modifier: StatModifier = {
+            damageMultiplier: 0,
+            damageReductionRate: 0,
+            powerBonus: 0,
+            clashPowerBonus: 0,
+            finalPowerBonus: 0,
+            atkPowerBonus: 0,
+            defPowerBonus: 0,
+            coinPowerBonus: 0,
+            coinPowerBonus_P: 0,
+            coinPowerBonus_M: 0,
+            atkLvBonus: 0,
+            defLvBonus: 0,
+            speedBoost: 0
+        };
+
+        // 2. 버프 리스트를 단 *한 번만* 순회합니다.
         for (const [id, status] of this.BufList) {
             const logic = BufRegistry[id];
-            console.log(id);
-            console.log(`[BufList]/[GetDamageMultiplier]: `);
-            if (logic && logic.GetDamageMultiplier) {
-                Bmultipler += logic.GetDamageMultiplier(this.owner, status);
+            
+            // 디버깅용 로그도 여기서 한 번만 찍으면 훨씬 깔끔합니다.
+            // console.log(`[BufList]/[GetCombinedModifier]: 계산 중인 버프 - ${id}`);
+            
+            if (logic && logic.OnModifyStats) {
+                // 버프 로직에게 바구니를 넘겨주고 알아서 수치를 담으라고 위임
+                logic.OnModifyStats(this.owner, status, modifier, context);
             }
         }
-        return Bmultipler;
-    }
 
-    GetDamageReduction() : number
-    {
-        let Bmultipler = 0;
-        for (const [id, status] of this.BufList) {
-            const logic = BufRegistry[id];
-            console.log("[BufList]: 부여된 버프", id);
-            console.log(`[BufList]/[GetDamageReduction]: `);
-            if (logic && logic.GetDamageReductionRate) {
-                Bmultipler += logic.GetDamageReductionRate(this.owner, status);
-            }
-        }
-        return Bmultipler;
-    }
-
-    GetAtkLvBonus() : number
-    {
-        let atkB = 0;
-        for (const [id, status] of this.BufList)
-        {
-            const logic = BufRegistry[id];
-            console.log(id);
-            console.log(`[BufList]/[GetAtkLvBonus]: `);
-            if (logic && logic.GetAtkLvBonus) {
-                atkB += logic.GetAtkLvBonus(this.owner, status);
-            }
-        }
-        return atkB;
-    }
-
-    GetDefLvBonus() : number
-    {
-        let defB = 0;
-        for (const [id, status] of this.BufList)
-        {
-            const logic = BufRegistry[id];
-            console.log(id);
-            console.log(`[BufList]/[GetDefLvBonus]: `);
-            if (logic && logic.GetDefLvBonus) {
-                defB += logic.GetDefLvBonus(this.owner, status);
-            }
-        }
-        return defB;
+        // 3. 모든 버프의 계산이 끝난 완성된 바구니 반환
+        return modifier;
     }
 
 }

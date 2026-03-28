@@ -119,10 +119,12 @@ export class Character {
     }
     SpeedSetting()
     {
+        const modifer = this.bufList.GetCombinedModifier();
         const minSpeed = this.minSpeed;
         const maxSpeed = this.maxSpeed;
         this.speed = Math.floor(Math.random()*(maxSpeed-minSpeed+1)) + minSpeed; // 스피드 세팅
-        this.speed += 0; // 당장은 더미로 남겨놓고(신속, 속박 처리)
+        
+        this.speed += modifer.speedBoost; // 당장은 더미로 남겨놓고(신속, 속박 처리)
         if (this.speed <= 0)
             this.speed = 1;
         console.log(`${this.name}의 속도: ${this.speed}`);

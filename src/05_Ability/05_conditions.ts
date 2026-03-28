@@ -25,7 +25,7 @@ export interface CheckLogic
     Execute(context: BattleContext, data: any): boolean;
     
     // 근데 이거 다 조건식이니까 일괄적으로 처리하려면 exexute 하나만 두는게 맞지않음?
-    CheckBuf?() : boolean | number; // 쪼갤까?
+    CheckBuf?() : boolean; // 쪼갤까?
     CheckSpeed?() : boolean;
     CheckHpRate?() : boolean;
     CanConsume?(owner: Character, data: any) : boolean;

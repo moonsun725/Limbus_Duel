@@ -218,6 +218,30 @@ export class GameRoom {
                 });
             },
 
+            onPowModify: async (char: Character, amount) => {
+                const role = this.getOwnerRole(char);
+                io.to(this.roomId).emit('skill_pow_modified', { // >< socket.on으로 다음에 받을 준비하시고
+                    role: role,
+                    bonus: amount
+                    // 이거 나중에 코인위력이 갱신될 수 있어서 봐야됨
+                });
+            },
+            onCoinPowModify: async (char: Character, amount) => {
+                const role = this.getOwnerRole(char);
+                io.to(this.roomId).emit('coin_pow_modified', {
+                    role: role,
+                    bonus: amount
+                    // 이거 나중에 코인위력이 갱신될 수 있어서 봐야됨
+                });
+            },
+            onFinalPowModify: async (char: Character, amount) => {
+                const role = this.getOwnerRole(char);
+                io.to(this.roomId).emit('skill_pow_modified', {
+                    role: role,
+                    bonus: amount
+                    // 이거 나중에 코인위력이 갱신될 수 있어서 봐야됨
+                });
+            }
         }
         // ★ BattleManager 초기화 (콜백 주입 - 여기서 UI 갱신 로직 정의)
 

@@ -10,6 +10,15 @@ export interface BattleCallbacks {
     onClashStart: (slot1: BattleSlot, slot2: BattleSlot) => Promise<void>;
     onCoinToss: (char: Character, isHeads: boolean) => Promise<void>;
     onCoinResult: (char: Character, isHeads: boolean) => Promise<void>; // 레거시 코드(일단은 남겨둠)
+    // 콜백 추가
+
+    // 코인 위력 변경
+    onCoinPowModify: (char: Character, bonusAmount: number) => Promise<void>;
+    // 그냥 위력 변경 
+    onPowModify: (char: Character, bonusAmount: number) => Promise<void>;
+    // 최종 위력 변경
+    onFinalPowModify: (char: Character, bonusAmount: number) => Promise<void>;
+
     onClashResult: (
         char1: Character, 
         power1: number, 

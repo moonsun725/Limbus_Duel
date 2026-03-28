@@ -79,15 +79,15 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     "PowerBonus": { // 위력 보너스
         Execute: () => {},
         GetPowerBonus: (context, data) => {
-            let multiplier = data.amount;
-            return multiplier;
+            let bonus = data.amount;
+            return bonus;
         },
     },
     "CoinPowerBonus": { // 코인 위력 보너스
         Execute: () => {},
         GetCoinPowerBonus: (context, data) => {
-            let multiplier = data.amount;
-            return multiplier;
+            let bonus = data.amount;
+            return bonus;
         }
     },
     "ClashPowerBonus": {

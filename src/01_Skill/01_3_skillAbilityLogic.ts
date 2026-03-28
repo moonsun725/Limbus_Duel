@@ -12,7 +12,7 @@ interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
     Execute(target: Character, data: any, damage?: number, source?: Character): void;
     // 나중에 군루 생각하면 쌍방 검사해야됨 이 시벌롬
-    GetPowerMultiplier?(target: Character, user: Character, data: any) : number;
+    GetPowerBonus?(target: Character, user: Character, data: any) : number;
 }
 
 // =========================================================
@@ -50,7 +50,7 @@ export function ProcessMoveEffects(
             const cond = CondRegistry[ability.condition.id];
             if (cond && cond.Execute) {
                 // 조건 레지스트리에게 가방과 조건 데이터를 넘겨서 통과(T/F) 여부만 받음
-                const isPassed = cond.Execute(context, ability.condition) as unknown as boolean;
+                const isPassed = cond.Execute(context, ability.condition);
                 if (!isPassed) continue; // 조건 불만족 시 효과 실행 스킵!
             }
         }
@@ -60,7 +60,7 @@ export function ProcessMoveEffects(
         if (logic && logic.Execute) {
             // 이제 Dispatcher는 "누구한테" 할지 고민하지 않고 가방(context)만 던집니다.
             // 타겟 판별은 Registry 내부에서 알아서 처리합니다.
-            logic.Execute(context, ability); 
+            logic.Execute(context, ability.data); 
         }
     }
 }
@@ -68,7 +68,7 @@ export function ProcessMoveEffects(
 // =========================================================
 // 스킬 위력 보정 전용 함수 (number 반환)
 // =========================================================
-export function GetPowerMultiplier(
+export function GetPowerBonus(
     move: Skill, 
     target: Character, 
     user: Character

@@ -7,6 +7,7 @@ import { ProcessCoinEffects } from '../02_Coin/02_1_coinAbilityLogic.js';
 import { ProcessMoveEffects } from '../01_Skill/01_3_skillAbilityLogic.js';
 import { BattleSlot } from '../00_Sinner/00_4_Slot.js'; // 타입 참조용
 import type { BattleCallbacks } from '../04_Game/Events/BattleEvents.js';
+import type { BattleContext } from '../05_Ability/00_BattleContext.js';
 
 export class BattleManager 
 {
@@ -25,7 +26,11 @@ export class BattleManager
                 onDamage: async (target, damage) => {},
                 onGetHit: async (target, damage) => {},
                 onCoinResult: async (char, isHeads) => {},
-                onAttackEnd: async (attacker, target) => {}
+                onAttackEnd: async (attacker, target) => {},
+                
+                onPowModify: async (char, amount) => {},
+                onCoinPowModify: async (char, amount) => {},
+                onFinalPowModify: async (char, amount) => {}
             }
     }
 
@@ -59,10 +64,9 @@ export class BattleManager
             // 코인 토스 및 위력 계산
             // [수정 후] 병렬 실행 (동시에 시작!)
             const [power1, power2] = await Promise.all([
-                this.CoinToss(char1, skill1, coins1),
-                this.CoinToss(char2, skill2, coins2)
+                this.CoinToss(char1, char2, skill1, coins1), // 수정사항: CoinToss가 양측 다 검사하도록 함
+                this.CoinToss(char2, char1, skill2, coins2)
             ]);
-            
 
             console.log(`   [Clash ${clashCount}합] ${char1.name}: ${power1} vs ${char2.name}: ${power2}`);
 
@@ -95,25 +99,37 @@ export class BattleManager
     }
 
     // 합 위력 계산 헬퍼
-    private async CoinToss(char: Character, skill: Skill, coins: Coin[]): Promise<number> {
+    private async CoinToss(char: Character, target: Character, skill: Skill, coins: Coin[]): Promise<number> {
         let power = skill.BasePower;
-        let headsCount = 0;
-        
-        
+        const context = { user: char, target: target, damage: 0, skill: skill };
+        const bMods = char.bufList.GetCombinedModifier(context);
+        // 이제 skill이랑 coin에서도 효과가 있을 건데 그때도 마찬가지로 context 넘기면서 하면 될듯??
+
+        // 기본 위력 계산
+        power += bMods.powerBonus;
+        if (skill.category == "attack") power += bMods.atkPowerBonus;
+        else power += bMods.defPowerBonus;
+
+        // 코인 위력 계산
         for (const coin of coins) {
             // 정신력 기반 코인 토스
-            const coinPower = coin.CoinPower; // 여기에다가 나중에 버프리스트 등등 긁어와서 추가로 더해줄 수 있음
+            const BaseCoinPower = coin.CoinPower; // 여기에다가 나중에 버프리스트 등등 긁어와서 추가로 더해줄 수 있음
+            let coinPower = BaseCoinPower + bMods.coinPowerBonus;
+            if (BaseCoinPower < 0) coinPower += bMods.coinPowerBonus_M; 
+            else coinPower += bMods.coinPowerBonus_P;
             const isHeads = Math.random() * 100 < (char.Stats.sp + 50)
             if (isHeads) {
                 console.log(`[CoinToss]: 앞면: + ${coinPower}`);
                 power += coinPower;
-                headsCount++;
             }
             else
                 console.log(`[CoinToss]: 뒷면: + 0`);
 
             await this.callbacks.onCoinToss(char, isHeads); // 이제 앞뒷면 둘다 연출될거임
         }
+
+        // 최종 위력 계산
+        power += bMods.finalPowerBonus;
         return power;
     }
 
@@ -142,36 +158,51 @@ export class BattleManager
             ProcessMoveEffects(skill, target, attacker, "OnUse");
         }
 
-        let currentPower = skill.BasePower; // 누적 위력 방식이므로
+        // 코인의 앞/뒷면에 따라 '순수하게 누적되는 스킬 위력'
+        let baseCurrentPower = skill.BasePower; 
 
         for (const coin of activeCoins) {
-            // 연출을 위한 딜레이 (코인 하나하나 때리는 느낌)
-
             attacker.bufList.OnCoinToss();
             const isHeads = Math.random() * 100 < (attacker.Stats.sp + 50);
 
+            // ---------------------------------------------------------
+            // 1. 새끼야 코인 위력도 계속 갱신해야하잖니
+            // ---------------------------------------------------------
+            const context = { user: attacker, target: target, damage: 0, skill: skill };
+            const bMods = attacker.bufList.GetCombinedModifier(context);
+
+            const BaseCoinPower = coin.CoinPower; // 여기에다가 나중에 버프리스트 등등 긁어와서 추가로 더해줄 수 있음
+            let coinPower = BaseCoinPower + bMods.coinPowerBonus;
+            if (BaseCoinPower < 0) coinPower += bMods.coinPowerBonus_M; 
+            else coinPower += bMods.coinPowerBonus_P;
+
+            // 2. 앞뒷면 여부 계산
             if (isHeads) {
-                currentPower += coin.CoinPower; // 앞면이면 위력 증가
-                console.log(`   [Coin] 앞면! 현재 위력: ${currentPower}`);
+                baseCurrentPower += coinPower; // 앞면이면 기본 위력 증가 (누적됨)
+                console.log(`   [Coin] 앞면! 현재 기본 위력: ${baseCurrentPower}`);
             } else {
-                console.log(`   [Coin] 뒷면! 현재 위력: ${currentPower}`);
+                console.log(`   [Coin] 뒷면! 현재 기본 위력: ${baseCurrentPower}`);
             }
             await this.callbacks.onCoinResult(attacker, isHeads);
 
-            // 데미지 계산 및 적용
-            const damage = calculateDamage(attacker, target, skill, coin, currentPower, clashCnt);
+            
+            // 3. 이번 타격의 '최종 위력' 계산 (누적된 코인 위력 + 현재 시점의 버프 보너스)
+            // 버프 보너스는 누적되면 안 되므로 여기서 임시로 더해줍니다.
+            let finalHitPower = baseCurrentPower + bMods.atkPowerBonus + bMods.finalPowerBonus;
+
+            // 4. 데미지 계산 및 적용 (calculateDamage 내부에서도 최신 Modifier를 가져오게 됨!)
+            const damage = calculateDamage(attacker, target, skill, coin, finalHitPower, clashCnt);
             target.takeDamage(damage);
-            this.callbacks.onGetHit(target); // UI 처리(공격 적중시 경직)
-            this.callbacks.onDamage(target, damage); // 대미지 표기 
-            
-            // 적중 시 효과 처리
+            this.callbacks.onGetHit(target); 
+            this.callbacks.onDamage(target, damage); 
+
+            // 5. ★ 적중 시 효과 발동 (여기서 대상의 파열, 침잠 등이 깎임!) ★
             target.bufList.OnHit(attacker, Math.floor(damage));
-            
-            // const effectType = isHeads ? "OnHeadsHit" : "OnTailsHit";
-            // ProcessCoinEffects(coin, target, attacker, effectType);
             ProcessCoinEffects(coin, target, attacker, "OnHit");
-            
-            // 만약 대상이 죽거나 흐트러지면 중단할지 여부 체크 로직 추가 가능
+
+            // -> 루프 끝! 
+            // 대상의 파열이 깎였으므로, 다음 코인 루프가 돌 때 
+            // 2번 과정에서 가져오는 atkMods에는 파열 보너스가 빠진 상태로 깔끔하게 계산됩니다!
         }
         skillSlot.consumeSkill();
         console.log(`[Attack End] 공격 종료`);
