@@ -135,7 +135,7 @@ export function initBattleCombat() {
         const atkBundleId = (data.atkRole === 'p1') ? 'p1-bundle' : 'p2-bundle';
         removeSkillUI(atkBundleId);
     });
-
+    
     // 4. 코인 토스() 신호
     // 이게 코인 던질때마다 받아야 됨(콜백이 루프 안에서 여러 번 던져주니까)
     socket.on('individual_coin_result', (data) => {
@@ -189,6 +189,42 @@ export function initBattleCombat() {
 
                 circle.style.color = '#ffffff';
             }
+        }
+    });
+    // 4-1. 스킬 위력 수정
+    socket.on('skill_pow_modified', (data) => {
+        // data : { role : 'p1' | 'p2', amount : number }
+        const bundle = document.getElementById(data.role === 'p1' ? 'p1-bundle' : 'p2-bundle');
+        if (!bundle) return;
+
+        const container = bundle.querySelector('.skill-container');
+        const circle = bundle.querySelector('.main-circle');
+        
+        if (container && circle) {
+            // 더하기 빼기 할 필요 없이 서버가 준 값을 그대로 꽂아버립니다! (초간단)
+            container.dataset.currentPower = data.finalPower;
+            circle.querySelector('.anim-target').innerText = data.finalPower;
+
+            // 만약 나중에 연출을 넣고 싶다면 data.amount를 활용하면 끝!
+            // if (data.amount > 0) circle.style.color = 'yellow';
+        }
+    });
+
+    // 4-2. 코인 위력 수정됨
+    socket.on('coin_pow_modified', (data) => {
+        // data : { role : 'p1' | 'p2', amount : number }
+        const targetBundleId = (data.role === 'p1') ? 'p1-bundle' : 'p2-bundle';
+        const bundle = document.getElementById(targetBundleId);
+        if (!bundle) return;
+
+        const container = bundle.querySelector('.skill-container');
+        
+        if (container) {
+            // 코인 위력은 데이터셋만 조작해두면, 코인 토스 콜백에서 알아서 꺼내 씁니다.
+            let currentCoinPow = parseInt(container.dataset.coinPower || 0);
+            currentCoinPow == data.bonus;
+            
+            container.dataset.coinPower = currentCoinPow;
         }
     });
 

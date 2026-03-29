@@ -222,9 +222,11 @@ export class GameRoom {
                 const role = this.getOwnerRole(char);
                 io.to(this.roomId).emit('skill_pow_modified', { // >< socket.on으로 다음에 받을 준비하시고
                     role: role,
-                    bonus: amount
+                    finalPower: amount
                     // 이거 나중에 코인위력이 갱신될 수 있어서 봐야됨
                 });
+                console.log(`위력 보정됨 ${amount}`);
+                await sleep(100);
             },
             onCoinPowModify: async (char: Character, amount) => {
                 const role = this.getOwnerRole(char);
