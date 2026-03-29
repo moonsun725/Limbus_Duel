@@ -30,6 +30,7 @@ export interface StatModifier {
 
     atkLvBonus: number;
     defLvBonus: number;
+    
     speedBoost: number;
 }
 
