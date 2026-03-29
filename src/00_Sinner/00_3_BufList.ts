@@ -200,6 +200,7 @@ export class BattleUnitBufList
         const modifier: StatModifier = {
             damageMultiplier: 0,
             damageReductionRate: 0,
+
             powerBonus: 0,
             clashPowerBonus: 0,
             finalPowerBonus: 0,
@@ -208,9 +209,13 @@ export class BattleUnitBufList
             coinPowerBonus: 0,
             coinPowerBonus_P: 0,
             coinPowerBonus_M: 0,
+            
             atkLvBonus: 0,
             defLvBonus: 0,
-            speedBoost: 0
+
+            speedBoost: 0,
+            minspeedBonus: 0,
+            maxspeedBonus: 0
         };
 
         // 2. 버프 리스트를 단 *한 번만* 순회합니다.
