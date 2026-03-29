@@ -21,12 +21,10 @@ export class BattleUnitBufList
         if (logic)
             logic.OnAddBuf(this.owner, data);
     }
+    // AddBufNextTurn도 마찬가지로 깔끔하게 예약만 하도록 수정
     AddBufNextTurn(Id: string, data: BattleUnitBuf) : void
     {
         this.ReadyBufList.set(Id, data);
-        const logic = BufRegistry[Id]
-        if (logic)
-            logic.OnAddBuf(this.owner, data);
     }
     AddKeyWordBuf(keyword: string, data: BattleUnitBuf) : void // keywordBuf는 위력, 횟수 모두 무조건 존재하므로
     {
@@ -49,31 +47,27 @@ export class BattleUnitBufList
                 logic.OnAddBuf(this.owner, data);
         }
     }
-    AddKeyWordBufNextTurn(keyword: string, data: BattleUnitBuf) : void // keywordBuf는 위력, 횟수 모두 무조건 존재하므로
+    AddKeyWordBufNextTurn(keyword: string, data: BattleUnitBuf) : void 
     {
-        if(this.hasBuf(keyword))
-        {
-            if (data.stack)
-                this.BufList.get(keyword)!.stack += data.stack;
-            if (data.count)
-                this.BufList.get(keyword)!.count! += data.count;
+        // 1. 이미 예약 목록에 같은 키워드가 있다면 수치만 누적
+        if (this.ReadyBufList.has(keyword)) {
+            const existing = this.ReadyBufList.get(keyword)!;
+            if (data.stack) existing.stack += data.stack;
+            if (data.count) existing.count! += data.count;
+        } 
+        // 2. 없다면 새로 예약 목록에 등록
+        else {
+            this.ReadyBufList.set(keyword, data);
         }
-        else    
-        {
-            if (!data.stack) data.stack = 1; // 버프가 없는 상태에서 [출혈 횟수 1 부여] 효과 받음 -> 위력은 1로 고정
-            if (!data.count) data.count = 1; // 버프가 없는 상태에서 [출혈 1 부여] 효과 받음 -> 횟수는 1로 고정
-
-            else if (data.stack) data.count++; 
-            this.BufList.set(keyword, data);
-            const logic = BufRegistry[keyword];
-            if (logic)
-                logic.OnAddBuf(this.owner, data);
-        }
+        console.log(`[BufList] 다음 턴 ${keyword} 버프 예약 됨`);
     }
+
+    
     RemoveBuf(id: string) {
         if (this.BufList.delete(id)) {
             console.log(`✨ ${this.owner.name}의 [${id}] 상태 해제`);
         }
+        else console.log("제거 실패");
     }
     Show() : void
     {
@@ -133,9 +127,36 @@ export class BattleUnitBufList
     }
     OnTurnStart() : void 
     {
-        // readyBufList에 있는 친구들을 옮겨온다
-        // 버프리스트에서 TurnStart인 친구들을 처리한다
-        // 나머진 모르겠음
+        // ==========================================
+        // 1. 다음 턴 버프(ReadyBufList) 이사 및 병합
+        // ==========================================
+        for (const [id, nextStatus] of this.ReadyBufList) {
+            
+            if (nextStatus.keyword) {
+                // 키워드 버프는 위력/횟수 합산 규칙이 복잡하므로 기존에 잘 만들어둔 함수 재활용!
+                this.AddKeyWordBuf(nextStatus.keyword, nextStatus); // 그렇네 이게 있구나
+            } else {
+                // 일반 버프 처리 (예: 취약, 보호 등)
+                if (this.BufList.has(id)) {
+                    // 이미 본 리스트에 있다면 스택 합산 (기획에 따라 덮어쓰려면 += 대신 = 사용)
+                    this.BufList.get(id)!.stack += nextStatus.stack;
+                } else {
+                    // 없다면 새로 등록하고 OnAddBuf(부여 시 효과) 발동!
+                    this.BufList.set(id, nextStatus);
+                    const logic = BufRegistry[id];
+                    if (logic && logic.OnAddBuf) {
+                        logic.OnAddBuf(this.owner, nextStatus);
+                    }
+                }
+            }
+        }
+
+        // 병합이 끝났으니 예약 바구니는 깨끗하게 비워줍니다!
+        this.ReadyBufList.clear();
+
+        // ==========================================
+        // 2. 턴 시작 효과 발동
+        // ==========================================
         for (const [id, status] of this.BufList) {
             const logic = BufRegistry[id];
             if (logic && logic.OnTurnStart) {
