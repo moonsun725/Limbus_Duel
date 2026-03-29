@@ -3,12 +3,13 @@ import { Character } from "./00_0_sinner.js";
 export interface Resist1 { [key: string]: number }
 export interface Resist2 { [key: string]: number }
 
-export interface IsinnerData
+export interface IsinnerData // 기초 데이터 옮기는 용도입니다 ^^
 {
     Snumber: number;
     name: string;
     lv: number; 
     hp: number; 
+    maxHp?: number; // 얘도 마찬가지로 안 쓸 데이터 
     hpRate: number; 
     Def: number; 
     
@@ -77,8 +78,13 @@ export class SinnerInfo // 각종 스탯, 내성
             case 'ResistP':
             case 'staggerGauge':
                 break;
+            case 'hp':
+                return this.hp;
+            case 'maxHp':
+                return this.maxHp;
             case 'Def':
-                return this.baseInfo['Def'] + this.baseInfo['lv'];
+                const bMod = this.owner.bufList.GetCombinedModifier();
+                return this.baseInfo['Def'] + this.baseInfo['lv'] + bMod.defLvBonus;
             case 'speed':
                 return this.speed; // 실제 속도를 반환하지만 일관성을 위해서 키 용도로는 넣어뒀다...
             default:
