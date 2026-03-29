@@ -32,6 +32,8 @@ export interface StatModifier {
     defLvBonus: number;
     
     speedBoost: number;
+    minspeedBonus: number;
+    maxspeedBonus: number;
 }
 
 export interface TriggerEvents {
