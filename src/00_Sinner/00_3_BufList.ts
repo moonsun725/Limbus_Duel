@@ -113,6 +113,7 @@ export class BattleUnitBufList
     // 이벤트
     OnTurnEnd() : void
     {
+        console.log('[BufList]/[OnTurnEnd]: 실행');
         // 1. 버프리스트에서 TurnEnd가 있는 친구들은 먼저 처리한다
         for (const [id, status] of this.BufList) {
             const logic = BufRegistry[id];
@@ -123,14 +124,12 @@ export class BattleUnitBufList
         
         // 2. 횟수나 위력이 0인 버프들은 날린다
         for (const [id, status] of this.BufList) {
-            if (status.count && status.count <= 0) {
+            console.log(`[BufList]/[OnTurnEnd]: ${status.Owner.name}, ${status.typeId}, ${id}, ${status.stack}, ${status.count}, ${status.count != null && status.count <= 0} `)
+            if (status.count != null && status.count <= 0) {
+                console.log("버프 제거");
                 this.RemoveBuf(id);
             }
         }
-        
-        // 이러면 이전에 있던 버프도 싹 날리는거잖아...
-        this.BufList = new Map(this.ReadyBufList);
-        // ReadyBufList 순회하면서 일일이 추가해줘야되나...
     }
     OnTurnStart() : void 
     {
