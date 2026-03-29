@@ -175,7 +175,12 @@ export class Character {
     }
 
     useSkill(choice: 0 | 1): Skill | void {
-        if (this.deck[choice]) {
+
+        console.log(`[useSkill]: 스킬 소모 전`);
+        this.showDeck();
+        console.log(`선택한 스킬: ${this.deck[choice]!.name}`);
+        if (this.deck[choice]) { // 인덱스가 0일 때 왜인지 모르겠는데 this.deck[choice]가 검출이 안 되는 듯 하다...
+            console.log('[useSkill]: 선택한 스킬 존재')
             if (choice === 0) {
                 this.deck.push(this.deck[choice]); // 맨 뒤로 보내고
                 this.deck.shift(); // 1칸 민다
@@ -183,15 +188,24 @@ export class Character {
             else // choice === 1
             {
                 let tmp = this.deck[0]; // 사실 얘는 무조건 있는거긴함
-                this.deck.push(this.deck[choice]); // 밀고
-                this.deck.shift();
+                this.deck.push(this.deck[choice]); // 1번을 맨 뒤로 보내고
+                this.deck.shift(); // 밀기 이러면 deck[0] = 1번임
                 if (tmp)
-                    this.deck[0] = tmp;
+                    this.deck[0] = tmp; // 다시 0번으로 바꿔주기
             }
+            console.log('스킬 소모 후');
+            this.showDeck();
             return this.deck[choice];
         }
+        
     }
 
+    showDeck()
+    {
+        this.deck.forEach(element => {
+            console.log(element.name);
+        });
+    }
 
     // 클라이언트 전달용 데이터 변환 함수
     public toData() {

@@ -30,9 +30,10 @@ export class BattleSlot {
 
     consumeSkill()
     {
+        console.log(`${this.owner.name}의 스킬 ${this.readySkill!.name} 소모, 인덱스: ${this.deckIndex}`);
         this.readySkill = null;
-        if (this.deckIndex)
-            this.owner.useSkill(this.deckIndex)
+        if (this.deckIndex !== undefined) // 이게 생각해보니까 0이면 if문에서 false로 취급을 하잖음 그래서 안된 거네
+            this.owner.useSkill(this.deckIndex);
     }
 
     updateState()
