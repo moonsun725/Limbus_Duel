@@ -573,8 +573,12 @@ function updateAllSanityUI() {
         const topAllyUI = document.querySelector(`.left-team .unit-column[data-unit-index="${idx}"] .type-sanity`);
         if (topAllyUI) {
             topAllyUI.innerText = charData.sp;
-            if(charData.sp === 45) topAllyUI.classList.add('maxsp');
-            if(charData.sp === -45) topAllyUI.classList.add('minsp');
+            if(charData.sp === 45) topAllyUI.classList.add('maxsp'); // 범위니까 if~elseif~else로 처리하는 게 맞습니다
+            else if(charData.sp === -45) topAllyUI.classList.add('minsp');
+            else {
+                topAllyUI.classList.remove('maxsp');
+                topAllyUI.classList.remove('minsp');
+            }
         }
 
         // 하단 스킬 패널의 아군 동그라미 찾기
@@ -591,7 +595,11 @@ function updateAllSanityUI() {
         if (topEnemyUI) {
             topEnemyUI.innerText = charData.sp;
             if(charData.sp === 45) topEnemyUI.classList.add('maxsp');
-            if(charData.sp === -45) topEnemyUI.classList.add('minsp');
+            else if(charData.sp === -45) topEnemyUI.classList.add('minsp');
+            else {
+                topEnemyUI.classList.remove('maxsp');
+                topEnemyUI.classList.remove('minsp');
+            }
         }
     });
 }

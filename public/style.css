@@ -233,7 +233,7 @@ body {
     -webkit-text-stroke: 0.25px #000;
     animation: pulse_fullsp 1s infinite;
 }
-@keyframes pulse_fullsp {
+@keyframes pulse_full_sp {
     0% { box-shadow: 0 0 0 0 rgb(0, 247, 255); }
     70% { box-shadow: 0 0 0 10px rgba(0, 255, 255, 0); }
     100% { box-shadow: 0 0 0 0 rgba(0, 251, 255, 0); }
@@ -242,9 +242,9 @@ body {
     color: #ff0000;
     background-color: #ff3737;
     -webkit-text-stroke: 0.25px #000;
-    animation: pulse_spempty 0.5s infinite
+    animation: pulse_empty_sp 0.5s infinite
 }
-@keyframes pulse_spempty {
+@keyframes pulse_empty_sp {
     0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
     70% { box-shadow: 0 0 0 5px rgba(255, 152, 0, 0); }
     100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
