@@ -45,14 +45,14 @@ export function ProcessCoinEffects(coin: Coin, defender: Character, attacker: Ch
 
         // 4. 로직 실행
         // 여기서도 타겟을 밖에서 찾지 않고, 'ability 전체'를 data로 넘겨버립니다.
-        const logic = AbilityRegistry[ability.Type]; 
+        const logic = AbilityRegistry[ability.type]; 
         if (logic) {
-            console.log("[processCoinEffects]: 코인 효과 발동:", ability.Type);
+            console.log("[processCoinEffects]: 코인 효과 발동:", ability.type);
             logic.Execute(context, ability.data); 
         }
     }
 }
-/*
+/* 얘도 고쳐야 하는데...
 export function GetCoinBonus(
     move: Skill, 
     target: Character, 

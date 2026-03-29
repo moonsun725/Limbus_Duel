@@ -6,7 +6,7 @@ import { AbilityRegistry } from "../05_Ability/03_Abilities.js";
 
 
 // 트리거 타입 정의: 언제 호출되었는가?
-export type EffectTrigger = 'OnUse' | 'OnHit' | 'OnBasePower' | 'OnParryWin';
+export type EffectTrigger = 'OnUse' | 'OnHit' | 'OnBasePower' | 'OnParryWin' | 'OnParryLose';
 
 interface AbilityLogic {
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
@@ -21,18 +21,18 @@ interface AbilityLogic {
 
 export function ProcessMoveEffects(
     move: Skill, 
+    attacker: Character,
     defender: Character, 
-    attacker: Character, 
     currentTiming: EffectTrigger, 
     damage: number = 0
 ): void {
     
     if (!move.abilities) return;
-
+    console.log(`[skillAbilityLogic]/[ProcessMoveEffects] 실행, move.abilities: ${move.abilities[0]?.type}`)
     // 1. [핵심] 만능 가방(Context) 생성!
     const context: BattleContext = {
         user: attacker,
-        target: defender,
+        target: defender, // 아 이게 문제가 있구나 user랑 target을 여기에서 정해버리니까 target에
         skill: move,
         damage: damage
     };
@@ -41,6 +41,7 @@ export function ProcessMoveEffects(
         
         // 2. 타이밍 체크
         const entryTiming = ability.timing || 'OnHit';
+        console.log(`   [skillAbilityLogic]/[ProcessMoveEffects]: entryTiming: [${entryTiming}], currentTiming: [${currentTiming}]`);
         if (entryTiming !== currentTiming) continue;
 
         // ★ 기존의 복잡했던 actualTarget(타겟 결정 로직)은 완전히 삭제되었습니다! ★
@@ -61,6 +62,7 @@ export function ProcessMoveEffects(
             // 이제 Dispatcher는 "누구한테" 할지 고민하지 않고 가방(context)만 던집니다.
             // 타겟 판별은 Registry 내부에서 알아서 처리합니다.
             logic.Execute(context, ability.data); 
+            
         }
     }
 }
