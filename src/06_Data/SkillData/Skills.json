@@ -26,7 +26,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
               "data": {
@@ -68,7 +68,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnSucceedAttack",
               "target": "opponent",
               "data": {
@@ -106,7 +106,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
               "data": {
@@ -127,7 +127,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
               "data": {
@@ -148,7 +148,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddBuf",
+              "type": "AddBuf",
               "timing": "OnHit",
               "target": "opponent",
               "condition": {
@@ -205,7 +205,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddBuf",
+              "type": "AddBuf",
               "timing": "OnHit",
               "target": "opponent",
               "data": {
@@ -245,7 +245,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddBufNextTurn",
+              "type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
               "data": {
@@ -280,7 +280,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddBufNextTurn",
+              "type": "AddBufNextTurn",
               "timing": "OnHeadsHit",
               "target": "opponent",
               "data": {
@@ -301,7 +301,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddBufNextTurn",
+              "type": "AddBufNextTurn",
               "timing": "OnHit",
               "target": "opponent",
               "data": {
@@ -338,7 +338,7 @@
       "desc": "[WinDuel] 다음 턴에 신속 2 얻음",
       "abilities": [
         {
-          "Type": "AddBufNextTurn",
+          "type": "AddBufNextTurn",
           "timing": "OnParryWin",
           "target": "self",
           "data": {
@@ -369,11 +369,11 @@
       "desc": "[WinDuel] 다음 턴에 공격 위력 증가 2 얻음",
       "abilities": [
         {
-          "Type": "AddBufNextTurn",
+          "type": "AddBufNextTurn",
           "timing": "OnParryWin",
           "target": "self",
           "data": {
-            "BattleUnitBuf": "AtkUp",
+            "BattleUnitBuf": "AtkPowUp",
             "stack": 2
           }
         }
@@ -407,7 +407,7 @@
       "desc": "속도가 10 이상이면, 코인 위력 +2",
       "abilities": [
         {
-          "Type": "AddBufNextTurn",
+          "type": "AddBufNextTurn",
           "timing": "OnParryWin",
           "target": "self",
           "data": {
@@ -436,7 +436,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnHeadsHit",
               "target": "opponent",
               "data": {
@@ -457,7 +457,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnHeadsHit",
               "target": "opponent",
               "data": {
@@ -478,7 +478,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "opponent",
               "data": {
@@ -535,7 +535,7 @@
           ],
           "abilities": [
             {
-              "Type": "AddKeywordBuf",
+              "type": "AddKeywordBuf",
               "timing": "OnHit",
               "target": "self",
               "data": {
@@ -570,7 +570,7 @@
           ],
           "abilities": [
             {
-              "Type": "DamageMultiplier",
+              "type": "DamageMultiplier",
               "timing": "OnHit",
               "target": "opponent",
               "condition": {
