@@ -2,7 +2,7 @@
 // 다른곳에 import만 안 해주면 되니 여기에 더미로 써놓긴하겠음
 
 export type EffectTiming = 'OnUse' | 'OnHit' | 'OnTurnEnd' | 'OnBasePower' | 'OnToss' | 'OnHit' | 'OnHeadsHit' | 'OnTailsHit'; // 코인에만 사용 가능한 이벤하고 스킬에만 사용 가능한 이벤이 달라서리...
-export type EffectTarget = 'self' | 'opponent' | 'randomAlley' | 'randomEnemy';
+export type EffectTarget = 'self' | 'opponent' | 'randomAlly' | 'randomEnemy';
 
 export interface CoinAbility {
   Type: string;

@@ -1,11 +1,13 @@
 import type { Coin } from "../02_Coin/02_0_coin.js";
+import type { EffectTiming } from "../05_Ability/01_AbilityInfo.js";
+import type { EffectTarget } from "../05_Ability/01_AbilityInfo.js";
 
 export interface Skill {
   id: number;
   level: number;
   name: string;
   desc?: string;
-  abilities: SkillAbility[];
+  abilities?: SkillAbility[];
   category: string;  
   color: string; 
   BasePower: number;
@@ -17,9 +19,6 @@ export interface Skill {
   AtkLv?: number;      // (가드 스킬에는 없음)
   Weight?: number;     // (가드 스킬에는 없음)
 }
-
-export type EffectTiming = 'OnUse' | 'OnHit' | 'OnTurnEnd' | 'OnBasePower';
-export type EffectTarget = 'Self' | 'Enemy' | 'RandomAlley' | 'RandomEnemy';
 
 export interface SkillAbility {
   type: string;

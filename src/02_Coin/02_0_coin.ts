@@ -1,4 +1,5 @@
-
+import type { EffectTiming } from "../05_Ability/01_AbilityInfo.js";
+import type { EffectTarget } from "../05_Ability/01_AbilityInfo.js";
 
 export interface Coin {
   Type: string;       // 예: "Slash", "Penetrate", "Guard"
@@ -11,11 +12,9 @@ export interface Coin {
   // 나중엔 코인 자체에 즉발로 적용되는 효과도
 }
 
-export type EffectTiming = 'OnToss' | 'OnHit' | 'OnHeadsHit' | 'OnTailsHit';
-export type EffectTarget = 'self' | 'opponent' | 'randomAlley' | 'randomEnemy';
 
 export interface CoinAbility {
-  Type: string;
+  type: string;
   timing: EffectTiming;
   target: EffectTarget;
 
