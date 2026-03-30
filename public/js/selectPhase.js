@@ -29,7 +29,6 @@ let floatingText, skillText, charText;
 let interactableElements;
 let buttons, skillButtons, targetButtons, goButton;
 let phaseSelect, phaseBattle;
-let allySlots;
 
 // 상태 변수
 let myRole = null;
@@ -84,8 +83,8 @@ export function initBattleSelect() {
             const uIndex = parseInt(parentCol.dataset.unitIndex, 10);
             const sIndex = parseInt(targetBtn.dataset.skillSlot, 10);
 
-            // UI 초기화: 내가 속한 기둥(캐릭터)의 다른 스킬들 불 다 끄기
-            parentCol.querySelectorAll('.type-red').forEach(b => b.classList.remove('used'));
+            // UI 초기화: 같은 캐릭터의 다른 스킬 버튼들은 'used' 클래스 제거
+            parentCol.querySelectorAll('.skill-button').forEach(b => b.classList.remove('used'));
 
             // 서버 전송
             socket.emit('action_select', {
@@ -144,8 +143,8 @@ export function initBattleSelect() {
     // 스킬 선택 하이라이트 동기화 이벤트 등록
     socket.on('ui_move_selected', (data) => {
         skillButtons.forEach(b => b.classList.remove('selected'));
-        // 쿼리셀렉터로 단번에 찾기!
-        const targetBtn = document.querySelector(`.skill-column[data-unit-index="${data.userIndex}"] .type-red[data-skill-slot="${data.skillSlot}"]`);
+        // 시맨틱 클래스 이름으로 버튼 찾기
+        const targetBtn = document.querySelector(`.skill-column[data-unit-index="${data.userIndex}"] .skill-button[data-skill-slot="${data.skillSlot}"]`);
         if (targetBtn) targetBtn.classList.add('selected');
     });
 
@@ -170,23 +169,22 @@ export function initBattleSelect() {
             const parentCol = document.querySelector(`.skill-column[data-unit-index="${data.srcIndex}"]`);
 
             if (parentCol) {
-                // 내 기둥에 있는 모든 스킬 선택/사용 해제
-                parentCol.querySelectorAll('.type-red').forEach(b => b.classList.remove('used', 'selected'));
+                // 해당 캐릭터의 모든 스킬 버튼에서 'used', 'selected' 클래스 제거
+                parentCol.querySelectorAll('.skill-button').forEach(b => b.classList.remove('used', 'selected'));
 
                 // 선택했던 스킬에만 'used' 달아주기
-                // const sSlot = (selectedSkillSlot !== null) ? selectedSkillSlot : 0;
-                const targetBtn = parentCol.querySelector(`.type-red[data-skill-slot="${sSlot}"]`);
+                const targetBtn = parentCol.querySelector(`.skill-button[data-skill-slot="${sSlot}"]`);
                 if (targetBtn) targetBtn.classList.add('used');
             }
 
             // 3. 적 유닛 'Locked' 상태 전면 재계산 (요구사항 22: 매핑 해제 시 초기화)
             // 모든 적의 locked를 지우고, targetingData에 있는 애들만 다시 칠함
-            const enemyUnits = document.querySelectorAll('.right-team .circle');
+            const enemyUnits = document.querySelectorAll('.enemy-slot');
             enemyUnits.forEach(el => el.classList.remove('locked'));
 
             Object.values(targetingData).forEach(tIdx => {
-                // ★ [수정] 부모(unit-column)의 번호표를 찾아서, 그 안에 있는 동그라미(.circle)를 선택!
-                const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${tIdx}"] .circle`);
+                // ★ [수정] 부모(unit-column)의 번호표를 찾아서, 그 안에 있는 동그라미(.enemy-slot)를 선택!
+                const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${tIdx}"] .enemy-slot`);
 
                 if (targetEl) targetEl.classList.add('locked');
             });
@@ -199,7 +197,7 @@ export function initBattleSelect() {
 
     document.addEventListener('click', (event) => {
         // 1. 내가 클릭한 곳이 상호작용 가능한 요소(버튼)인가?
-        const isInteractable = event.target.closest('.type-red, .type-blue, .type-green, .type-orange, .type-white, .type-yellow, .type-violet');
+        const isInteractable = event.target.closest('.skill-button, .character-slot, .defense-button, .character-box, .enemy-slot, .start-button, .enemy-box');
 
         // 2. 내가 클릭한 곳이 툴팁 그 자체인가? (툴팁 안의 텍스트를 드래그할 수도 있으니)
         const isTooltipS = event.target.closest('#tooltip-skill');
@@ -237,13 +235,11 @@ function initDOMs_BattleSelect() {
 
     phaseSelect = document.getElementById('phase-select');
     phaseBattle = document.getElementById('phase-battle');
-    goButton = document.querySelector('.circle.large');
-
-    skillButtons = document.querySelectorAll('.type-red');
-    targetButtons = document.querySelectorAll('.right-team .circle');
-
-    allySlots = document.querySelectorAll('.left-team .circle');
-
+    
+    // 시맨틱 클래스 이름으로 DOM 요소 다시 선택
+    goButton = document.querySelector('.start-button');
+    skillButtons = document.querySelectorAll('.skill-button');
+    targetButtons = document.querySelectorAll('.enemy-slot');
 }
 
 // 마우스가 객체 위에 올라갔을 때 실행되는 함수
@@ -256,25 +252,25 @@ function handleMouseEnter(event) {
 
     switch (type) {
         // 스킬 아이콘들 (red, blue, green 모두 이 로직을 탐)
-        case 'red':
-        case 'blue':
-        case 'green':
+        case 'skill-button':
+        case 'character-slot':
+        case 'defense-button':
             handleMouseEnter_SkillIcon(target, type);
             break;
 
         // 아군 캐릭터
-        case 'orange':
+        case 'character-box':
             handleMouseEnter_Character(target, 'ally');
             break;
 
         // 적군 캐릭터
-        case 'white':
+        case 'enemy-slot': // 적군 동그라미는 캐릭터 툴팁을 띄우지 않음
             break;
-        case 'violet':
+        case 'enemy-box':
             handleMouseEnter_Character(target, 'enemy');
             break;
 
-        // 기타 아이콘 (버프, 디버프 등)
+        // 기타 (패시브 슬롯 등)
         default:
             floatingTooltip.classList.remove('hidden');
             floatingText.innerText = "기타 정보";
@@ -293,16 +289,16 @@ function handleClick(event) {
 
     switch (type) {
         // 스킬 아이콘 클릭 시 -> 잠금 ON
-        case 'red':
-        case 'blue':
-        case 'green':
+        case 'skill-button':
+        case 'character-slot':
+        case 'defense-button':
             isSkillTooltipLocked = true;
             console.log("🔒 스킬 툴팁 잠금 ON!");
             // (여기에 기존 스킬 선택 처리 로직 작성)
             // selectSkill(target);
             break;
-        case 'orange':
-        case 'violet':
+        case 'character-box':
+        case 'enemy-box':
             isCharTooltipLocked = true;
             console.log("🔒 캐릭터 툴팁 잠금 ON!");
             break;
@@ -331,7 +327,7 @@ function handleMouseEnter_SkillIcon(target, type) {
 
     let infoMessage = "";
 
-    if (type === 'red') {
+    if (type === 'skill-button') {
         // [빨간 버튼] 하단 스킬 패널에서 데이터 찾기
         const uIndex = parseInt(target.closest('.skill-column').dataset.unitIndex, 10);
         const sIndex = parseInt(target.dataset.skillSlot, 10);
@@ -345,14 +341,14 @@ function handleMouseEnter_SkillIcon(target, type) {
         if (target.classList.contains('used')) {
             const targetEnemyIdx = targetingData[uIndex];
             if (targetEnemyIdx !== undefined) {
-                const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${targetEnemyIdx}"] .circle`);
+                const targetEl = document.querySelector(`.right-team .unit-column[data-unit-index="${targetEnemyIdx}"] .enemy-slot`);
                 if (targetEl) {
                     targetEl.classList.add('hover-targeted');
                 }
             }
         }
 
-    } else if (type === 'blue') {
+    } else if (type === 'character-slot') {
         // [파란 버튼] 상단 캐릭터 슬롯에서 데이터 찾기
         const uIndex = parseInt(target.closest('.unit-column').dataset.unitIndex, 10);
         const charData = allyTeamInfo[uIndex];
@@ -361,7 +357,7 @@ function handleMouseEnter_SkillIcon(target, type) {
         const skillData = (charData && charData.slots) ? charData.slots[0] : null;
         infoMessage = skillData ? buildSkillText(skillData) : "장착된 스킬 없음";
 
-    } else if (type === 'green') {
+    } else if (type === 'defense-button') {
         infoMessage = "수비 스킬 정보";
     }
 
@@ -474,20 +470,20 @@ function handleMouseLeave(event) {
     const type = getElementType(target);
 
     switch (type) {
-        case 'red':
-            const enemyCircles = document.querySelectorAll('.right-team .circle');
+        case 'skill-button':
+            const enemyCircles = document.querySelectorAll('.enemy-slot');
             enemyCircles.forEach(circle => circle.classList.remove('hover-targeted'));
-        case 'blue':
-        case 'green':
+        case 'character-slot':
+        case 'defense-button':
             // ★ 스킬 툴팁: 잠겨있으면 숨기지 않음!
             if (!isSkillTooltipLocked) {
                 skillTooltip.classList.add('hidden');
             }
             break;
 
-        case 'orange':
-        case 'white':
-        case 'violet':
+        case 'character-box':
+        case 'enemy-slot':
+        case 'enemy-box':
             if (!isCharTooltipLocked) {
                 charTooltip.classList.add('hidden');
             }
@@ -505,20 +501,14 @@ function handleMouseLeave(event) {
 
 // 요소의 클래스를 분석하여 타입(색상) 반환
 function getElementType(element) {
+    if (element.classList.contains('skill-button')) return 'skill-button';
+    if (element.classList.contains('defense-button')) return 'defense-button';
+    if (element.classList.contains('character-box')) return 'character-box';
+    if (element.classList.contains('enemy-box')) return 'enemy-box';
+    if (element.classList.contains('character-slot')) return 'character-slot';
+    if (element.classList.contains('enemy-slot')) return 'enemy-slot';
+    if (element.classList.contains('start-button')) return 'start-button';
     if (element.classList.contains('type-pink')) return 'pink'; // 핑크: 전투 패시브/서포트 패시브
-
-    if (element.classList.contains('type-blue')) return 'blue'; // 아군 스킬 슬롯
-    if (element.classList.contains('type-white')) return 'white'; // 동그란 타겟 버튼/적군 스킬 슬롯
-
-    if (element.classList.contains('type-orange')) return 'orange'; // 단순 스프라이트/나중에는 버튼으로?
-    if (element.classList.contains('type-violet')) return 'violet'; // ★ [추가] 적군 네모 박스용
-
-    if (element.classList.contains('type-red')) return 'red'; // 스킬 패널 -> 스킬 버튼
-    if (element.classList.contains('type-green')) return 'green'; // 초상화 있어야하는 곳인데 당장은 눌렀을 때 수비 나가게
-
-    if (element.classList.contains('type-yellow')) return 'yellow'; // 전투 시작 버튼
-
-
     return 'unknown';
 }
 
@@ -539,6 +529,8 @@ function OnTurnStart(data) {
     updateAllSanityUI();
     // 속도 갱신
     updateAllSpeedUI();
+    // 스킬 버튼 색상 갱신
+    updateSkillButtonUI();
 
     // 선택 페이즈 레이어는 드러내기
     phaseSelect.classList.remove('hidden');
@@ -623,5 +615,37 @@ function updateAllSpeedUI() {
         // 상단 배틀 필드의 적군 속도 박스 찾기
         const topEnemyUI = document.querySelector(`.right-team .unit-column[data-unit-index="${idx}"] .type-speed`);
         if (topEnemyUI) topEnemyUI.innerText = charData.speed;
+    });
+}
+
+function updateSkillButtonUI() {
+    // 하단 스킬 패널의 모든 스킬 기둥을 순회
+    const skillColumns = document.querySelectorAll('.skill-panel .skill-column');
+    skillColumns.forEach(column => {
+        const unitIndex = parseInt(column.dataset.unitIndex, 10);
+        const charData = allyTeamInfo[unitIndex];
+
+        if (!charData || !charData.skills) {
+            return;
+        }
+
+        // 해당 기둥 내의 모든 스킬 버튼을 찾음
+        const buttons = column.querySelectorAll('button.skill-button[data-skill-slot]');
+        buttons.forEach(btn => {
+            const skillSlot = parseInt(btn.dataset.skillSlot, 10);
+            const skillData = charData.skills[skillSlot];
+
+            // 기존 색상 클래스 모두 제거 (type- 으로 시작하는 모든 클래스)
+            btn.className.split(' ').forEach(cls => {
+                if (cls.startsWith('type-')) {
+                    btn.classList.remove(cls);
+                }
+            });
+
+            if (skillData && skillData.color) {
+                // 새 색상 클래스 추가
+                btn.classList.add(`type-${skillData.color}`);
+            }
+        });
     });
 }

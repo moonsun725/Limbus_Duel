@@ -49,6 +49,15 @@ body {
     font-weight: bold;
     font-size: 12px;
 }
+
+/* [New] player-info-box에 직접 스타일 적용 */
+.player-info-box {
+    width: 300px; height: 100%;
+    background-color: #eee;
+    font-size: 18px;
+    /* type-gray 스타일 통합 */
+    display: flex; align-items: center; justify-content: center;
+}
 .circle {
     width: 60px;   /* 크기 확대 */
     height: 60px;
@@ -63,16 +72,26 @@ body {
 .box.mini { width: 40px; height: 40px; }
 
 /* 색상 팔레트 */
+/* === [New] 선택 페이즈용 시맨틱 클래스 === */
+.skill-button { background-color: #f44336; margin: 2px; }
+.defense-button { background-color: #4caf50; margin: 2px; }
+.character-box { background-color: #ff9800; border-color: #e65100; }
+.enemy-box { background-color: #6a0277; border-color: #490053; }
+.character-slot { background-color: #2196f3; border-color: #0d47a1; }
+.enemy-slot { background-color: #ffffff; }
+.start-button { background-color: #ffeb3b; }
+
 .type-gray { background-color: #e0e0e0; }
 .type-gray-light { background-color: #d0d0d0; margin-bottom: 4px; }
-.type-pink { background-color: #ff4081; margin-bottom: 4px; border-color: #880e4f;}
-.type-blue { background-color: #2196f3; border-color: #0d47a1;}
-.type-orange { background-color: #ff9800; border-color: #e65100;}
-.type-violet {background-color: #6a0277; border-color: #490053;}
+.type-pink { background-color: #ff4081; margin-bottom: 4px; margin: 2px;}
+.type-blue { --skill-color: #21c6f3; background-color: var(--skill-color); margin: 2px;}
+.type-orange { --skill-color: #fe712b; background-color: var(--skill-color); margin: 2px;}
+.type-violet { --skill-color: #89039b; background-color: var(--skill-color); margin: 2px;}
+.type-indigo { --skill-color: #3a55ed; background-color: var(--skill-color); margin: 2px; }
 .type-white { background-color: #ffffff; }
-.type-red { background-color: #f44336; margin: 2px; }
-.type-green { background-color: #4caf50; margin: 2px; }
-.type-yellow { background-color: #ffeb3b; }
+.type-red { --skill-color: #f44336; background-color: var(--skill-color); margin: 2px; }
+.type-green { --skill-color: #20ff58; background-color: var(--skill-color); margin: 2px; }
+.type-yellow { --skill-color: #c9b612; background-color: var(--skill-color); }
 
 [data-has-info="true"] { cursor: help; }
 
@@ -83,11 +102,6 @@ body {
     height: 60px;
     margin-bottom: 10px;
     padding: 0 20px;
-}
-.player-info-box {
-    width: 300px; height: 100%;
-    background-color: #eee;
-    font-size: 18px;
 }
 
 /* === 메인 (Main Layer) 수정 === */
@@ -183,7 +197,7 @@ body {
     gap: 5px; /* 기둥 안의 스킬 버튼들 사이 간격 */
 }
 
-/* 버튼 스타일 미세 조정 */
+/* 하단 레이어 버튼 공통 스타일 */
 .bottom-layer .circle {
     width: 50px;  /* 버튼 크기 조정 */
     height: 50px;
@@ -196,7 +210,7 @@ body {
     position: relative; 
 }
 
-.skill-column .type-green {
+.skill-column .defense-button {
     margin-top: 5px; /* 방어 스킬은 조금 더 떨어트려서 구분감 주기 (선택 사항) */
 }
 
@@ -455,16 +469,16 @@ body {
 }
 
 /* [Rule Update] 이미 스킬 선택을 마친 버튼 (어둡게 처리) */
-.type-red.used {
+.skill-button.used {
     filter: brightness(0.5); /* 밝기를 낮춰서 '사용됨' 표시 */
     border-color: #550000;
     transform: scale(0.95);  /* 살짝 눌린 듯한 느낌 */
 }
 
 /* [Rule Update] 현재 선택 중인 버튼 (강조 - 기존 selected-skill 대체 가능) */
-.type-red.selected {
-    border: 3px solid #FFD700 !important; /* 금색 테두리 */
-    box-shadow: 0 0 15px #FFD700;
+.skill-button.selected {
+    border: 3px solid var(--skill-color, #f44336) !important; /* 스킬 색상 또는 기본 빨강 */
+    box-shadow: 0 0 15px var(--skill-color, #f44336);
     transform: scale(1.1);
     z-index: 100;
     filter: brightness(1.2);
@@ -472,7 +486,7 @@ body {
 
 /* [New] 스킬 버튼에 마우스 올렸을 때, 타겟팅된 적이 누구인지 보여주는 효과 */
 /* 기존 .locked (노란색) 보다 더 눈에 띄게 (예: 붉은 점선이나 확대) */
-.type-white.hover-targeted {
+.enemy-slot.hover-targeted {
     border: 3px dashed #ff0000 !important; /* 붉은 점선 */
     background-color: #ffebee !important;   /* 연한 붉은 배경 */
     transform: scale(1.15);                 /* 크기 확대 */
@@ -481,7 +495,7 @@ body {
 }
 
 /* [Rule Update] 타겟으로 지정된 적 유닛 (노랗게/붉게 표시) */
-.type-white.locked {
+.enemy-slot.locked {
     background-color: #fff9c4 !important; /* 약간 노란빛 */
     border: 3px solid #ff9800 !important; /* 주황색 테두리 */
     box-shadow: 0 0 10px #ff9800;
