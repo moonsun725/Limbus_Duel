@@ -109,6 +109,7 @@ export class BattleManager
         power += bMods.powerBonus;
         if (skill.category == "attack") power += bMods.atkPowerBonus;
         else power += bMods.defPowerBonus;
+        await this.callbacks.onPowModify(char, power);
 
         // 코인 위력 계산
         for (const coin of coins) {
@@ -117,6 +118,7 @@ export class BattleManager
             let coinPower = BaseCoinPower + bMods.coinPowerBonus;
             if (BaseCoinPower < 0) coinPower += bMods.coinPowerBonus_M; 
             else coinPower += bMods.coinPowerBonus_P;
+            await this.callbacks.onCoinPowModify(char, coinPower);
             const isHeads = Math.random() * 100 < (char.Stats.sp + 50)
             if (isHeads) {
                 console.log(`[CoinToss]: 앞면: + ${coinPower}`);
@@ -130,6 +132,7 @@ export class BattleManager
 
         // 최종 위력 계산
         power += bMods.finalPowerBonus;
+        await this.callbacks.onPowModify(char, power);
         return power;
     }
 
@@ -176,6 +179,10 @@ export class BattleManager
             // ---------------------------------------------------------
             const context = { user: attacker, target: target, damage: 0, skill: skill };
             const bMods = attacker.bufList.GetCombinedModifier(context);
+            // 기본 위력 계산
+            let finalHitPower = baseCurrentPower + bMods.powerBonus + bMods.atkPowerBonus;
+            if (bMods.powerBonus + bMods.atkPowerBonus > 0)
+                await this.callbacks.onPowModify(attacker, finalHitPower);
 
             const BaseCoinPower = coin.CoinPower; // 여기에다가 나중에 버프리스트 등등 긁어와서 추가로 더해줄 수 있음
             let coinPower = BaseCoinPower + bMods.coinPowerBonus;
@@ -192,9 +199,10 @@ export class BattleManager
             await this.callbacks.onCoinResult(attacker, isHeads);
 
             
-            // 3. 이번 타격의 '최종 위력' 계산 (누적된 코인 위력 + 현재 시점의 버프 보너스)
-            // 버프 보너스는 누적되면 안 되므로 여기서 임시로 더해줍니다.
-            let finalHitPower = baseCurrentPower + bMods.atkPowerBonus + bMods.finalPowerBonus;
+            // 3. 최종 위력 계산(코인 토스 후 계산하는 위력)
+            finalHitPower += bMods.finalPowerBonus;
+            if(bMods.finalPowerBonus > 0)
+                await this.callbacks.onPowModify(attacker, finalHitPower);
 
             // 4. 데미지 계산 및 적용 (calculateDamage 내부에서도 최신 Modifier를 가져오게 됨!)
             const damage = calculateDamage(attacker, target, skill, coin, finalHitPower, clashCnt);
