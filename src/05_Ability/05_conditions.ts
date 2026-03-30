@@ -1,5 +1,5 @@
 import type { Character } from "../00_Sinner/00_0_sinner.js";
-import type { BattleContext } from "./00_BattleContext.js";
+import  { type BattleContext, handleTargets } from "./00_BattleContext.js";
 import type { KeyWords } from "./04_battleUnitBufs.js"; // >< 이거는 나중에 아예 목록으로 빼놓읍시다. 맵의 키로 사용하면 될듯 ㅇㅇ
 
 // utils/comparator.ts (또는 05_conditions.ts 상단) -> 나중에 따로 빼야겠다
@@ -62,7 +62,7 @@ export const CondRegistry: { [key: string]: CheckLogic } = {
     "CheckSP" : { // 정신력 기준 판단 연산
         Execute: (context, data) => {
             console.log("정신력 체크 시작");
-            const target = (data.target === 'self') ? context.user : context.target;
+            const target = (data.target === 'self') ? context.user : context.target; // 사실 이것도 target이 여러 종류이기 때문에 단지 두 가지로만 비교할 수는 없는데?
             const sp = target.Stats.sp;
             console.log("대상: ", target.name, "조건치: ", data.value, "현재 정신력: ", target.Stats.sp, "연산:", data.operator);
             return Compare(sp, data.operator || '>=', data.value);

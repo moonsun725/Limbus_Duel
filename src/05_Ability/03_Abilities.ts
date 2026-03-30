@@ -1,6 +1,6 @@
 import type { Character } from "../00_Sinner/00_0_sinner.js";
 import type { BattleUnitBuf } from "./04_battleUnitBufs.js";
-import type { BattleContext } from "./00_BattleContext.js";
+import { handleTargets, type BattleContext } from "./00_BattleContext.js";
 
 export interface AbilityLogic { // 아니시발 인터페이스니까 여기에 needSource 변수 박으면 되잖아?
     // 대부분의 경우 user, target을 구분해서 받지 않고, "적용 대상(target)" 하나만 받음
@@ -15,7 +15,7 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     "AddKeywordBuf": {
         Execute: (context, data) => {
             
-            const target = context.target;
+            const target = handleTargets(context, data);
             const status: BattleUnitBuf = {
                 typeId: data.KeywordBuf,
                 Owner: target,
@@ -31,7 +31,7 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     "AddKeywordBufNextTurn": {
         Execute: (context, data) => {
             
-            const target = context.target;
+            const target = handleTargets(context, data);
             const status: BattleUnitBuf = {
                 typeId: data.KeywordBuf,
                 Owner: target,
@@ -40,15 +40,15 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
                 keyword: data.KeywordBuf
             };
             target.bufList.AddKeyWordBuf(status.keyword!, status); // 얘도 임시처리니까 나중에 체크해야한다~~
-            console.log("AddKeyWordBuf 실행:",JSON.stringify(data), "대상:", target.name, "키워드버프", status.keyword);
+            console.log("AddKeyWordBufNextTurn 실행:",JSON.stringify(data), "대상:", target.name, "키워드버프", status.keyword);
             console.log("버프 추가 완료.", data.KeywordBuf);
         }
     },
-    "AddBuf": { // 이새끼는 당분간 보류다
+    "AddBuf": {
         Execute: (context, data) => {
             
             const user = context.user;
-            const target = context.target;
+            const target = handleTargets(context, data);
             const status: BattleUnitBuf = {
                 typeId: data.BattleUnitBuf,
                 source: user, // 누적 가능이면 user가 다를 때 머리아플텐데...
@@ -64,7 +64,7 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
         Execute: (context, data) => {
             
             const user = context.user;
-            const target = context.target;
+            const target = handleTargets(context, data);
             const status: BattleUnitBuf = {
                 typeId: data.BattleUnitBuf,
                 source: user,
@@ -73,6 +73,7 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
                 count: 0 // 대부분의 버프는 횟수가 없음 ㅇㅇ
             };
             target.bufList.AddBufNextTurn(status.typeId, status);
+            console.log("AddBufNextTurn 실행:",JSON.stringify(data), "대상:", target.name, "버프", status.keyword);
         }
     },
 
@@ -100,8 +101,7 @@ export const AbilityRegistry: { [key: string]: AbilityLogic } = {
     
     "TremorBurst": {
         Execute: (context, data) => {
-            const user = context.user;
-            const target = context.target;
+            const target = handleTargets(context, data);
             const cost = data.cost; // 있으면 값 넣고 없으면 0 넣어라 근데 지금은 any라서 판단을 안 하지 않나
 
             if(cost) target.bufList.TremorBurst(cost);
