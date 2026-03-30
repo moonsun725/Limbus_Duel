@@ -88,11 +88,11 @@ export class BattleManager
 
         // 승자 판별 및 공격 이행
         if (coins1.length > 0) {
-            this.ApplyClashResult(char1, char2, "WIN", clashCount);
+            this.ApplyClashResult(slot1, slot2, clashCount);
             await this.Attack(slot1, slot2, coins1, clashCount); // 남은 코인으로 공격
             slot2.consumeSkill(); // 패배한 스킬 소멸
         } else {
-            this.ApplyClashResult(char2, char1, "WIN", clashCount);
+            this.ApplyClashResult(slot2, slot1, clashCount);
             await this.Attack(slot2, slot1, coins2, clashCount);
             slot1.consumeSkill();
         }
@@ -133,10 +133,16 @@ export class BattleManager
         return power;
     }
 
-    private ApplyClashResult(winner: Character, loser: Character, state: string, clashCount: number) {
+    private ApplyClashResult(win: BattleSlot, lose: BattleSlot, clashCount: number) {
+        const winner = win.owner;
+        const loser = lose.owner;
         console.log(`[Clash Result] 승자: ${winner.name}`);
+
         winner.ClashWin(clashCount);
         loser.ClashLose();
+
+        ProcessMoveEffects(win.readySkill!, winner, loser, "OnParryWin"); // 이 시점에는 무조건 있음(null 아님) 체킹도 필요 없음
+        ProcessMoveEffects(lose.readySkill!, loser, winner, "OnParryLose"); // 패배한 쪽에도 전달은 해야지
         // 필요하다면 BattleState 변경 로직 추가
     }
 
